@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}};
+
+use Fnlla\Php\Controllers\Controller;
+use Fnlla\Php\Http\Request;
+use Fnlla\Php\Http\Response;
+
+final class {{class}} extends Controller
+{
+    public function __invoke(Request $request): Response
+    {
+        return Response::html("");
+    }
+}

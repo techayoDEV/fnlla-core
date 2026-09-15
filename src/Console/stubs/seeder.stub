@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}};
+
+use Fnlla\Php\Database\Seeders\Seeder;
+
+final class {{class}} extends Seeder
+{
+    public function run(): void
+    {
+    }
+}

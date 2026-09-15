@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}};
+
+use Fnlla\Php\Database\Factories\Factory;
+
+final class {{class}} extends Factory
+{
+    protected function table(): string { return "{{table}}"; }
+    protected function definition(): array { return []; }
+}

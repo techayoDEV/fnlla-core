@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}};
+
+use Fnlla\Php\Http\Request;
+use Fnlla\Php\Middleware\MiddlewareInterface;
+
+final class {{class}} implements MiddlewareInterface
+{
+    public function handle(Request $request, callable $next): mixed
+    {
+        return $next($request);
+    }
+}

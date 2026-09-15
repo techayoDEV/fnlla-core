@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+use Fnlla\Php\Database\DatabaseManager;
+use Fnlla\Php\Database\Migrations\Migration;
+
+return new class(app(DatabaseManager::class)) extends Migration {
+    public function up(): void
+    {
+    }
+
+    public function down(): void
+    {
+    }
+};

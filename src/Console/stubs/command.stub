@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}};
+
+use Fnlla\Php\Console\Command;
+
+final class {{class}} extends Command
+{
+    public function name(): string { return "{{command}}"; }
+    public function description(): string { return "Describe the command."; }
+
+    public function handle(array $arguments): int
+    {
+        return 0;
+    }
+}
