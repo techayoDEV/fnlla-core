@@ -22,8 +22,12 @@ Those belong in the full FNLLA repository: `techayoDEV/fnlla`.
 
 ## Install
 
+Until the package is registered on Packagist, install it from the public GitHub
+repository:
+
 ```powershell
-composer require techayodev/fnlla-core
+composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
+composer require techayodev/fnlla-core:~2.2.0
 ```
 
 The package autoloads `Fnlla\Php\` from `src/` and includes the shared helper
