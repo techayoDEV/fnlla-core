@@ -9,7 +9,7 @@ cache, mail, queue and core CLI building blocks.
 
 Package: `techayodev/fnlla-core`
 Repository: `techayoDEV/fnlla-core`
-Version: `2.2.4`
+Version: `2.2.5`
 
 ## FNLLA Family
 
