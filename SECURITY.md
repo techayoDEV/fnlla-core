@@ -2,7 +2,7 @@
 
 FNLLA Core is maintained as a public MIT-licensed framework core by TechAyo LTD
 (techayo.co.uk). Product website: [fnlla.com](https://fnlla.com). Policy edition:
-**2.2.4**.
+**2.2.5**.
 
 ## Version And Support Boundary
 

@@ -1,6 +1,6 @@
 # FNLLA Core Brand Standards
 
-Edition 2.2.4. Identity: outline. Official domain: fnlla.com.
+Edition 2.2.5. Identity: outline. Official domain: fnlla.com.
 
 FNLLA Core shares the FNLLA visual system, but the words around it must make the
 package boundary visible. The goal is a repo that looks unmistakably FNLLA while
