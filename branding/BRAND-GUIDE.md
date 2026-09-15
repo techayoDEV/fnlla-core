@@ -16,13 +16,14 @@ Technical line: **Runtime primitives for FNLLA applications.**
 
 Short profile: FNLLA Core is the open PHP framework core used by FNLLA. It
 contains the runtime, routing, HTTP, container, validation, database, session,
-cache, mail, queue and core CLI building blocks without the integrated product
-shell. Created & maintained by TechAyo.
+cache, mail, queue and core CLI building blocks. Created & maintained by
+TechAyo.
 
 ## Relationship To FNLLA
 
 FNLLA is the full product family and platform repository. FNLLA Core is the
-standalone core package from that family.
+standalone core package from that family. The public website `https://fnlla.com`
+ties both tracks together.
 
 Both use the same outline mark, Blueprint Blue `#2563EB`, neutral interface
 palette and TechAyo attribution. The distinction is scope, not quality or visual
@@ -38,10 +39,8 @@ full platform repository.
 Keep literal identifiers unchanged: `techayodev/fnlla-core`,
 `techayoDEV/fnlla-core`, `Fnlla\Php\`.
 
-Do not claim that FNLLA Core includes the Developer Panel, Client Portal, setup
-UI, platform operations layer, FIONN gateway or generated starter experience.
-Those belong to the full FNLLA product unless a future release explicitly moves
-part of that surface into Core.
+Describe FNLLA Core as the framework core package. Describe wider product
+workflows, generated applications and public website material as part of FNLLA.
 
 ## Visual Rules
 
@@ -72,17 +71,20 @@ crop tightly or apply unapproved effects.
 ## Repository Usage
 
 The README should open with **FNLLA Core**, describe the package boundary early
-and link to the full FNLLA repository for platform-only features.
+and link to the full FNLLA repository for the wider product experience.
 
 Social posts or package listings should lead with the Core descriptor before
-mentioning wider FNLLA capabilities. If a screenshot or diagram shows platform
-UI, label it as full FNLLA, not FNLLA Core.
+mentioning wider FNLLA capabilities. If a screenshot or diagram shows the wider
+product experience, label it as FNLLA rather than FNLLA Core.
 
 ## Maintainer Credit
 
 Created & maintained by **TechAyo**.
 
 Lead Developer / Product Manager - **Marcin Kordyaczny**.
+
+The FNLLA name comes from Finella Gardens in Dundee, Scotland, where the
+framework idea began.
 
 The brand guide describes presentation rules only. It does not certify release
 status, security posture or runtime compliance.

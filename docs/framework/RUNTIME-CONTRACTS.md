@@ -64,7 +64,8 @@ CLI commands. Back up before destructive schema work.
 ## Sessions And Authentication
 
 Application authentication uses `AuthManager`, `UserProviderInterface` and
-`SessionStore`. Developer and customer panel identities are not part of Core.
+`SessionStore`. Product-specific account contexts are provided by applications
+built on top of Core.
 
 Persistent HTTP sessions enforce idle and absolute expiry. Expiry or corrupt
 metadata clears all session domains and rotates identifiers. Redis sessions use
@@ -90,7 +91,7 @@ forwarded protocol headers with one canonical value.
 
 ## Upgrade Boundary
 
-FNLLA Core owns public framework primitives. Full FNLLA owns project setup,
-Developer Panel, Client Portal, diagnostics workbenches, update UI, analytics
-surfaces and FIONN AI gateway UI. Do not add those surfaces to Core without a
-deliberate product-boundary decision.
+FNLLA Core owns public framework primitives. Full FNLLA builds on those
+primitives with the broader application platform, project workflow and product
+experience. Keep Core changes useful to standalone framework consumers and add
+shared primitives here before consuming them from the full product.

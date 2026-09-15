@@ -11,5 +11,5 @@
 
 ## Boundary Check
 
-- [ ] This change belongs in FNLLA Core rather than the full FNLLA product shell.
-- [ ] No Developer Panel, Client Portal, setup UI, FIONN gateway UI or platform-only asset was added.
+- [ ] This change fits the public FNLLA Core framework scope.
+- [ ] Product-shell or website-only changes have been kept in their owning project.

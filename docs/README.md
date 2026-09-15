@@ -16,6 +16,16 @@ to describe from the Core repository itself.
 
 ## Boundary
 
-Core documentation must not imply that this package includes the full FNLLA
-Developer Panel, Client Portal, setup UI, commercial operations layer, FIONN AI
-gateway UI or platform marketing assets. Those belong in `techayoDEV/fnlla`.
+Core documentation should describe reusable framework behavior, public package
+contracts and supported extension points. The wider FNLLA product documentation
+belongs with `techayoDEV/fnlla` and the public website at `https://fnlla.com`.
+
+## FNLLA Family
+
+FNLLA Core is the open framework core package. FNLLA is the full product and
+application platform built around that core. `https://fnlla.com` is the public
+website and documentation hub for both.
+
+The FNLLA name comes from Finella Gardens in Dundee, Scotland. FNLLA Core is
+created and maintained by TechAyo, with Marcin Kordyaczny as Lead Developer /
+Product Manager.

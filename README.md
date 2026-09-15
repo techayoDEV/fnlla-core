@@ -3,27 +3,54 @@
 ![FNLLA Core lockup](branding/assets/logo/fnlla-core-lockup.svg)
 
 FNLLA Core is the open PHP framework core used by FNLLA. It carries the same
-FNLLA identity system and maintainer attribution, but its product promise is
-deliberately narrower: runtime primitives, routing, HTTP, container, validation,
-database, session, cache, mail, queue and core CLI building blocks.
+FNLLA identity system and maintainer attribution, with a framework-first promise:
+runtime primitives, routing, HTTP, container, validation, database, session,
+cache, mail, queue and core CLI building blocks.
 
 Package: `techayodev/fnlla-core`
 Repository: `techayoDEV/fnlla-core`
 Version: `2.2.4`
 
+## FNLLA Family
+
+There are two public FNLLA tracks:
+
+- **FNLLA Core** - this repository, the open PHP framework core package.
+- **FNLLA** - the full product and application platform repository:
+  `techayoDEV/fnlla`.
+
+[fnlla.com](https://fnlla.com) is the public website and documentation hub that
+ties FNLLA Core and FNLLA together.
+
+## Origin And Maintainers
+
+The FNLLA name comes from Finella Gardens in Dundee, Scotland, where the idea
+for the framework began.
+
+FNLLA Core is created and maintained by **TechAyo**.
+
+Lead Developer / Product Manager - **Marcin Kordyaczny**.
+
+Official public sources are the GitHub repositories under `techayoDEV` and
+[fnlla.com](https://fnlla.com).
+
 ## Scope
 
 FNLLA Core is for framework-level code and package consumers who need the base
-runtime without the integrated product shell.
+runtime. The full FNLLA product builds on Core with the broader application
+platform, project workflow and public website experience.
 
-It does not include the Developer Panel, Client Portal, FNLLA UI surface,
-project setup screens, commercial operations layer or platform marketing assets.
-Those belong in the full FNLLA repository: `techayoDEV/fnlla`.
+Core includes framework CLI commands for controllers, middleware, commands,
+factories, seeders, migrations, migration execution, route inspection, route
+cache, config cache, queues, database seeding and framework upgrades.
+
+Project creation is currently managed by the full FNLLA distribution through
+`make:project`, which prepares applications from the maintained project
+templates and can target the Core profile.
 
 ## Install
 
-Until the package is registered on Packagist, install it from the public GitHub
-repository:
+Install from the public GitHub VCS repository:
 
 ```powershell
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
@@ -63,5 +90,5 @@ commands and namespaces literal, especially `techayodev/fnlla-core` and
 ## Maintenance
 
 This repository is generated from the maintained FNLLA source manifest. Keep
-changes aligned with the core package boundary and avoid adding platform-only
-files here.
+changes aligned with the public framework-core scope so the package remains
+clear, reusable and professional on its own.

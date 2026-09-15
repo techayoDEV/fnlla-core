@@ -10,9 +10,8 @@ open framework core package.
 Use **FNLLA Core** in repository titles, README copy, package descriptions and
 public references to this package.
 
-Use **FNLLA** for the full product family or the platform repository. Do not use
-FNLLA Core copy to imply the Developer Panel, Client Portal, setup UI or the
-commercial operations layer are included in this package.
+Use **FNLLA** for the full product family, the platform repository and the wider
+application experience built around Core.
 
 Literal package and namespace identifiers stay unchanged:
 
@@ -41,6 +40,10 @@ outside the approved treatments.
 Created & maintained by **TechAyo**.
 
 Lead Developer / Product Manager - **Marcin Kordyaczny**.
+
+The FNLLA name comes from Finella Gardens in Dundee, Scotland, where the
+framework idea began. Official public references should point to the GitHub
+repositories under `techayoDEV` and `https://fnlla.com`.
 
 Use the legal license text from the repository `LICENSE.md`. Branding guidance
 is not a software release declaration.
