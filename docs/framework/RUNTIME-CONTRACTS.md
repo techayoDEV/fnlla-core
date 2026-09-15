@@ -1,7 +1,7 @@
 # FNLLA Core Runtime Contracts
 
 These contracts describe the public runtime surface shipped by FNLLA Core
-2.2.4. Full FNLLA builds on the same primitives and adds the integrated
+2.2.5. Full FNLLA builds on the same primitives and adds the integrated
 project operations layer separately.
 
 ## Application Generators
