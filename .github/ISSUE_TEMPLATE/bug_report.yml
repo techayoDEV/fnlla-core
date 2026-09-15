@@ -1,0 +1,57 @@
+name: Bug report
+description: Report a reproducible FNLLA Core defect
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a FNLLA Core issue. Do not include secrets, private customer data, session cookies or raw environment files.
+  - type: input
+    id: version
+    attributes:
+      label: FNLLA Core version
+      description: Include the VERSION file value, tag or commit.
+      placeholder: "2.2.4"
+    validations:
+      required: true
+  - type: input
+    id: php
+    attributes:
+      label: PHP version
+      placeholder: "8.3.x"
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest commands or code needed to reproduce the issue.
+      placeholder: |
+        1. Run ...
+        2. Open ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Relevant output
+      description: Paste the smallest relevant redacted output.
+      render: shell
+    validations:
+      required: false

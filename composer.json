@@ -1,6 +1,6 @@
 {
     "name": "techayodev/fnlla-core",
-    "description": "FNLLA Core PHP framework package without the integrated Developer Panel or FNLLA UI surface.",
+    "description": "Open PHP framework core for FNLLA applications.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://fnlla.com",
@@ -23,6 +23,5 @@
         "test": "@php scripts/test.php",
         "lint": "@php scripts/lint.php",
         "analyse": "@php scripts/static-analysis.php"
-    },
-    "version": "2.2.4"
+    }
 }
