@@ -1,0 +1,59 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+define("APP_ROOT", __DIR__);
+
+$autoload = __DIR__ . "/vendor/autoload.php";
+if (is_file($autoload)) {
+    require_once $autoload;
+} else {
+    spl_autoload_register(static function (string $class): void {
+        $prefix = "Fnlla\\Php\\";
+
+        if (!str_starts_with($class, $prefix)) {
+            return;
+        }
+
+        $path = __DIR__ . "/src/" . str_replace("\\", "/", substr($class, strlen($prefix))) . ".php";
+
+        if (is_file($path)) {
+            require $path;
+        }
+    });
+
+    require_once __DIR__ . "/src/Support/helpers.php";
+}
+
+$GLOBALS["fnlla_config"] = [
+    "app" => [
+        "name" => "FNLLA Core",
+        "base_url" => "",
+    ],
+];
+$GLOBALS["fnlla_php_config"] = $GLOBALS["fnlla_config"];
+
+$container = new \Fnlla\Php\Container\Container();
+$GLOBALS["fnlla_container"] = $container;
+$GLOBALS["fnlla_php_container"] = $container;
+
+$container->instance(\Fnlla\Php\Container\Container::class, $container);
+$container->singleton(\Fnlla\Php\Console\Application::class);
+
+$console = $container->make(\Fnlla\Php\Console\Application::class);
+$commands = [
+    "MakeProject", "RouteList", "RouteCache", "ConfigCache", "CacheClear", "Migrate", "MigrateRollback",
+    "MigrateStatus", "Seed", "QueueWork", "FnllaUpgrade", "MakeController", "MakeMiddleware",
+    "MakeCommand", "MakeFactory", "MakeSeeder", "MakeMigration",
+];
+
+foreach ($commands as $command) {
+    $class = "Fnlla\\Php\\Console\\Commands\\" . $command . "Command";
+
+    if (class_exists($class)) {
+        $console->register($class);
+    }
+}
+
+exit($console->run($_SERVER["argv"] ?? []));

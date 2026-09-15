@@ -19,6 +19,9 @@
             "src/Support/helpers.php"
         ]
     },
+    "bin": [
+        "fnlla"
+    ],
     "scripts": {
         "test": "@php scripts/test.php",
         "lint": "@php scripts/lint.php",

@@ -1,0 +1,10 @@
+parameters:
+    level: 5
+    paths:
+        - app
+        - packages/fnlla-core/src
+    bootstrapFiles:
+        - scripts/phpstan-bootstrap.php
+    scanFiles:
+        - packages/fnlla-core/src/Support/helpers.php
+    tmpDir: storage/framework/phpstan

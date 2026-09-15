@@ -1,0 +1,10 @@
+:root { color-scheme: light dark; font: 16px/1.5 system-ui, sans-serif; letter-spacing: 0; --ink: #0b1220; --paper: #fafafa; --link: #2563eb; }
+body { margin: 0; color: var(--ink); background: var(--paper); }
+main { width: min(100% - 40px, 1120px); margin: 40px auto; }
+h1 { font-size: 32px; line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }
+.core-home { display: grid; gap: 12px; }
+.core-framework-edition { width: fit-content; margin: 0; border: 1px solid color-mix(in srgb, var(--link) 35%, transparent); border-radius: 999px; padding: 5px 10px; color: var(--link); font-size: 13px; font-weight: 650; }
+a { color: var(--link); text-underline-offset: 3px; overflow-wrap: anywhere; }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
+code, pre { font-family: ui-monospace, monospace; }
+@media (prefers-color-scheme: dark) { :root { --ink: #e5e7eb; --paper: #16181d; --link: #60a5fa; } }

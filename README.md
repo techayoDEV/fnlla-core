@@ -44,9 +44,9 @@ Core includes framework CLI commands for controllers, middleware, commands,
 factories, seeders, migrations, migration execution, route inspection, route
 cache, config cache, queues, database seeding and framework upgrades.
 
-Project creation is currently managed by the full FNLLA distribution through
-`make:project`, which prepares applications from the maintained project
-templates and can target the Core profile.
+Core also includes a limited `make:project` command. It creates a minimal public
+FNLLA Core application from this repository only. The full FNLLA repository owns
+the broader platform profile and project tooling.
 
 ## Install
 
@@ -59,6 +59,19 @@ composer require techayodev/fnlla-core:~2.2.0
 
 The package autoloads `Fnlla\Php\` from `src/` and includes the shared helper
 file from `src/Support/helpers.php`.
+
+## Create A Core Project
+
+From a clone of this repository:
+
+```powershell
+php fnlla make:project ../my-core-app "My Core App"
+```
+
+The generated project includes a small public homepage, routing, config,
+tests, lint/static-analysis scripts, the `fnlla` CLI launcher and a local
+`packages/fnlla-core` path package. It does not create the full FNLLA platform
+application; use `techayoDEV/fnlla` when you need that profile.
 
 ## Validate
 

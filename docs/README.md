@@ -14,6 +14,13 @@ to describe from the Core repository itself.
   boundary.
 - [Security policy](../SECURITY.md) explains private vulnerability reporting.
 
+## Core Project Template
+
+`php fnlla make:project <target-path> "App Name"` creates a minimal public
+FNLLA Core application from this repository. The command only supports the Core
+profile; the full `techayoDEV/fnlla` repository owns the broader FNLLA platform
+profile.
+
 ## Boundary
 
 Core documentation should describe reusable framework behavior, public package

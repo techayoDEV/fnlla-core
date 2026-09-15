@@ -1,0 +1,28 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$container = require __DIR__ . "/bootstrap/common.php";
+$console = $container->make(\Fnlla\Php\Console\Application::class);
+$commands = [
+    "MakeProject", "RouteList", "RouteCache", "ConfigCache", "CacheClear", "Migrate", "MigrateRollback",
+    "MigrateStatus", "Seed", "QueueWork", "FnllaUpgrade", "MakeController", "MakeMiddleware",
+    "MakeCommand", "MakeFactory", "MakeSeeder", "MakeMigration",
+    "AiAsk", "AiBrief", "AiExplainLog", "AiTriage", "BackupPlan", "ConfigDoctor",
+    "DeveloperInstallStorage", "DeveloperRecoveryLink", "ReleaseManifest", "TechDebtUpdate",
+    "AiContext", "AiProviders", "AiRedact", "AiReviewPack", "AiUpgradeBrief", "AppMap",
+    "Doctor", "FnllaRuntimeSync", "FnllaRuntimeValidate", "FrameworkUpdate", "OptimizeClear",
+    "Optimize", "OptimizeWarm", "PerfBaselineUpdate", "PerfBudget", "PerfCompare", "PerfProfile",
+    "ProjectAcceptance", "ProjectClaim", "ReleaseChecksums", "ReleasePrepare", "ReleaseSbom",
+    "ScheduleRun", "SecurityAudit", "UpgradeApply", "UpgradeCheck", "UpgradePlan",
+    "VersionStatus", "VersionSync",
+];
+
+foreach ($commands as $command) {
+    $class = "Fnlla\\Php\\Console\\Commands\\" . $command . "Command";
+    if (class_exists($class)) {
+        $console->register($class);
+    }
+}
+exit($console->run($_SERVER["argv"] ?? []));
