@@ -1,5 +1,17 @@
 # FNLLA Core Changelog
 
+## 2.3.0
+
+### Release Summary
+
+- Promote the exact validated RC.2 runtime and public API to stable without
+  behavioral changes.
+- Preserve Core package bytes and manifests through direct and Framework
+  exports, including clean Composer consumers.
+- Retain the compatible legacy queue-store contract while reliable envelopes
+  fail closed unless the explicit reliable capability is implemented.
+- Keep long-lived HTTP workers unsupported and production RPO/RTO unclaimed.
+
 ## 2.3.0-rc.2 — Local candidate
 
 - Preserve package bytes and manifest integrity when the Core exporter

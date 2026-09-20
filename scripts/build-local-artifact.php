@@ -28,10 +28,16 @@ foreach ([$output, $archive, $archive . ".sha256"] as $path) {
 }
 
 $policy = json_decode((string) file_get_contents($root . "/resources/package-distribution.json"), true, 512, JSON_THROW_ON_ERROR);
+$channel = $policy["channel"] ?? null;
+$releaseApproved = $policy["release_approved"] ?? null;
+$stableVersion = preg_match('/^\d+\.\d+\.\d+$/D', $version) === 1;
 if (($policy["schema"] ?? null) !== "fnlla.core_distribution.v1"
     || ($policy["package"] ?? null) !== "techayodev/fnlla-core"
     || ($policy["candidate"] ?? null) !== $version
-    || ($policy["release_approved"] ?? true) !== false) {
+    || !is_bool($releaseApproved)
+    || !in_array($channel, ["local-review", "stable"], true)
+    || ($channel === "stable") !== $releaseApproved
+    || $releaseApproved !== $stableVersion) {
     fwrite(STDERR, "Candidate version or release state does not match the Core distribution policy." . PHP_EOL);
     exit(2);
 }
@@ -86,10 +92,10 @@ foreach ($files as $relative => $source) {
 }
 
 $provenance = [
-    "schema" => "fnlla.core.local-candidate.v2",
+    "schema" => $releaseApproved ? "fnlla.core.release.v2" : "fnlla.core.local-candidate.v2",
     "package" => "techayodev/fnlla-core",
     "version" => $version,
-    "channel" => "local-review",
+    "channel" => $channel,
     "source_repository" => "https://github.com/techayoDEV/fnlla-core",
     "base_commit" => $baseCommit,
     "source_identifier" => "git+https://github.com/techayoDEV/fnlla-core#" . $baseCommit,
@@ -98,8 +104,10 @@ $provenance = [
     "workspace_dirty" => trim($status) !== "",
     "source_date_epoch" => $commitEpoch,
     "built_at_utc" => $builtAt,
-    "release_approved" => false,
-    "purpose" => "Reproducible local Core 2.3.0 release-candidate validation; not an official release",
+    "release_approved" => $releaseApproved,
+    "purpose" => $releaseApproved
+        ? "Reproducible immutable FNLLA Core stable release"
+        : "Reproducible local FNLLA Core release-candidate validation; not an official release",
 ];
 write_file(
     $output . "/FNLLA-PROVENANCE.json",
@@ -110,8 +118,8 @@ $packageMetadata = [
     "schema" => "fnlla.package.v1",
     "package" => "techayodev/fnlla-core",
     "version" => $version,
-    "channel" => "local-review",
-    "release_approved" => false,
+    "channel" => $channel,
+    "release_approved" => $releaseApproved,
     "source" => [
         "repository" => $provenance["source_repository"],
         "commit" => $baseCommit,
@@ -173,7 +181,7 @@ fwrite(STDOUT, json_encode([
     "files" => count($hashes),
     "manifest_sha256" => hash("sha256", $manifest),
     "archive_sha256" => $archiveHash,
-    "release_approved" => false,
+    "release_approved" => $releaseApproved,
 ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL);
 
 function is_sensitive_path(string $relative): bool
