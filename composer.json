@@ -9,7 +9,16 @@
         "source": "https://github.com/techayoDEV/fnlla-core"
     },
     "require": {
-        "php": "^8.3"
+        "php": "^8.3",
+        "ext-fileinfo": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-pdo": "*",
+        "ext-session": "*"
+    },
+    "suggest": {
+        "ext-pdo_mysql": "Required by the maintained MySQL database connection.",
+        "ext-redis": "Required only for Redis cache, queue or session drivers."
     },
     "autoload": {
         "psr-4": {

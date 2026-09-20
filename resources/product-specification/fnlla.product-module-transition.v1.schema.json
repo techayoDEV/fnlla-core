@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.product-module-transition.v1.schema.json",
+  "title": "FNLLA Product Module Transition v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "operation", "changed", "enabled", "data_behavior", "uninstall", "effective_on"],
+  "properties": {
+    "schema": {"const": "fnlla.product-module-transition.v1"},
+    "operation": {"enum": ["enabled", "disabled"]},
+    "changed": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "enabled": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "data_behavior": {"const": "preserve"},
+    "uninstall": {"const": false},
+    "effective_on": {"const": "next_bootstrap"}
+  }
+}

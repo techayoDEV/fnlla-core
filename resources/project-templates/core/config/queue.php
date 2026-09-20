@@ -23,6 +23,11 @@ return [
     "max_attempts" => max(1, (int) env("QUEUE_MAX_ATTEMPTS", 1)),
     "retry_backoff_seconds" => max(1, (int) env("QUEUE_RETRY_BACKOFF_SECONDS", 30)),
     "visibility_timeout_seconds" => max(1, (int) env("QUEUE_VISIBILITY_TIMEOUT_SECONDS", 300)),
+    "worker_max_seconds" => max(1, (int) env("QUEUE_WORKER_MAX_SECONDS", 300)),
+    "idempotency_ttl_seconds" => max(60, (int) env("QUEUE_IDEMPOTENCY_TTL_SECONDS", 86400)),
+    "accept_legacy_payloads" => true,
+    "legacy_payload_sunset" => "FNLLA Core 3.0.0",
+    "job_types" => [],
     "connections" => [
         "file" => [
             "path" => (string) env("QUEUE_PATH", "framework/queue"),

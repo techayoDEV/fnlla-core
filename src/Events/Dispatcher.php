@@ -21,12 +21,14 @@ Purpose:
 namespace Fnlla\Php\Events;
 
 use Fnlla\Php\Container\Container;
+use Fnlla\Php\Database\DatabaseManager;
+use RuntimeException;
 
 final class Dispatcher
 {
     private array $listeners = [];
 
-    public function __construct(private Container $container)
+    public function __construct(private Container $container, private ?DatabaseManager $database = null)
     {
     }
 
@@ -36,6 +38,24 @@ final class Dispatcher
     }
 
     public function dispatch(object|string $event, array $payload = []): array
+    {
+        if ($this->database?->hasActiveManagedTransaction()) {
+            throw new RuntimeException("Event dispatch inside a transaction must use dispatchAfterCommit().");
+        }
+        return $this->dispatchNow($event, $payload);
+    }
+
+    public function dispatchAfterCommit(object|string $event, array $payload = []): void
+    {
+        if (!$this->database instanceof DatabaseManager) {
+            throw new RuntimeException("dispatchAfterCommit requires the configured DatabaseManager.");
+        }
+        $this->database->afterCommit(function () use ($event, $payload): void {
+            $this->dispatchNow($event, $payload);
+        });
+    }
+
+    private function dispatchNow(object|string $event, array $payload): array
     {
         $eventName = is_object($event) ? $event::class : $event;
         $results = [];

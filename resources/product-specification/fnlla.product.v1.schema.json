@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.product.v1.schema.json",
+  "title": "FNLLA Product Specification v1",
+  "description": "A portable declaration of product intent. It is not runtime evidence or an authorization to generate or deploy code.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "specification_version", "product", "modules", "entities", "relations", "roles", "permissions", "actions", "events", "workflows", "surfaces", "routes", "capabilities", "requirements", "proposals"],
+  "properties": {
+    "schema": {"const": "fnlla.product.v1"},
+    "specification_version": {"type": "string", "pattern": "^1\\.[0-9]+\\.[0-9]+$"},
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "summary", "origin"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "name": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1},
+        "origin": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "reference"],
+          "properties": {
+            "kind": {"enum": ["maintained", "migration", "example_fixture"]},
+            "reference": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "modules": {"type": "array", "items": {"$ref": "#/$defs/namedItem"}},
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "module", "description", "tenant_scoped"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "module": {"$ref": "#/$defs/id"},
+          "description": {"type": "string", "minLength": 1},
+          "tenant_scoped": {"type": "boolean"}
+        }
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "from_entity", "to_entity", "kind"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "from_entity": {"$ref": "#/$defs/id"},
+          "to_entity": {"$ref": "#/$defs/id"},
+          "kind": {"enum": ["belongs_to", "has_one", "has_many", "many_to_many"]}
+        }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "permissions"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "description": {"type": "string", "minLength": 1},
+          "permissions": {"type": "array", "items": {"$ref": "#/$defs/id"}}
+        }
+      }
+    },
+    "permissions": {"type": "array", "items": {"$ref": "#/$defs/namedItem"}},
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "module", "entity", "permissions", "emits_events"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "module": {"$ref": "#/$defs/id"},
+          "entity": {"$ref": "#/$defs/id"},
+          "permissions": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+          "emits_events": {"type": "array", "items": {"$ref": "#/$defs/id"}}
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "entity", "description"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "entity": {"$ref": "#/$defs/id"},
+          "description": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "workflows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "entity", "initial_state", "states", "transitions"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "entity": {"$ref": "#/$defs/id"},
+          "initial_state": {"$ref": "#/$defs/id"},
+          "states": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+          "transitions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "from", "to", "action"],
+              "properties": {
+                "id": {"$ref": "#/$defs/id"},
+                "from": {"$ref": "#/$defs/id"},
+                "to": {"$ref": "#/$defs/id"},
+                "action": {"$ref": "#/$defs/id"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "surfaces": {"type": "array", "items": {"$ref": "#/$defs/namedItem"}},
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "surface", "method", "path", "action", "status"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "surface": {"$ref": "#/$defs/id"},
+          "method": {"enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]},
+          "path": {"type": "string", "pattern": "^/"},
+          "action": {"$ref": "#/$defs/id"},
+          "status": {"enum": ["proposed", "implemented", "retired"]}
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "requirement"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "requirement": {"enum": ["required", "optional", "deferred", "disabled"]}
+        }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tenancy", "audit", "search", "seo", "ai"],
+      "properties": {
+        "tenancy": {"$ref": "#/$defs/requirement"},
+        "audit": {"$ref": "#/$defs/requirement"},
+        "search": {"$ref": "#/$defs/requirement"},
+        "seo": {"$ref": "#/$defs/requirement"},
+        "ai": {"$ref": "#/$defs/requirement"}
+      }
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "status", "planned_for"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "kind": {"enum": ["command", "api", "generator", "capability"]},
+          "status": {"const": "proposed"},
+          "planned_for": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"},
+    "namedItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "description": {"type": "string", "minLength": 1}
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "required", "notes"],
+      "properties": {
+        "mode": {"type": "string", "minLength": 1},
+        "required": {"type": "boolean"},
+        "notes": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.module.v1.schema.json",
+  "title": "FNLLA Module Declaration v1",
+  "description": "A declarative module-to-product and lifecycle link. It never contains executable commands or destructive uninstall instructions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "version", "id", "product_id", "description", "default_enabled", "depends_on", "entities", "actions", "events", "capabilities", "services", "routes", "assets"],
+  "properties": {
+    "schema": {"const": "fnlla.module.v1"},
+    "version": {"type": "string", "pattern": "^1\\.[0-9]+\\.[0-9]+$"},
+    "id": {"$ref": "#/$defs/id"},
+    "product_id": {"$ref": "#/$defs/id"},
+    "description": {"type": "string", "minLength": 1},
+    "default_enabled": {"type": "boolean"},
+    "depends_on": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+    "entities": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+    "actions": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+    "events": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+    "capabilities": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+    "services": {"type": "array", "items": {"$ref": "#/$defs/service"}},
+    "routes": {"type": "array", "items": {"$ref": "#/$defs/route"}},
+    "assets": {"type": "array", "items": {"$ref": "#/$defs/asset"}}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"},
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "abstract", "lifetime"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "abstract": {"type": "string", "minLength": 1},
+        "lifetime": {"enum": ["transient", "singleton", "scoped"]}
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "middleware", "privileged"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "middleware": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "privileged": {"type": "boolean"}
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "target", "publication", "disable_behavior", "removal"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "target": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9_.\\/-]+$"},
+        "publication": {"enum": ["application-owned", "module-copy"]},
+        "disable_behavior": {"const": "preserve"},
+        "removal": {"enum": ["owner-reviewed", "package-manager"]}
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS `fnlla_action_receipts` (
+  `idempotency_key` VARCHAR(64) PRIMARY KEY,
+  `action_id` VARCHAR(128) NOT NULL,
+  `request_hash` VARCHAR(64) NOT NULL,
+  `context_json` LONGTEXT NOT NULL,
+  `status` VARCHAR(16) NOT NULL,
+  `result_json` LONGTEXT NULL,
+  `created_at` DATETIME(6) NOT NULL,
+  `completed_at` DATETIME(6) NULL,
+  INDEX `action_completed` (`action_id`, `completed_at`)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS `fnlla_action_outbox` (
+  `message_id` VARCHAR(96) PRIMARY KEY,
+  `kind` VARCHAR(32) NOT NULL,
+  `message_name` VARCHAR(128) NOT NULL,
+  `payload_json` LONGTEXT NOT NULL,
+  `created_at` DATETIME(6) NOT NULL,
+  `published_at` DATETIME(6) NULL,
+  INDEX `outbox_pending` (`published_at`, `created_at`, `message_id`)
+) ENGINE=InnoDB;

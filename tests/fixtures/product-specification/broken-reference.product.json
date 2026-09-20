@@ -1,0 +1,24 @@
+{
+  "schema": "fnlla.product.v1",
+  "specification_version": "1.0.0",
+  "product": {"id": "broken-reference-fixture", "name": "Broken fixture", "summary": "Test only", "origin": {"kind": "example_fixture", "reference": "K-04.B"}},
+  "modules": [{"id": "example", "description": "Example module"}],
+  "entities": [{"id": "record", "module": "example", "description": "Example record", "tenant_scoped": true}],
+  "relations": [],
+  "roles": [{"id": "operator", "description": "Operator", "permissions": ["records.view"]}],
+  "permissions": [{"id": "records.view", "description": "View records"}],
+  "actions": [{"id": "record.view", "module": "example", "entity": "record", "permissions": ["records.view"], "emits_events": ["record.missing"]}],
+  "events": [],
+  "workflows": [],
+  "surfaces": [{"id": "web", "description": "Web"}],
+  "routes": [{"id": "records.index", "surface": "web", "method": "GET", "path": "/records", "action": "record.missing", "status": "proposed"}],
+  "capabilities": [{"id": "search.exact-match", "requirement": "required"}],
+  "requirements": {
+    "tenancy": {"mode": "row-scope", "required": true, "notes": "Test only"},
+    "audit": {"mode": "disabled", "required": false, "notes": "Test only"},
+    "search": {"mode": "exact-match", "required": true, "notes": "Test only"},
+    "seo": {"mode": "disabled", "required": false, "notes": "Test only"},
+    "ai": {"mode": "disabled", "required": false, "notes": "Test only"}
+  },
+  "proposals": []
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.audit-event.v1.schema.json",
+  "title": "FNLLA Audit Event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "occurred_at", "action", "source", "actor", "subject", "tenant_id", "correlation_id", "before", "after"],
+  "properties": {
+    "schema": {"const": "fnlla.audit-event.v1"},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "action": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:@/\\\\-]*$", "maxLength": 128},
+    "source": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:@/\\\\-]*$", "maxLength": 128},
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {"id": {"type": ["string", "null"], "maxLength": 160}}
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {"type": "string", "maxLength": 128},
+        "id": {"type": "string", "maxLength": 160}
+      }
+    },
+    "tenant_id": {"type": ["string", "null"], "maxLength": 160},
+    "correlation_id": {"type": "string", "maxLength": 160},
+    "before": {"type": "object"},
+    "after": {"type": "object"}
+  }
+}

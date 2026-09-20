@@ -119,6 +119,12 @@ final class Router
                 }
 
                 $metadata = $definition->metadataAll();
+                if (is_string($metadata["product_module"] ?? null)) {
+                    // Module state can change independently of the application
+                    // route cache. Register these routes from the live registry
+                    // on every bootstrap so disable cannot leave a cached route.
+                    continue;
+                }
                 unset($metadata["router"], $metadata["name_prefix"]);
 
                 $cached[] = [

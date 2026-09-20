@@ -44,8 +44,9 @@ $container->singleton(\Fnlla\Php\Console\Application::class);
 $console = $container->make(\Fnlla\Php\Console\Application::class);
 $commands = [
     "MakeProject", "RouteList", "RouteCache", "ConfigCache", "CacheClear", "Migrate", "MigrateRollback",
-    "MigrateStatus", "Seed", "QueueWork", "FnllaUpgrade", "MakeController", "MakeMiddleware",
-    "MakeCommand", "MakeFactory", "MakeSeeder", "MakeMigration",
+    "MigrateStatus", "Seed", "QueueWork", "RuntimeInspect", "FnllaUpgrade", "MakeController", "MakeMiddleware",
+    "MakeCommand", "MakeFactory", "MakeSeeder", "MakeMigration", "ProductValidate",
+    "ProductModuleValidate", "ProductModuleList", "ProductModuleInspect", "ProductModuleEnable", "ProductModuleDisable",
 ];
 
 foreach ($commands as $command) {

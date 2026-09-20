@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.domain-event.v1.schema.json",
+  "title": "FNLLA Domain Event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "name", "payload_version", "occurred_at", "subject", "context", "payload"],
+  "properties": {
+    "schema": {"const": "fnlla.domain-event.v1"},
+    "id": {"type": "string", "minLength": 1, "maxLength": 160},
+    "name": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+    "payload_version": {"type": "integer", "minimum": 1},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {"type": "string", "minLength": 1, "maxLength": 160},
+        "id": {"type": "string", "minLength": 1, "maxLength": 160}
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_id", "tenant_id", "source", "correlation_id"],
+      "properties": {
+        "actor_id": {"type": ["string", "null"]},
+        "tenant_id": {"type": ["string", "null"]},
+        "source": {"enum": ["human", "system", "api", "agent"]},
+        "correlation_id": {"type": "string", "minLength": 1, "maxLength": 160}
+      }
+    },
+    "payload": {"type": "object"}
+  }
+}

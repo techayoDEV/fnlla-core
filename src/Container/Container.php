@@ -32,13 +32,20 @@ final class Container
     private array $bindings = [];
     private array $instances = [];
     private array $resolving = [];
+    /** @var list<array<string, mixed>> */
+    private array $scopes = [];
 
     public function bind(string $abstract, Closure|string|null $concrete = null, bool $shared = false): void
     {
         unset($this->instances[$abstract]);
+        foreach ($this->scopes as &$scope) {
+            unset($scope[$abstract]);
+        }
+        unset($scope);
         $this->bindings[$abstract] = [
             "concrete" => $concrete ?? $abstract,
             "shared" => $shared,
+            "scoped" => false,
         ];
     }
 
@@ -47,25 +54,114 @@ final class Container
         $this->bind($abstract, $concrete, true);
     }
 
+    public function scoped(string $abstract, Closure|string|null $concrete = null): void
+    {
+        $this->bind($abstract, $concrete);
+        $this->bindings[$abstract]["scoped"] = true;
+    }
+
     public function instance(string $abstract, mixed $instance): void
     {
         $this->instances[$abstract] = $instance;
     }
 
+    public function scopedInstance(string $abstract, mixed $instance): void
+    {
+        $index = array_key_last($this->scopes);
+        if ($index === null) {
+            throw new RuntimeException("Cannot register scoped instance without an active work scope: " . $abstract);
+        }
+        $this->scopes[$index][$abstract] = $instance;
+    }
+
+    public function beginScope(): void
+    {
+        $this->scopes[] = [];
+    }
+
+    public function endScope(): void
+    {
+        if ($this->scopes === []) {
+            throw new RuntimeException("Cannot end a work scope when none is active.");
+        }
+        array_pop($this->scopes);
+    }
+
+    public function withinScope(callable $callback): mixed
+    {
+        $this->beginScope();
+        try {
+            return $callback($this);
+        } finally {
+            $this->endScope();
+        }
+    }
+
+    public function hasActiveScope(): bool
+    {
+        return $this->scopes !== [];
+    }
+
+    /**
+     * Return deterministic binding metadata without resolving services or
+     * exposing instance values.
+     *
+     * @return list<array{abstract:string,lifetime:string,concrete:string}>
+     */
+    public function inspectBindings(): array
+    {
+        $abstracts = array_values(array_unique([
+            ...array_keys($this->bindings),
+            ...array_keys($this->instances),
+        ]));
+        sort($abstracts, SORT_STRING);
+
+        $result = [];
+        foreach ($abstracts as $abstract) {
+            $binding = $this->bindings[$abstract] ?? null;
+            if (array_key_exists($abstract, $this->instances)) {
+                $lifetime = "instance";
+                $concrete = get_debug_type($this->instances[$abstract]);
+            } else {
+                $lifetime = ($binding["scoped"] ?? false) === true
+                    ? "scoped"
+                    : (($binding["shared"] ?? false) === true ? "singleton" : "transient");
+                $target = $binding["concrete"] ?? $abstract;
+                $concrete = $target instanceof Closure ? "closure" : (string) $target;
+            }
+            $result[] = [
+                "abstract" => $abstract,
+                "lifetime" => $lifetime,
+                "concrete" => $concrete,
+            ];
+        }
+
+        return $result;
+    }
+
     public function has(string $abstract): bool
     {
-        return array_key_exists($abstract, $this->instances)
+        $index = array_key_last($this->scopes);
+        return ($index !== null && array_key_exists($abstract, $this->scopes[$index]))
+            || array_key_exists($abstract, $this->instances)
             || array_key_exists($abstract, $this->bindings)
             || class_exists($abstract);
     }
 
     public function make(string $abstract, array $parameters = []): mixed
     {
+        $scopeIndex = array_key_last($this->scopes);
+        if ($scopeIndex !== null && array_key_exists($abstract, $this->scopes[$scopeIndex])) {
+            return $this->scopes[$scopeIndex][$abstract];
+        }
         if (array_key_exists($abstract, $this->instances)) {
             return $this->instances[$abstract];
         }
 
         $binding = $this->bindings[$abstract] ?? null;
+        if (($binding["scoped"] ?? false) === true && $scopeIndex === null) {
+            throw new RuntimeException("Scoped container entry requires an active work scope: " . $abstract);
+        }
         $concrete = $binding["concrete"] ?? $abstract;
         if (in_array($abstract, $this->resolving, true)) {
             throw new RuntimeException("Circular dependency: " . implode(" -> ", [...$this->resolving, $abstract]));
@@ -77,6 +173,8 @@ final class Container
                 : $this->build($concrete, $parameters);
             if (($binding["shared"] ?? false) === true) {
                 $this->instances[$abstract] = $object;
+            } elseif (($binding["scoped"] ?? false) === true && $scopeIndex !== null) {
+                $this->scopes[$scopeIndex][$abstract] = $object;
             }
             return $object;
         } finally {

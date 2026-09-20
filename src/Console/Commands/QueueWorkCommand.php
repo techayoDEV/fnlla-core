@@ -32,13 +32,23 @@ final class QueueWorkCommand extends Command
 
     public function description(): string
     {
-        return "Process queued jobs from the file queue.";
+        return "Process registered versioned jobs from the configured queue.";
     }
 
     public function handle(array $arguments): int
     {
         $maxJobs = isset($arguments[0]) ? max(1, (int) $arguments[0]) : 50;
-        $processed = $this->container->make(QueueManager::class)->work($maxJobs);
+        $maxSeconds = isset($arguments[1]) ? max(1, (int) $arguments[1]) : null;
+        $worker = $this->container->make(QueueManager::class);
+        if (function_exists("pcntl_async_signals") && function_exists("pcntl_signal")) {
+            pcntl_async_signals(true);
+            foreach ([defined("SIGTERM") ? SIGTERM : null, defined("SIGINT") ? SIGINT : null] as $signal) {
+                if (is_int($signal)) {
+                    pcntl_signal($signal, static function () use ($worker): void { $worker->requestStop(); });
+                }
+            }
+        }
+        $processed = $worker->work($maxJobs, $maxSeconds);
         $this->line("Processed jobs: " . $processed);
 
         return 0;

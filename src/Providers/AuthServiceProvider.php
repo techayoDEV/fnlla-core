@@ -35,5 +35,7 @@ final class AuthServiceProvider extends ServiceProvider
 
         $gate->define("view-dashboard", static fn (?array $user): bool => $user !== null);
         $gate->define("manage-admin-area", static fn (?array $user): bool => $user !== null && (($user["role"] ?? "user") === "admin"));
+        $gate->mapPermission("view-dashboard", "project.view");
+        $gate->mapPermission("manage-admin-area", "project.manage");
     }
 }

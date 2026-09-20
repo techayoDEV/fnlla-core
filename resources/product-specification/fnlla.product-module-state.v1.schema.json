@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.product-module-state.v1.schema.json",
+  "title": "FNLLA Product Module State v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "enabled"],
+  "properties": {
+    "schema": {"const": "fnlla.product-module-state.v1"},
+    "enabled": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+  }
+}

@@ -7,8 +7,9 @@ $container = require __DIR__ . "/bootstrap/common.php";
 $console = $container->make(\Fnlla\Php\Console\Application::class);
 $commands = [
     "MakeProject", "RouteList", "RouteCache", "ConfigCache", "CacheClear", "Migrate", "MigrateRollback",
-    "MigrateStatus", "Seed", "QueueWork", "FnllaUpgrade", "MakeController", "MakeMiddleware",
-    "MakeCommand", "MakeFactory", "MakeSeeder", "MakeMigration",
+    "MigrateStatus", "Seed", "QueueWork", "RuntimeInspect", "FnllaUpgrade", "MakeController", "MakeMiddleware",
+    "MakeCommand", "MakeFactory", "MakeSeeder", "MakeMigration", "ProductValidate",
+    "ProductModuleValidate", "ProductModuleList", "ProductModuleInspect", "ProductModuleEnable", "ProductModuleDisable",
     "AiAsk", "AiBrief", "AiExplainLog", "AiTriage", "BackupPlan", "ConfigDoctor",
     "DeveloperInstallStorage", "DeveloperRecoveryLink", "ReleaseManifest", "TechDebtUpdate",
     "AiContext", "AiProviders", "AiRedact", "AiReviewPack", "AiUpgradeBrief", "AppMap",

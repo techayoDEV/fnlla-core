@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.product-drift.v1.schema.json",
+  "title": "FNLLA Product Drift Report v1",
+  "description": "A deterministic comparison of declared intent and explicit implementation evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "product_schema", "product_id", "summary", "entries"],
+  "properties": {
+    "schema": {"const": "fnlla.product-drift.v1"},
+    "product_schema": {"const": "fnlla.product.v1"},
+    "product_id": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declared", "implemented", "unverified", "contradictory"],
+      "properties": {
+        "declared": {"type": "integer", "minimum": 0},
+        "implemented": {"type": "integer", "minimum": 0},
+        "unverified": {"type": "integer", "minimum": 0},
+        "contradictory": {"type": "integer", "minimum": 0}
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["target", "status", "intent_reference", "evidence_references", "message"],
+        "properties": {
+          "target": {"type": "string"},
+          "status": {"enum": ["declared", "implemented", "unverified", "contradictory"]},
+          "intent_reference": {"type": "string"},
+          "evidence_references": {"type": "array", "items": {"type": "string"}},
+          "message": {"type": "string"}
+        }
+      }
+    }
+  }
+}

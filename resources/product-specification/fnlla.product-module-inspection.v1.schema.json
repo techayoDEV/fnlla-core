@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.product-module-inspection.v1.schema.json",
+  "title": "FNLLA Product Module Inspection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "enabled", "depends_on", "active_dependents", "services", "routes", "assets", "disable_is_uninstall", "data_behavior"],
+  "properties": {
+    "schema": {"const": "fnlla.product-module-inspection.v1"},
+    "id": {"type": "string"},
+    "enabled": {"type": "boolean"},
+    "depends_on": {"type": "array", "items": {"type": "string"}},
+    "active_dependents": {"type": "array", "items": {"type": "string"}},
+    "services": {"type": "array"},
+    "routes": {"type": "array"},
+    "assets": {"type": "array"},
+    "disable_is_uninstall": {"const": false},
+    "data_behavior": {"const": "preserve"}
+  }
+}

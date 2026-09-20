@@ -23,7 +23,8 @@ namespace Fnlla\Php\Queue;
 
 interface QueueStoreInterface
 {
-    public function push(string $jobClass, array $payload = []): string;
+    /** @param array<string, mixed> $metadata */
+    public function push(string $jobClass, array $payload = [], array $metadata = []): string;
 
     /**
      * Reserve, do not destructively dequeue. Built-in stores recover expired leases.
@@ -34,6 +35,20 @@ interface QueueStoreInterface
     public function complete(array $job): void;
 
     public function fail(array $job): string;
+
+    public function reject(array $job, string $reason): string;
+
+    public function owns(array $job): bool;
+
+    /** @return array<string, mixed> */
+    public function renew(array $job, int $leaseSeconds): array;
+
+    /** @return 'untracked'|'claimed'|'busy'|'completed' */
+    public function beginIdempotent(array $job): string;
+
+    public function completeIdempotent(array $job): void;
+
+    public function releaseIdempotent(array $job): void;
 
     public function pendingCount(): int;
 

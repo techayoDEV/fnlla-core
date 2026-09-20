@@ -1,0 +1,16 @@
+{
+  "schema": "fnlla.module.v1",
+  "version": "1.0.0",
+  "id": "tenancy",
+  "product_id": "property-maintenance",
+  "description": "Declares the tenant boundary used by the example.",
+  "default_enabled": false,
+  "depends_on": [],
+  "entities": ["tenant"],
+  "actions": [],
+  "events": [],
+  "capabilities": ["tenancy.row-scope", "audit.append-only"],
+  "services": [],
+  "routes": [],
+  "assets": []
+}

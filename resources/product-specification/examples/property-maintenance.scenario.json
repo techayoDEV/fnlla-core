@@ -1,0 +1,23 @@
+{
+  "schema": "fnlla.product-example-scenario.v1",
+  "fixture": true,
+  "product_id": "property-maintenance",
+  "data_classification": "synthetic-test-only",
+  "tenants": [
+    {"id": "tenant-blue", "label": "Blue Example"},
+    {"id": "tenant-green", "label": "Green Example"}
+  ],
+  "work_orders": [
+    {"id": "work-order-blue-1", "tenant_id": "tenant-blue", "property_id": "property-blue-1", "state": "requested"},
+    {"id": "work-order-green-1", "tenant_id": "tenant-green", "property_id": "property-green-1", "state": "scheduled"}
+  ],
+  "isolation_expectations": [
+    "tenant-blue cannot read or change work-order-green-1",
+    "tenant-green cannot read or change work-order-blue-1",
+    "a tenant_id supplied by request data is not authorization"
+  ],
+  "limitations": [
+    "This is a fixture, not customer data.",
+    "This is not a promise of a ready-made SaaS or billing engine."
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "fnlla.module.v1",
+  "version": "1.0.0",
+  "id": "tenancy",
+  "product_id": "property-maintenance",
+  "description": "Cycle fixture A",
+  "depends_on": ["properties"],
+  "entities": ["tenant"],
+  "actions": [],
+  "events": [],
+  "capabilities": ["tenancy.row-scope"]
+}

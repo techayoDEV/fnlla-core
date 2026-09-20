@@ -30,6 +30,9 @@ final class DatabaseManager
     private ?PDO $pdo = null;
     /** @var array<string, self> */
     private array $named = [];
+    private int $managedTransactionDepth = 0;
+    /** @var list<list<callable>> */
+    private array $afterCommitFrames = [];
 
     public function __construct(private ?string $connectionName = null) {}
 
@@ -157,6 +160,7 @@ final class DatabaseManager
     {
         $pdo = $this->connection();
         $nested = $pdo->inTransaction();
+        $externallyOwned = $nested && $this->managedTransactionDepth === 0;
         // Unique names also isolate calls inside transactions owned by application code.
         $savepoint = "fnlla_" . bin2hex(random_bytes(12));
         if ($nested) {
@@ -165,19 +169,26 @@ final class DatabaseManager
             $pdo->beginTransaction();
         }
 
+        $this->managedTransactionDepth++;
+        $this->afterCommitFrames[] = [];
         try {
             $result = $callback($this);
             if (!$pdo->inTransaction()) {
                 throw new RuntimeException("Transaction ended inside its callback. Do not commit, roll back or execute implicit-commit DDL inside transaction().");
+            }
+            $callbacks = array_pop($this->afterCommitFrames) ?? [];
+            if ($externallyOwned && $callbacks !== []) {
+                throw new RuntimeException("Cannot defer external effects from a transaction owned outside DatabaseManager.");
             }
             if ($nested) {
                 $pdo->exec("RELEASE SAVEPOINT " . $savepoint);
             } else {
                 $pdo->commit();
             }
-
-            return $result;
         } catch (\Throwable $exception) {
+            if (count($this->afterCommitFrames) >= $this->managedTransactionDepth) {
+                array_pop($this->afterCommitFrames);
+            }
             // Deadlocks and connection failures may already have ended the transaction.
             if ($pdo->inTransaction()) {
                 try {
@@ -191,8 +202,51 @@ final class DatabaseManager
                     throw new RuntimeException("Transaction rollback failed: " . $rollbackError->getMessage(), 0, $exception);
                 }
             }
+            $this->managedTransactionDepth--;
             throw $exception;
         }
+
+        $this->managedTransactionDepth--;
+        if ($nested && !$externallyOwned) {
+            $parent = array_key_last($this->afterCommitFrames);
+            if ($parent === null) {
+                throw new RuntimeException("Managed transaction callback stack is inconsistent.");
+            }
+            array_push($this->afterCommitFrames[$parent], ...$callbacks);
+            return $result;
+        }
+
+        foreach ($callbacks as $index => $afterCommit) {
+            try {
+                $afterCommit();
+            } catch (\Throwable $exception) {
+                throw new PostCommitCallbackException(
+                    "Database commit succeeded, but after-commit callback " . ($index + 1) . " failed: " . $exception->getMessage(),
+                    0,
+                    $exception
+                );
+            }
+        }
+
+        return $result;
+    }
+
+    public function afterCommit(callable $callback): void
+    {
+        if ($this->managedTransactionDepth === 0) {
+            $callback();
+            return;
+        }
+        $index = array_key_last($this->afterCommitFrames);
+        if ($index === null) {
+            throw new RuntimeException("Managed transaction callback stack is unavailable.");
+        }
+        $this->afterCommitFrames[$index][] = $callback;
+    }
+
+    public function hasActiveManagedTransaction(): bool
+    {
+        return $this->managedTransactionDepth > 0;
     }
 
     public function supportsTransactionalMigrations(): bool

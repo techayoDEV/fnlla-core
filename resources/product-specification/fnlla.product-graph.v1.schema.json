@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.product-graph.v1.schema.json",
+  "title": "FNLLA Derived Product Graph v1",
+  "description": "A non-authoritative graph derived from a Product Specification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "product_schema", "product_id", "authoritative", "source_references", "nodes", "edges"],
+  "properties": {
+    "schema": {"const": "fnlla.product-graph.v1"},
+    "product_schema": {"const": "fnlla.product.v1"},
+    "product_id": {"type": "string"},
+    "authoritative": {"const": false},
+    "source_references": {"type": "array", "items": {"type": "string"}},
+    "nodes": {"type": "array", "items": {"type": "object", "required": ["id", "kind"], "properties": {"id": {"type": "string"}, "kind": {"type": "string"}}, "additionalProperties": false}},
+    "edges": {"type": "array", "items": {"type": "object", "required": ["from", "to", "kind"], "properties": {"from": {"type": "string"}, "to": {"type": "string"}, "kind": {"type": "string"}}, "additionalProperties": false}}
+  }
+}

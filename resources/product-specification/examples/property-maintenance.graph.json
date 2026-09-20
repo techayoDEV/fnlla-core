@@ -1,0 +1,20 @@
+{
+  "schema": "fnlla.product-graph.v1",
+  "product_schema": "fnlla.product.v1",
+  "product_id": "property-maintenance",
+  "authoritative": false,
+  "source_references": ["examples/property-maintenance.product.json"],
+  "nodes": [
+    {"id": "module:work-orders", "kind": "module"},
+    {"id": "entity:work-order", "kind": "entity"},
+    {"id": "action:work-order.schedule", "kind": "action"},
+    {"id": "event:work-order.scheduled", "kind": "event"},
+    {"id": "surface:tenant-api", "kind": "surface"}
+  ],
+  "edges": [
+    {"from": "module:work-orders", "to": "entity:work-order", "kind": "owns"},
+    {"from": "action:work-order.schedule", "to": "entity:work-order", "kind": "changes"},
+    {"from": "action:work-order.schedule", "to": "event:work-order.scheduled", "kind": "emits"},
+    {"from": "surface:tenant-api", "to": "action:work-order.schedule", "kind": "proposes"}
+  ]
+}

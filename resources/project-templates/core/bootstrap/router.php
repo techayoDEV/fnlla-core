@@ -6,6 +6,7 @@ $router = ($rebuildRouteCache ?? false) ? new \Fnlla\Php\Routing\Router($contain
 foreach (["csrf" => \Fnlla\Php\Middleware\VerifyCsrfToken::class,
     "auth" => \Fnlla\Php\Auth\Middleware\Authenticate::class,
     "authorize" => \Fnlla\Php\Auth\Middleware\Authorize::class,
+    "tenant" => \Fnlla\Php\Tenancy\ResolveTenantContext::class,
     "cors" => \Fnlla\Php\Middleware\HandleCors::class,
     "throttle" => \Fnlla\Php\Middleware\ThrottleRequests::class,
     "trusted-hosts" => \Fnlla\Php\Middleware\EnforceTrustedHosts::class] as $alias => $class) {
@@ -27,4 +28,5 @@ if ($cachedRoutes !== null) {
     }
     require base_path("routes/web.php");
 }
+$container->make(\Fnlla\Php\Product\ProductModuleRegistry::class)->registerRoutes($router);
 return $router;

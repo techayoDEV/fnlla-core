@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fnlla.com/schemas/fnlla.product-implementation-facts.v1.schema.json",
+  "title": "FNLLA Product Implementation Facts v1",
+  "description": "Observed code or test evidence kept separate from product intent.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "product_schema", "product_id", "origin", "observations"],
+  "properties": {
+    "schema": {"const": "fnlla.product-implementation-facts.v1"},
+    "product_schema": {"const": "fnlla.product.v1"},
+    "product_id": {"type": "string"},
+    "origin": {"enum": ["repository_scan", "test_run", "example_fixture"]},
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "target", "kind", "status", "evidence"],
+        "properties": {
+          "id": {"type": "string"},
+          "target": {"type": "string"},
+          "kind": {"enum": ["code", "test", "configuration", "route"]},
+          "status": {"enum": ["verified", "absent", "unverified", "contradictory"]},
+          "evidence": {"type": "string"}
+        }
+      }
+    }
+  }
+}

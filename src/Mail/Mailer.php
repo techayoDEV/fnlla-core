@@ -20,16 +20,39 @@ Purpose:
 
 namespace Fnlla\Php\Mail;
 
+use Fnlla\Php\Database\DatabaseManager;
 use RuntimeException;
 
 final class Mailer
 {
+    public function __construct(private ?DatabaseManager $database = null)
+    {
+    }
+
     public function to(array|string $recipients): PendingMail
     {
         return new PendingMail($this, $recipients);
     }
 
     public function send(array|string $recipients, string $subject, string $html, string $text = ""): void
+    {
+        if ($this->database?->hasActiveManagedTransaction()) {
+            throw new RuntimeException("Mail delivery inside a transaction must use sendAfterCommit().");
+        }
+        $this->sendNow($recipients, $subject, $html, $text);
+    }
+
+    public function sendAfterCommit(array|string $recipients, string $subject, string $html, string $text = ""): void
+    {
+        if (!$this->database instanceof DatabaseManager) {
+            throw new RuntimeException("sendAfterCommit requires the configured DatabaseManager.");
+        }
+        $this->database->afterCommit(function () use ($recipients, $subject, $html, $text): void {
+            $this->sendNow($recipients, $subject, $html, $text);
+        });
+    }
+
+    private function sendNow(array|string $recipients, string $subject, string $html, string $text): void
     {
         $driver = (string) config("mail.default", "log");
         $recipients = $this->normaliseRecipients($recipients);

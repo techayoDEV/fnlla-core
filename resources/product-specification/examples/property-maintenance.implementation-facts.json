@@ -1,0 +1,13 @@
+{
+  "schema": "fnlla.product-implementation-facts.v1",
+  "product_schema": "fnlla.product.v1",
+  "product_id": "property-maintenance",
+  "origin": "example_fixture",
+  "observations": [
+    {"id": "fact-tenant-entity", "target": "entity:tenant", "kind": "code", "status": "verified", "evidence": "fixture://code/entities/tenant"},
+    {"id": "fact-tenant-isolation", "target": "capability:tenancy.row-scope", "kind": "test", "status": "verified", "evidence": "fixture://tests/tenant-isolation"},
+    {"id": "fact-work-order-route", "target": "route:work-orders.store", "kind": "route", "status": "absent", "evidence": "fixture://route-scan/no-match"},
+    {"id": "fact-search", "target": "capability:search.exact-match", "kind": "test", "status": "unverified", "evidence": "fixture://tests/no-evidence"},
+    {"id": "fact-tenancy-mode", "target": "requirement:tenancy", "kind": "configuration", "status": "contradictory", "evidence": "fixture://config/single-tenant"}
+  ]
+}

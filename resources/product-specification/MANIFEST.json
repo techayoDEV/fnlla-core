@@ -1,0 +1,33 @@
+{
+  "schema": "fnlla.product_contract_manifest.v1",
+  "contract": "fnlla.product.v1",
+  "contract_version": "1.0.0",
+  "status": "public",
+  "owner": "FNLLA Core",
+  "schemas": [
+    "fnlla.product.v1.schema.json",
+    "fnlla.module.v1.schema.json",
+    "fnlla.product-validation-report.v1.schema.json",
+    "fnlla.product-module-state.v1.schema.json",
+    "fnlla.product-module-transition.v1.schema.json",
+    "fnlla.product-module-inspection.v1.schema.json",
+    "fnlla.product-implementation-facts.v1.schema.json",
+    "fnlla.product-drift.v1.schema.json",
+    "fnlla.product-graph.v1.schema.json"
+  ],
+  "examples": [
+    "examples/property-maintenance.product.json",
+    "examples/property-maintenance.scenario.json",
+    "examples/property-maintenance.implementation-facts.json",
+    "examples/property-maintenance.drift.json",
+    "examples/property-maintenance.graph.json",
+    "examples/modules/tenancy.module.json",
+    "examples/modules/properties.module.json",
+    "examples/modules/work-orders.module.json"
+  ],
+  "migration": "docs/framework/PRODUCT-SPECIFICATION.md",
+  "runtime_validator": "Fnlla\\Php\\Product\\ProductValidator",
+  "command": "product:validate",
+  "module_lifecycle_registry": "Fnlla\\Php\\Product\\ProductModuleRegistry",
+  "module_commands": ["module:list", "module:inspect", "module:validate", "module:enable", "module:disable"]
+}

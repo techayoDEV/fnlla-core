@@ -1,0 +1,91 @@
+{
+  "schema": "fnlla.product.v1",
+  "specification_version": "1.0.0",
+  "product": {
+    "id": "property-maintenance",
+    "name": "Property Maintenance Example",
+    "summary": "Synthetic product intent for tenant-isolated property work orders.",
+    "origin": {
+      "kind": "example_fixture",
+      "reference": "K-04.A property-maintenance example"
+    }
+  },
+  "modules": [
+    {"id": "tenancy", "description": "Tenant boundary declarations."},
+    {"id": "properties", "description": "Properties within a tenant boundary."},
+    {"id": "work-orders", "description": "Maintenance request workflow."}
+  ],
+  "entities": [
+    {"id": "tenant", "module": "tenancy", "description": "Logical isolation boundary.", "tenant_scoped": false},
+    {"id": "property", "module": "properties", "description": "Synthetic managed property.", "tenant_scoped": true},
+    {"id": "work-order", "module": "work-orders", "description": "Maintenance work requested for a property.", "tenant_scoped": true}
+  ],
+  "relations": [
+    {"id": "property-tenant", "from_entity": "property", "to_entity": "tenant", "kind": "belongs_to"},
+    {"id": "work-order-property", "from_entity": "work-order", "to_entity": "property", "kind": "belongs_to"},
+    {"id": "work-order-tenant", "from_entity": "work-order", "to_entity": "tenant", "kind": "belongs_to"}
+  ],
+  "roles": [
+    {"id": "tenant-admin", "description": "Administers one tenant.", "permissions": ["properties.view", "work-orders.create", "work-orders.schedule", "work-orders.view"]},
+    {"id": "dispatcher", "description": "Schedules work within one tenant.", "permissions": ["properties.view", "work-orders.schedule", "work-orders.view"]},
+    {"id": "technician", "description": "Performs assigned work within one tenant.", "permissions": ["work-orders.progress", "work-orders.view"]}
+  ],
+  "permissions": [
+    {"id": "properties.view", "description": "View tenant-scoped properties."},
+    {"id": "work-orders.create", "description": "Create a tenant-scoped work order."},
+    {"id": "work-orders.schedule", "description": "Schedule a tenant-scoped work order."},
+    {"id": "work-orders.progress", "description": "Start or complete assigned work."},
+    {"id": "work-orders.view", "description": "View tenant-scoped work orders."}
+  ],
+  "actions": [
+    {"id": "work-order.create", "module": "work-orders", "entity": "work-order", "permissions": ["work-orders.create"], "emits_events": ["work-order.created"]},
+    {"id": "work-order.schedule", "module": "work-orders", "entity": "work-order", "permissions": ["work-orders.schedule"], "emits_events": ["work-order.scheduled"]},
+    {"id": "work-order.start", "module": "work-orders", "entity": "work-order", "permissions": ["work-orders.progress"], "emits_events": ["work-order.started"]},
+    {"id": "work-order.complete", "module": "work-orders", "entity": "work-order", "permissions": ["work-orders.progress"], "emits_events": ["work-order.completed"]}
+  ],
+  "events": [
+    {"id": "work-order.created", "entity": "work-order", "description": "A work order was declared."},
+    {"id": "work-order.scheduled", "entity": "work-order", "description": "A work order was scheduled."},
+    {"id": "work-order.started", "entity": "work-order", "description": "Assigned work began."},
+    {"id": "work-order.completed", "entity": "work-order", "description": "Assigned work was completed."}
+  ],
+  "workflows": [
+    {
+      "id": "work-order-lifecycle",
+      "entity": "work-order",
+      "initial_state": "requested",
+      "states": ["requested", "scheduled", "in-progress", "completed"],
+      "transitions": [
+        {"id": "schedule", "from": "requested", "to": "scheduled", "action": "work-order.schedule"},
+        {"id": "start", "from": "scheduled", "to": "in-progress", "action": "work-order.start"},
+        {"id": "complete", "from": "in-progress", "to": "completed", "action": "work-order.complete"}
+      ]
+    }
+  ],
+  "surfaces": [
+    {"id": "operations-web", "description": "Proposed operator-facing web surface."},
+    {"id": "tenant-api", "description": "Proposed tenant-scoped JSON API."}
+  ],
+  "routes": [
+    {"id": "work-orders.index", "surface": "operations-web", "method": "GET", "path": "/work-orders", "action": "work-order.create", "status": "proposed"},
+    {"id": "work-orders.store", "surface": "tenant-api", "method": "POST", "path": "/api/work-orders", "action": "work-order.create", "status": "proposed"},
+    {"id": "work-orders.schedule", "surface": "tenant-api", "method": "PATCH", "path": "/api/work-orders/{work-order}/schedule", "action": "work-order.schedule", "status": "proposed"}
+  ],
+  "capabilities": [
+    {"id": "tenancy.row-scope", "requirement": "required"},
+    {"id": "audit.append-only", "requirement": "required"},
+    {"id": "search.exact-match", "requirement": "required"},
+    {"id": "seo.metadata", "requirement": "optional"},
+    {"id": "ai.semantic-search", "requirement": "deferred"}
+  ],
+  "requirements": {
+    "tenancy": {"mode": "row-scope", "required": true, "notes": "Every tenant-scoped read and write must derive tenant context from verified identity, not request data alone."},
+    "audit": {"mode": "append-only", "required": true, "notes": "State transitions require actor, tenant, correlation and timestamp evidence."},
+    "search": {"mode": "exact-match", "required": true, "notes": "Basic tenant-scoped search is required; semantic search is not."},
+    "seo": {"mode": "metadata", "required": false, "notes": "Public metadata may be provided; this example does not require public indexable records."},
+    "ai": {"mode": "disabled", "required": false, "notes": "No LLM inference, AI SEO or semantic search is required by this contract."}
+  },
+  "proposals": [
+    {"id": "module.lifecycle", "kind": "capability", "status": "proposed", "planned_for": "K-06.A"}
+  ]
+}

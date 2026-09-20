@@ -1,0 +1,16 @@
+{
+  "schema": "fnlla.module.v1",
+  "version": "1.0.0",
+  "id": "properties",
+  "product_id": "property-maintenance",
+  "description": "Declares property records inside a tenant boundary.",
+  "default_enabled": false,
+  "depends_on": ["tenancy"],
+  "entities": ["property"],
+  "actions": [],
+  "events": [],
+  "capabilities": ["tenancy.row-scope", "search.exact-match"],
+  "services": [],
+  "routes": [],
+  "assets": []
+}

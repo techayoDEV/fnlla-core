@@ -1,0 +1,14 @@
+{
+  "schema": "fnlla.product-drift.v1",
+  "product_schema": "fnlla.product.v1",
+  "product_id": "property-maintenance",
+  "summary": {"declared": 1, "implemented": 2, "unverified": 2, "contradictory": 1},
+  "entries": [
+    {"target": "module:work-orders", "status": "declared", "intent_reference": "/modules/2", "evidence_references": [], "message": "The module is product intent; no implementation conclusion is implied."},
+    {"target": "entity:tenant", "status": "implemented", "intent_reference": "/entities/0", "evidence_references": ["fact-tenant-entity"], "message": "Synthetic code evidence verifies this fixture target."},
+    {"target": "capability:tenancy.row-scope", "status": "implemented", "intent_reference": "/capabilities/0", "evidence_references": ["fact-tenant-isolation"], "message": "Synthetic test evidence verifies this fixture target."},
+    {"target": "route:work-orders.store", "status": "unverified", "intent_reference": "/routes/1", "evidence_references": ["fact-work-order-route"], "message": "Declared route has no matching implementation in the fixture evidence."},
+    {"target": "capability:search.exact-match", "status": "unverified", "intent_reference": "/capabilities/2", "evidence_references": ["fact-search"], "message": "A file or declaration alone does not verify runtime behavior."},
+    {"target": "requirement:tenancy", "status": "contradictory", "intent_reference": "/requirements/tenancy", "evidence_references": ["fact-tenancy-mode"], "message": "The fixture observation conflicts with the declared multi-tenant boundary."}
+  ]
+}
