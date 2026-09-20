@@ -90,6 +90,15 @@ bounded retries and durable idempotency markers. Delivery remains at-least-once:
 job handlers must recheck permission and lease validity immediately before an
 external effect. FNLLA does not promise exactly-once mail, API or payment effects.
 
+The published `QueueStoreInterface` remains the six-method Core v2.2.4 contract
+for basic third-party stores. Core's file and Redis stores additionally implement
+`ReliableQueueStoreInterface`, which is required for versioned metadata,
+`JobContext`, tenant-aware work, lease ownership/renewal and durable idempotency.
+A legacy store is called with the original two-argument `push()` signature and
+may run only the basic non-contextual flow. Supplying dispatch context or enabling
+tenant-aware work without the reliable capability fails before a job is written
+or reserved; metadata is never silently discarded.
+
 Run `php fnlla queue:work [max-jobs] [max-seconds]` for a bounded worker and
 `php fnlla runtime:inspect` for versioned, redacted local diagnostics. Use
 `DatabaseManager::afterCommit()` or the queue/event/mail `*AfterCommit` methods

@@ -7,7 +7,7 @@ namespace Fnlla\Php\Queue;
 use RuntimeException;
 
 /** Local-disk, at-least-once queue. Persist the reservation before work begins. */
-final class FileQueueStore implements QueueStoreInterface
+final class FileQueueStore implements ReliableQueueStoreInterface
 {
     public function __construct(private string $directory)
     {
@@ -17,7 +17,12 @@ final class FileQueueStore implements QueueStoreInterface
         $this->directory = (string) realpath($directory);
     }
 
-    public function push(string $jobClass, array $payload = [], array $metadata = []): string
+    public function push(string $jobClass, array $payload = []): string
+    {
+        return $this->pushWithMetadata($jobClass, $payload);
+    }
+
+    public function pushWithMetadata(string $jobClass, array $payload = [], array $metadata = []): string
     {
         return $this->locked(function () use ($jobClass, $payload, $metadata): string {
             $id = gmdate("YmdHis") . "_" . bin2hex(random_bytes(8));

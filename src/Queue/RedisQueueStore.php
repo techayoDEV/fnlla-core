@@ -7,7 +7,7 @@ namespace Fnlla\Php\Queue;
 use Redis;
 use RuntimeException;
 
-final class RedisQueueStore implements QueueStoreInterface
+final class RedisQueueStore implements ReliableQueueStoreInterface
 {
     private Redis $redis;
     private string $pendingKey;
@@ -42,7 +42,12 @@ final class RedisQueueStore implements QueueStoreInterface
         }
     }
 
-    public function push(string $jobClass, array $payload = [], array $metadata = []): string
+    public function push(string $jobClass, array $payload = []): string
+    {
+        return $this->pushWithMetadata($jobClass, $payload);
+    }
+
+    public function pushWithMetadata(string $jobClass, array $payload = [], array $metadata = []): string
     {
         $id = gmdate("YmdHis") . "_" . bin2hex(random_bytes(8));
         $this->redis->rPush($this->pendingKey, json_encode([

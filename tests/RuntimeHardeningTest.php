@@ -216,7 +216,7 @@ $GLOBALS["fnlla_config"]["queue"] = [
 
 $queueDirectory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "fnlla-core-queue-hardening-" . bin2hex(random_bytes(4));
 $queueStore = new FileQueueStore($queueDirectory);
-$queueId = $queueStore->push(RuntimeHardeningQueueJob::class, ["value" => [1, "safe"]], [
+$queueId = $queueStore->pushWithMetadata(RuntimeHardeningQueueJob::class, ["value" => [1, "safe"]], [
     "job_type" => "runtime-hardening",
     "job_version" => 1,
     "context" => [
@@ -248,7 +248,7 @@ file_put_contents($queueDirectory . DIRECTORY_SEPARATOR . "000-poison.job", json
     "payload" => [],
     "context" => ["correlation_id" => "poison-correlation"],
 ], JSON_THROW_ON_ERROR));
-$validAfterPoison = $queueStore->push(RuntimeHardeningQueueJob::class, [], [
+$validAfterPoison = $queueStore->pushWithMetadata(RuntimeHardeningQueueJob::class, [], [
     "job_type" => "runtime-hardening",
     "job_version" => 1,
     "context" => ["correlation_id" => "correlation-2"],
@@ -296,7 +296,7 @@ runtime_expect_exception(
     "Unregistered queue job class must fail closed."
 );
 
-$leaseId = $managerStore->push(RuntimeHardeningQueueJob::class, [], [
+$leaseId = $managerStore->pushWithMetadata(RuntimeHardeningQueueJob::class, [], [
     "job_type" => "runtime-hardening",
     "job_version" => 1,
     "context" => ["correlation_id" => "lease-renew", "idempotency_key" => "lease-renew"],

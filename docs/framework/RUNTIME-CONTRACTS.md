@@ -102,6 +102,15 @@ renewal, retry/backoff metadata, poison quarantine and stale-token rejection.
 Jobs use the `fnlla.queue.v1` envelope and an explicit `queue.job_types`
 registry. A bounded legacy reader is enabled only until FNLLA Core 3.0.0.
 
+Third-party stores implementing the published Core v2.2.4
+`QueueStoreInterface` remain compatible with the basic six-method queue flow;
+the manager invokes their original two-argument `push()` method. Advanced stores
+opt in through `ReliableQueueStoreInterface`. That extension is mandatory for
+versioned metadata, tenant or actor context, `JobContext`, lease ownership and
+renewal, poison rejection and durable idempotency. Context-aware dispatch and
+tenant-aware work fail before queue mutation when the configured store lacks the
+extension. Core never reports those protections as successful on a legacy store.
+
 Each job receives an isolated `JobContext` containing correlation, tenant,
 actor, attempt and idempotency identifiers. Handlers must call
 `assertLeaseOwned()` immediately before external effects and may call

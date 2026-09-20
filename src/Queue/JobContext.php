@@ -9,7 +9,7 @@ use RuntimeException;
 final class JobContext
 {
     /** @param array<string, mixed> $job */
-    public function __construct(private QueueStoreInterface $store, private array $job)
+    public function __construct(private ReliableQueueStoreInterface $store, private array $job)
     {
     }
 

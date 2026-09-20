@@ -57,6 +57,7 @@ final class QueueManager
         if (!$this->database instanceof DatabaseManager) {
             throw new RuntimeException("pushAfterCommit requires the configured DatabaseManager.");
         }
+        $this->assertDispatchCapabilities($context);
         $this->database->afterCommit(function () use ($jobClass, $payload, $context): void {
             $this->pushNow($jobClass, $payload, $context);
         });
@@ -64,6 +65,11 @@ final class QueueManager
 
     private function pushNow(string $jobClass, array $payload, array $context): string
     {
+        if (!$this->store instanceof ReliableQueueStoreInterface) {
+            $this->assertDispatchCapabilities($context);
+            return $this->store->push($jobClass, $payload);
+        }
+
         [$jobType, $jobVersion] = $this->registeredJobForClass($jobClass);
         if ($this->tenants !== null && $this->tenants->mode() !== "none") {
             $authoritative = $this->tenants->requireContext();
@@ -76,7 +82,7 @@ final class QueueManager
         }
         $context["correlation_id"] ??= request_id();
         $context["idempotency_key"] ??= "dispatch-" . bin2hex(random_bytes(16));
-        return $this->store->push($jobClass, $payload, [
+        return $this->store->pushWithMetadata($jobClass, $payload, [
             "job_type" => $jobType,
             "job_version" => $jobVersion,
             "context" => $context,
@@ -85,6 +91,10 @@ final class QueueManager
 
     public function work(int $maxJobs = 50, ?int $maxSeconds = null): int
     {
+        if (!$this->store instanceof ReliableQueueStoreInterface) {
+            return $this->workLegacy($maxJobs, $maxSeconds);
+        }
+
         $processed = 0;
         $startedAt = microtime(true);
         $maximumSeconds = max(1, $maxSeconds ?? (int) config("queue.worker_max_seconds", 300));
@@ -204,6 +214,76 @@ final class QueueManager
     public function requestStop(): void
     {
         $this->stopRequested = true;
+    }
+
+    private function workLegacy(int $maxJobs, ?int $maxSeconds): int
+    {
+        if ($this->tenants !== null && $this->tenants->mode() !== "none") {
+            throw new RuntimeException(
+                "Tenant-aware queue work requires ReliableQueueStoreInterface; no job was reserved."
+            );
+        }
+
+        $processed = 0;
+        $startedAt = microtime(true);
+        $maximumSeconds = max(1, $maxSeconds ?? (int) config("queue.worker_max_seconds", 300));
+
+        for ($index = 0; $index < max(1, $maxJobs); $index++) {
+            if ($this->stopRequested || microtime(true) - $startedAt >= $maximumSeconds) {
+                break;
+            }
+
+            $queuedJob = $this->store->pop();
+            if ($queuedJob === null) {
+                break;
+            }
+
+            try {
+                $this->container->withinScope(function (Container $scope) use ($queuedJob): void {
+                    $jobClass = $queuedJob["job"] ?? null;
+                    $parameters = $queuedJob["payload"] ?? null;
+                    if (!is_string($jobClass) || !class_exists($jobClass) || !is_array($parameters)) {
+                        throw new QueuePayloadException("Queued legacy job class or payload is invalid.");
+                    }
+
+                    $job = $scope->make($jobClass, $parameters);
+                    if (!method_exists($job, "handle")) {
+                        throw new QueuePayloadException("Queued job must define a handle method: " . $jobClass);
+                    }
+                    $scope->call([$job, "handle"]);
+                });
+            } catch (Throwable $exception) {
+                $queuedJob["last_error"] = $exception->getMessage();
+                $failedPath = $this->store->fail($queuedJob);
+                Logger::exception($exception, [
+                    "queue_job_id" => $queuedJob["id"] ?? "unknown",
+                    "queue_failed_job_file" => $failedPath,
+                ]);
+                continue;
+            }
+
+            try {
+                $this->store->complete($queuedJob);
+                $processed++;
+            } catch (Throwable $exception) {
+                Logger::exception($exception, ["queue_job_id" => $queuedJob["id"] ?? "unknown"]);
+            }
+        }
+
+        return $processed;
+    }
+
+    /** @param array<string, mixed> $context */
+    private function assertDispatchCapabilities(array $context): void
+    {
+        if ($this->store instanceof ReliableQueueStoreInterface) {
+            return;
+        }
+        if ($context !== [] || ($this->tenants !== null && $this->tenants->mode() !== "none")) {
+            throw new RuntimeException(
+                "Context-aware queue dispatch requires ReliableQueueStoreInterface; no job was queued."
+            );
+        }
     }
 
     /** @return array{0:string,1:int} */
