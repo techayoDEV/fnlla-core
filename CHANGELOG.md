@@ -1,5 +1,18 @@
 # FNLLA Core Changelog
 
+## 2.3.0-rc.2 — Local candidate
+
+- Preserve package bytes and manifest integrity when the Core exporter
+  customizes application-owned templates.
+- Generate directly installable prerelease projects with an exact bundled Core
+  version and matching Composer stability policy.
+- Reject registered or versioned reliable envelopes when a six-method legacy
+  queue store reads or retries them, before the handler or any external effect.
+- Export Core-specific product guidance containing only commands available in
+  the Core profile.
+- Keep this candidate local-only with `release_approved=false`; no artifact,
+  tag, package or official channel is published by this change.
+
 ## 2.3.0-rc.1 — Local candidate
 
 - Restore the published Core v2.2.4 six-method `QueueStoreInterface` contract

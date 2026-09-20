@@ -9,7 +9,7 @@ cache, mail, queue and core CLI building blocks.
 
 Package: `techayodev/fnlla-core`
 Repository: `techayoDEV/fnlla-core`
-Candidate version: `2.3.0-rc.1` (local review only; not published or
+Candidate version: `2.3.0-rc.2` (local review only; not published or
 release-approved). The published baseline remains `2.2.4`.
 
 ## FNLLA Family
