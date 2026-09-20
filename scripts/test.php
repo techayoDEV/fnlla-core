@@ -11,3 +11,4 @@ require __DIR__ . "/../tests/ProductValidatorTest.php";
 require __DIR__ . "/../tests/ProductModuleLifecycleTest.php";
 require __DIR__ . "/../tests/SecurityPrimitivesTest.php";
 require __DIR__ . "/../tests/ActionEventFlowTest.php";
+require __DIR__ . "/../tests/ReleaseArtifactBuilderTest.php";

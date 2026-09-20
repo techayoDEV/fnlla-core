@@ -81,11 +81,7 @@ foreach ($files as $relative => $source) {
     }
     $contents = (string) file_get_contents($source);
     assert_no_secret($relative, $contents);
-    if ($relative === "composer.json") {
-        $composer = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
-        $composer["version"] = $version;
-        $contents = json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL;
-    } elseif ($relative === "VERSION") {
+    if ($relative === "VERSION") {
         $contents = $version . PHP_EOL;
     }
     write_file($target, $contents);
