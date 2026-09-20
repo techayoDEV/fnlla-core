@@ -99,7 +99,7 @@ $provenance = [
     "source_date_epoch" => $commitEpoch,
     "built_at_utc" => $builtAt,
     "release_approved" => false,
-    "purpose" => "K-02.C reproducible local distribution review; not an official release",
+    "purpose" => "Reproducible local Core 2.3.0 release-candidate validation; not an official release",
 ];
 write_file(
     $output . "/FNLLA-PROVENANCE.json",

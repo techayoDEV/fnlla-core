@@ -1,5 +1,17 @@
 # FNLLA Core Changelog
 
+## 2.3.0-rc.1 — Local candidate
+
+- Restore the published Core v2.2.4 six-method `QueueStoreInterface` contract
+  for third-party stores while retaining metadata, reservation ownership,
+  lease renewal and idempotency through the explicit
+  `ReliableQueueStoreInterface` capability.
+- Add a separate-process v2.2.4 consumer fixture proving the two-argument
+  legacy push path and fail-before-mutation behavior for unsupported context.
+- Keep this candidate local-only with `release_approved=false`; publication,
+  official-channel installation and external exact-commit CI remain separate
+  gates.
+
 ## 2.3.0-alpha.9 — Unreleased candidate
 
 - Add server-derived `ActionContext`, a permission-first Action registry/runner,

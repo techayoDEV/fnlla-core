@@ -3,7 +3,7 @@
   "package": "techayodev/fnlla-core",
   "canonical_source": "https://github.com/techayoDEV/fnlla-core",
   "published_baseline": "2.2.4",
-  "candidate": "2.3.0-alpha.9",
+  "candidate": "2.3.0-rc.1",
   "channel": "local-review",
   "release_approved": false,
   "framework_compatibility": ">=3.0.0-alpha.1 <4.0.0",
