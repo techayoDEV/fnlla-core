@@ -30,6 +30,7 @@ use Fnlla\Php\Http\Request;
 use Fnlla\Php\Http\Response;
 use Fnlla\Php\Routing\Router;
 use Fnlla\Php\Support\FrameworkIdentity;
+use Fnlla\Php\Support\RuntimeIdentity;
 use Fnlla\Php\Validation\ValidationException;
 use Fnlla\Php\Validation\Validator;
 
@@ -51,6 +52,7 @@ $classes = [
     Validator::class,
     Fnlla\Php\View\View::class,
     FrameworkIdentity::class,
+    RuntimeIdentity::class,
 ];
 
 foreach ($classes as $class) {
@@ -133,6 +135,11 @@ if (in_array("sqlite", PDO::getAvailableDrivers(), true)) {
 
 assert_same("techayoDEV/fnlla-core", FrameworkIdentity::REPOSITORY, "Core repository identity was not rewritten.");
 assert_same("FNLLA Core", FrameworkIdentity::PRODUCT_NAME, "Core product identity was not rewritten.");
+assert_same("FNLLA Core", RuntimeIdentity::get("name"), "Core runtime identity default is incorrect.");
+RuntimeIdentity::configure(["name" => "Consumer Runtime", "slug" => "consumer-runtime"]);
+assert_same("Consumer Runtime", RuntimeIdentity::get("name"), "Consumer runtime identity was not applied.");
+RuntimeIdentity::reset();
+assert_same("FNLLA Core", RuntimeIdentity::get("name"), "Core runtime identity reset failed.");
 
 $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "fnlla-core-make-project-" . bin2hex(random_bytes(4));
 $container->singleton(ConsoleApplication::class);
@@ -143,12 +150,43 @@ assert_same(0, $exitCode, "make:project should export a Core project.");
 assert_true(is_file($target . "/composer.json"), "Core project composer.json missing.");
 assert_true(is_file($target . "/fnlla"), "Core project CLI launcher missing.");
 assert_true(is_file($target . "/packages/fnlla-core/src/Application.php"), "Bundled Core package missing.");
+assert_true(is_file($target . "/packages/fnlla-core/resources/product-specification/fnlla.product.v1.schema.json"), "Bundled Product Specification schema missing.");
+assert_true(is_file($target . "/packages/fnlla-core/resources/security/fnlla.audit-event.v1.schema.json"), "Bundled audit event schema missing.");
+assert_true(is_file($target . "/packages/fnlla-core/resources/events/fnlla.domain-event.v1.schema.json"), "Bundled domain event schema missing.");
+assert_true(is_file($target . "/config/product_modules.php"), "Exported Core Product Module configuration missing.");
+assert_true(is_file($target . "/config/actions.php"), "Exported Core action/outbox configuration missing.");
+assert_true(str_contains((string) file_get_contents($target . "/bootstrap/router.php"), '"tenant"'), "Exported Core tenant middleware alias missing.");
+assert_true(str_contains((string) file_get_contents($target . "/.env.example"), "TENANCY_MODE=none"), "Exported Core tenancy default missing.");
+assert_same(
+    hash_file("sha256", $root . "/resources/product-specification/examples/property-maintenance.product.json"),
+    hash_file("sha256", $target . "/packages/fnlla-core/resources/product-specification/examples/property-maintenance.product.json"),
+    "Bundled Product Specification example changed during export."
+);
 assert_true(str_contains((string) file_get_contents($target . "/README.md"), "Core Smoke"), "Core project README was not customized.");
 assert_true(str_contains((string) file_get_contents($target . "/README.md"), "GitHub or fnlla.com"), "Core project README should document official update sources.");
 
 [$routeExit, $routeOutput] = run_process([PHP_BINARY, "fnlla", "route:list"], $target);
 assert_same(0, $routeExit, "Exported Core route:list failed: " . $routeOutput);
 assert_true(str_contains($routeOutput, "GET"), "Exported Core route:list did not list routes.");
+
+[$productExit, $productOutput] = run_process([
+    PHP_BINARY,
+    "fnlla",
+    "product:validate",
+    "packages/fnlla-core/resources/product-specification/examples/property-maintenance.product.json",
+    "--module=packages/fnlla-core/resources/product-specification/examples/modules/tenancy.module.json",
+    "--module=packages/fnlla-core/resources/product-specification/examples/modules/properties.module.json",
+    "--module=packages/fnlla-core/resources/product-specification/examples/modules/work-orders.module.json",
+], $target);
+assert_same(0, $productExit, "Exported Core product:validate failed: " . $productOutput);
+$productReport = json_decode($productOutput, true, 512, JSON_THROW_ON_ERROR);
+assert_same("fnlla.product-validation-report.v1", $productReport["schema"] ?? null, "Exported Product Validator report schema mismatch.");
+assert_same(true, $productReport["valid"] ?? null, "Exported Product Validator rejected valid declarations.");
+
+[$moduleExit, $moduleOutput] = run_process([PHP_BINARY, "fnlla", "module:validate"], $target);
+assert_same(0, $moduleExit, "Exported Core module:validate failed: " . $moduleOutput);
+$moduleReport = json_decode($moduleOutput, true, 512, JSON_THROW_ON_ERROR);
+assert_same("product_modules_not_configured", $moduleReport["warnings"][0]["id"] ?? null, "Unconfigured exported module registry is not explicit.");
 
 [$testExit, $testOutput] = run_process([PHP_BINARY, "scripts/test.php"], $target);
 assert_same(0, $testExit, "Exported Core tests failed: " . $testOutput);

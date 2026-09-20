@@ -33,7 +33,7 @@ final class CoreProjectExporter
 
     private function copyCorePackage(string $sourceRoot, string $packageRoot): void
     {
-        foreach (["src", "bootstrap", "docs/framework", "branding", "resources/project-templates/core"] as $directory) {
+        foreach (["src", "bootstrap", "docs/framework", "branding", "resources/product-specification", "resources/security", "resources/events", "resources/project-templates/core"] as $directory) {
             $source = $sourceRoot . "/" . $directory;
 
             if (is_dir($source)) {
@@ -62,6 +62,15 @@ final class CoreProjectExporter
             ],
             "require" => [
                 "php" => "^8.3",
+                "ext-fileinfo" => "*",
+                "ext-json" => "*",
+                "ext-mbstring" => "*",
+                "ext-pdo" => "*",
+                "ext-session" => "*",
+            ],
+            "suggest" => [
+                "ext-pdo_mysql" => "Required by the maintained MySQL database connection.",
+                "ext-redis" => "Required only for Redis cache, queue or session drivers.",
             ],
             "autoload" => [
                 "psr-4" => [
@@ -72,6 +81,29 @@ final class CoreProjectExporter
                 ],
             ],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL);
+        $this->writePackageManifest($packageRoot);
+    }
+
+    private function writePackageManifest(string $packageRoot): void
+    {
+        $hashes = [];
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($packageRoot, FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $item) {
+            if (!$item->isFile() || $item->isLink() || $item->getFilename() === "FNLLA-MANIFEST.sha256") {
+                continue;
+            }
+            $path = str_replace("\\", "/", $item->getPathname());
+            $relative = ltrim(substr($path, strlen(rtrim(str_replace("\\", "/", $packageRoot), "/"))), "/");
+            $hashes[$relative] = hash_file("sha256", $item->getPathname());
+        }
+        ksort($hashes, SORT_STRING);
+        $manifest = "";
+        foreach ($hashes as $relative => $hash) {
+            $manifest .= $hash . "  " . $relative . PHP_EOL;
+        }
+        $this->write($packageRoot . "/FNLLA-MANIFEST.sha256", $manifest);
     }
 
     private function writeProjectComposer(string $targetRoot, string $appName, string $packageSlug): void
@@ -100,6 +132,10 @@ final class CoreProjectExporter
                     "Database\\Seeders\\" => "database/seeders/",
                     "Database\\Factories\\" => "database/factories/",
                 ],
+            ],
+            "suggest" => [
+                "phpunit/phpunit" => "Optional full PHPUnit runner. The Core export ships a dependency-light local smoke-test harness.",
+                "phpstan/phpstan" => "Optional deeper static analysis. The Core export runs a dependency-light baseline without it.",
             ],
             "scripts" => [
                 "console" => "@php fnlla",
@@ -166,7 +202,7 @@ final class CoreProjectExporter
     private function writeRuntimePlaceholders(string $targetRoot): void
     {
         $placeholders = [
-            "storage/.gitignore" => "# Runtime data is private.\n*\n!*/\n!.gitignore\n",
+            "storage/.gitignore" => "# Runtime data is private, including files created by future modules.\n*\n!*/\n!.gitignore\n",
             "storage/app/.gitignore" => "*\n!.gitignore\n",
             "storage/logs/.gitignore" => "*\n!.gitignore\n",
             "storage/framework/cache/.gitignore" => "*\n!.gitignore\n",
@@ -205,7 +241,7 @@ final class CoreProjectExporter
     {
         $version = trim((string) strtok((string) file_get_contents($this->packageRoot() . "/VERSION"), "\r\n"));
 
-        if (preg_match('/^\d+\.\d+\.\d+$/D', $version) !== 1) {
+        if (preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/D', $version) !== 1) {
             throw new RuntimeException("Invalid FNLLA Core version.");
         }
 

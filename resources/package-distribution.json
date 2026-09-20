@@ -1,0 +1,31 @@
+{
+  "schema": "fnlla.core_distribution.v1",
+  "package": "techayodev/fnlla-core",
+  "canonical_source": "https://github.com/techayoDEV/fnlla-core",
+  "published_baseline": "2.2.4",
+  "candidate": "2.3.0-alpha.9",
+  "channel": "local-review",
+  "release_approved": false,
+  "framework_compatibility": ">=3.0.0-alpha.1 <4.0.0",
+  "requirements": {
+    "php": "^8.3",
+    "required_extensions": ["fileinfo", "json", "mbstring", "pdo", "session"],
+    "feature_extensions": {
+      "pdo_mysql": "Required by the maintained MySQL database connection.",
+      "redis": "Required only for Redis cache, queue or session drivers."
+    }
+  },
+  "deprecations": [],
+  "rights": {
+    "core_license": "MIT",
+    "historical_notices_changed": false,
+    "commercial_packages_included": false,
+    "trademarks_granted": false
+  },
+  "release_order": [
+    "approve and release an immutable FNLLA Core artifact",
+    "lock and validate Framework against that exact Core artifact",
+    "approve and release Framework",
+    "publish entitlement-controlled commercial downloads separately"
+  ]
+}

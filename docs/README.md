@@ -8,6 +8,12 @@ to describe from the Core repository itself.
 
 - [Runtime contracts](framework/RUNTIME-CONTRACTS.md) describe the core CLI,
   HTTP, routing, validation, session, cache, database and queue promises.
+- [Product Specification](framework/PRODUCT-SPECIFICATION.md) defines the
+  neutral `fnlla.product.v1` intent, evidence, drift and derived-graph layers.
+- [Security primitives](framework/SECURITY-PRIMITIVES.md) define Core-only
+  RBAC/policies, tenant context/isolation and the neutral audit event contract.
+- [Actions and domain events](framework/ACTIONS-AND-DOMAIN-EVENTS.md) define the
+  permission-first mutation, transactional receipt/outbox and delivery boundary.
 - [Trademark notice](framework/TRADEMARKS.md) explains how the FNLLA name and
   marks may be referenced.
 - [Support policy](framework/SUPPORT.md) defines the public, best-effort support

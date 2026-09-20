@@ -9,7 +9,8 @@ cache, mail, queue and core CLI building blocks.
 
 Package: `techayodev/fnlla-core`
 Repository: `techayoDEV/fnlla-core`
-Version: `2.2.4`
+Candidate version: `2.3.0-alpha.9` (local review only; not published or
+release-approved). The published baseline remains `2.2.4`.
 
 ## FNLLA Family
 
@@ -81,10 +82,93 @@ php scripts/lint.php
 php scripts/static-analysis.php
 ```
 
+## Queue And Runtime Inspection
+
+Queue jobs use the `fnlla.queue.v1` envelope and must be registered in
+`queue.job_types`. File and Redis stores use reservations, expiring leases,
+bounded retries and durable idempotency markers. Delivery remains at-least-once:
+job handlers must recheck permission and lease validity immediately before an
+external effect. FNLLA does not promise exactly-once mail, API or payment effects.
+
+Run `php fnlla queue:work [max-jobs] [max-seconds]` for a bounded worker and
+`php fnlla runtime:inspect` for versioned, redacted local diagnostics. Use
+`DatabaseManager::afterCommit()` or the queue/event/mail `*AfterCommit` methods
+inside managed transactions; rollback discards deferred callbacks.
+
+## Product Specification
+
+Core ships the neutral `fnlla.product.v1` JSON contract, related evidence,
+drift and derived-graph schemas, and synthetic examples under
+`resources/product-specification/`. These declarations do not register routes
+or prove runtime behavior. Validate a specification and optional module
+declarations with:
+
+```powershell
+php fnlla product:validate path/to/product.json --module=path/to/module.json
+```
+
+The JSON report uses `fnlla.product-validation-report.v1`; a valid declaration
+still reports runtime evidence as `not_evaluated`. See
+[the Product Specification contract](docs/framework/PRODUCT-SPECIFICATION.md).
+
+## Product Modules
+
+Applications may configure one Product Specification, its complete
+`fnlla.module.v1` manifest set and trusted PHP extension classes in
+`config/product_modules.php`. The registry validates the same K-04 contract,
+resolves dependencies, detects service/route collisions and uses the existing
+Container and Router extension points. JSON never names an executable provider
+or command.
+
+```powershell
+php fnlla module:validate
+php fnlla module:list
+php fnlla module:inspect work-orders
+php fnlla module:enable work-orders
+php fnlla module:disable work-orders
+```
+
+Enabling a module enables its dependencies. Disabling an active dependency is
+refused. Disable is not uninstall: application data and declared assets are
+preserved, module routes are omitted immediately, and removal remains an
+owner-reviewed or package-manager operation.
+
+## Authorization, Tenancy And Audit
+
+Core includes deny-by-default role/permission and resource-policy primitives,
+server-resolved tenant context, explicit tenant-scoped adapters for repositories,
+cache, files, exports and tools, and a versioned allowlist-based audit event.
+These controls do not require the FNLLA Developer Panel.
+
+The default `TENANCY_MODE=none` preserves single-tenant behavior. For
+`organization` or `custom`, use the `tenant` middleware on scoped routes and
+migrate every application-owned data boundary deliberately. Queue dispatch
+copies the active authoritative context, and workers revalidate actor access
+before handling. See
+[Security primitives](docs/framework/SECURITY-PRIMITIVES.md) before enabling a
+multi-tenant mode.
+
+## Actions And Domain Events
+
+`ActionRunner` derives actor, tenant, source and correlation from trusted runtime
+context, enforces permission/policy before validation, and records the domain
+mutation, idempotency receipt, audit and versioned domain events in one managed
+transaction. Audit/event relay begins only after commit; rollback publishes no
+success. The application must install the reference InnoDB receipt/outbox schema
+through a reviewed migration.
+
+Queued listeners inherit actor, tenant, correlation and event idempotency data.
+Delivery remains at-least-once, so external-effect handlers must use the event ID
+as a business/provider idempotency key. See
+[Actions and domain events](docs/framework/ACTIONS-AND-DOMAIN-EVENTS.md).
+
 ## Documentation
 
 - [Core package docs](docs/README.md)
 - [Runtime contracts](docs/framework/RUNTIME-CONTRACTS.md)
+- [Product Specification](docs/framework/PRODUCT-SPECIFICATION.md)
+- [Security primitives](docs/framework/SECURITY-PRIMITIVES.md)
+- [Actions and domain events](docs/framework/ACTIONS-AND-DOMAIN-EVENTS.md)
 - [Trademark notice](docs/framework/TRADEMARKS.md)
 - [Support boundary](docs/framework/SUPPORT.md)
 - [Security policy](SECURITY.md)

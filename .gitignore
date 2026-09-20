@@ -1,5 +1,6 @@
 /vendor/
 /storage/
+/dist/
 /.env
 /.env.*
 !.env.example
