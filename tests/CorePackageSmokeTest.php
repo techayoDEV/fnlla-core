@@ -142,6 +142,7 @@ RuntimeIdentity::reset();
 assert_same("FNLLA Core", RuntimeIdentity::get("name"), "Core runtime identity reset failed.");
 
 $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "fnlla-core-make-project-" . bin2hex(random_bytes(4));
+$coreVersion = trim((string) file_get_contents($root . "/VERSION"));
 $container->singleton(ConsoleApplication::class);
 $console = $container->make(ConsoleApplication::class);
 $console->register(MakeProjectCommand::class);
@@ -155,6 +156,9 @@ assert_true(is_file($target . "/packages/fnlla-core/resources/security/fnlla.aud
 assert_true(is_file($target . "/packages/fnlla-core/resources/events/fnlla.domain-event.v1.schema.json"), "Bundled domain event schema missing.");
 assert_true(is_file($target . "/config/product_modules.php"), "Exported Core Product Module configuration missing.");
 assert_true(is_file($target . "/config/actions.php"), "Exported Core action/outbox configuration missing.");
+assert_true(is_file($target . "/AGENTS.md"), "Exported Core product guidance missing.");
+assert_true(str_contains((string) file_get_contents($target . "/AGENTS.md"), "php fnlla route:list"), "Core product guidance does not use the Core CLI.");
+assert_true(!str_contains((string) file_get_contents($target . "/AGENTS.md"), "project:claim"), "Core product guidance names a full-Framework command.");
 assert_true(str_contains((string) file_get_contents($target . "/bootstrap/router.php"), '"tenant"'), "Exported Core tenant middleware alias missing.");
 assert_true(str_contains((string) file_get_contents($target . "/.env.example"), "TENANCY_MODE=none"), "Exported Core tenancy default missing.");
 assert_same(
@@ -164,6 +168,27 @@ assert_same(
 );
 assert_true(str_contains((string) file_get_contents($target . "/README.md"), "Core Smoke"), "Core project README was not customized.");
 assert_true(str_contains((string) file_get_contents($target . "/README.md"), "GitHub or fnlla.com"), "Core project README should document official update sources.");
+
+$packageManifest = file($target . "/packages/fnlla-core/FNLLA-MANIFEST.sha256", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+assert_true($packageManifest !== [], "Bundled Core package manifest is empty.");
+foreach ($packageManifest as $entry) {
+    assert_same(1, preg_match('/^([a-f0-9]{64})  ([A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*)$/D', $entry, $matches), "Invalid bundled Core manifest entry.");
+    $manifestFile = $target . "/packages/fnlla-core/" . $matches[2];
+    assert_true(is_file($manifestFile), "Bundled Core manifest file is missing: " . $matches[2]);
+    assert_same($matches[1], hash_file("sha256", $manifestFile), "Project customization changed bundled Core content: " . $matches[2]);
+}
+$projectComposer = json_decode((string) file_get_contents($target . "/composer.json"), true, 512, JSON_THROW_ON_ERROR);
+$bundledComposer = json_decode((string) file_get_contents($target . "/packages/fnlla-core/composer.json"), true, 512, JSON_THROW_ON_ERROR);
+if (str_contains($coreVersion, "-")) {
+    assert_same($bundledComposer["version"], $projectComposer["require"]["techayodev/fnlla-core"] ?? null, "Prerelease export is not pinned to the bundled Core version.");
+} else {
+    $parts = explode(".", $coreVersion);
+    assert_same("~" . $parts[0] . "." . $parts[1] . ".0", $projectComposer["require"]["techayodev/fnlla-core"] ?? null, "Stable export does not use the supported minor constraint.");
+}
+if (str_contains(strtolower($coreVersion), "-rc.")) {
+    assert_same("RC", $projectComposer["minimum-stability"] ?? null, "RC export does not declare the required Composer stability.");
+    assert_same(true, $projectComposer["prefer-stable"] ?? null, "RC export should prefer stable transitive dependencies.");
+}
 
 [$routeExit, $routeOutput] = run_process([PHP_BINARY, "fnlla", "route:list"], $target);
 assert_same(0, $routeExit, "Exported Core route:list failed: " . $routeOutput);

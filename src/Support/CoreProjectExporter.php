@@ -20,8 +20,9 @@ final class CoreProjectExporter
             throw new RuntimeException("Core project template is missing.");
         }
 
+        // Customize only application-owned template files. The bundled package is
+        // copied last so project tokens can never rewrite verified Core content.
         $this->copyDirectory($templateRoot, $targetRoot);
-        $this->copyCorePackage($packageRoot, $targetRoot . "/packages/fnlla-core");
         $this->writeProjectComposer($targetRoot, $appName, $packageSlug);
         $this->replaceTokens($targetRoot, [
             "{{APP_NAME}}" => $this->cleanAppName($appName),
@@ -29,6 +30,7 @@ final class CoreProjectExporter
             "{{FNLLA_CORE_VERSION}}" => $this->version(),
         ]);
         $this->writeRuntimePlaceholders($targetRoot);
+        $this->copyCorePackage($packageRoot, $targetRoot . "/packages/fnlla-core");
     }
 
     private function copyCorePackage(string $sourceRoot, string $packageRoot): void
@@ -108,7 +110,8 @@ final class CoreProjectExporter
 
     private function writeProjectComposer(string $targetRoot, string $appName, string $packageSlug): void
     {
-        $this->write($targetRoot . "/composer.json", json_encode([
+        $version = $this->version();
+        $composer = [
             "name" => "project/" . $packageSlug,
             "description" => $appName . " built on FNLLA Core.",
             "type" => "project",
@@ -124,7 +127,7 @@ final class CoreProjectExporter
             ],
             "require" => [
                 "php" => "^8.3",
-                "techayodev/fnlla-core" => $this->versionConstraint(),
+                "techayodev/fnlla-core" => $this->versionConstraint($version),
             ],
             "autoload" => [
                 "psr-4" => [
@@ -146,7 +149,15 @@ final class CoreProjectExporter
             "config" => [
                 "sort-packages" => true,
             ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL);
+        ];
+        if (str_contains($version, "-")) {
+            $composer["minimum-stability"] = $this->minimumStability($version);
+            $composer["prefer-stable"] = true;
+        }
+        $this->write($targetRoot . "/composer.json", json_encode(
+            $composer,
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+        ) . PHP_EOL);
     }
 
     private function copyDirectory(string $sourceRoot, string $targetRoot): void
@@ -248,11 +259,26 @@ final class CoreProjectExporter
         return $version;
     }
 
-    private function versionConstraint(): string
+    private function versionConstraint(string $version): string
     {
-        $parts = explode(".", $this->version());
+        if (str_contains($version, "-")) {
+            return $version;
+        }
+        $parts = explode(".", $version);
 
         return "~" . $parts[0] . "." . $parts[1] . ".0";
+    }
+
+    private function minimumStability(string $version): string
+    {
+        $label = strtolower((string) preg_replace('/^\d+\.\d+\.\d+-([^.+]+).*$/D', '$1', $version));
+
+        return match (true) {
+            str_starts_with($label, "rc") => "RC",
+            str_starts_with($label, "beta") => "beta",
+            str_starts_with($label, "alpha") => "alpha",
+            default => "dev",
+        };
     }
 
     private function packageRoot(): string

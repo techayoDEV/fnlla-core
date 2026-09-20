@@ -186,6 +186,15 @@ produce 400 when they reach PHP; a server may reject framing before application
 execution. Configure body limits in the web server/PHP as well: application
 capture cannot prevent upstream buffering or multipart processing by the SAPI.
 
+## Queue Capability Boundary
+
+The six-method `QueueStoreInterface` remains compatible with basic historical
+jobs only. Registered/versioned jobs, tenant or actor context, `JobContext`,
+leases and idempotency require `ReliableQueueStoreInterface`. A legacy worker
+rejects reserved versioned-envelope fields and jobs registered by trusted queue
+configuration before the handler runs; it never strips those requirements and
+marks the record successful.
+
 ## Upgrade Checklist
 
 1. Back up code, configuration and data; compare framework-owned file hashes.

@@ -245,6 +245,7 @@ final class QueueManager
                     if (!is_string($jobClass) || !class_exists($jobClass) || !is_array($parameters)) {
                         throw new QueuePayloadException("Queued legacy job class or payload is invalid.");
                     }
+                    $this->assertLegacyCapabilities($queuedJob, $jobClass);
 
                     $job = $scope->make($jobClass, $parameters);
                     if (!method_exists($job, "handle")) {
@@ -283,6 +284,28 @@ final class QueueManager
             throw new RuntimeException(
                 "Context-aware queue dispatch requires ReliableQueueStoreInterface; no job was queued."
             );
+        }
+    }
+
+    private function assertLegacyCapabilities(array $queuedJob, string $jobClass): void
+    {
+        foreach ($this->jobTypes() as $definition) {
+            if ($definition["class"] === $jobClass) {
+                throw new QueuePayloadException(
+                    "Registered queue jobs require ReliableQueueStoreInterface; the legacy record was rejected."
+                );
+            }
+        }
+
+        // Reserved envelope fields are never downgraded to the six-method legacy
+        // contract. An untrusted record can cause a fail-closed rejection, but it
+        // cannot opt a handler out of trusted registry or reliable-store policy.
+        foreach (["schema", "job_type", "job_version", "context", "reservation", "reserved_by", "reserved_until", "lease_token"] as $field) {
+            if (array_key_exists($field, $queuedJob)) {
+                throw new QueuePayloadException(
+                    "Versioned or context-aware queue records require ReliableQueueStoreInterface; the legacy record was rejected."
+                );
+            }
         }
     }
 
