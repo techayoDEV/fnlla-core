@@ -1,5 +1,17 @@
 # FNLLA Core Changelog
 
+## 2.3.1
+
+### Release Summary
+
+- Recognize pristine Core-owned template files during `fnlla:upgrade` so a
+  freshly generated Core project can migrate to the full Framework without
+  false project-content conflicts.
+- Preserve application-owned paths and fail visibly when a Core-owned target
+  was modified locally.
+- Keep upgrade application inside the existing transactional rollback and
+  recovery boundary.
+
 ## 2.3.0
 
 ### Release Summary

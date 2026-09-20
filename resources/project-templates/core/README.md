@@ -100,6 +100,9 @@ composer update techayodev/fnlla-core
 Commit `composer.lock` and run project tests. Keep the previous deployment for
 rollback. When a project needs the full FNLLA platform, start from
 `techayoDEV/fnlla` or migrate deliberately after reviewing the product boundary.
+The full Framework's `fnlla:upgrade` path may replace files that still exactly
+match the installed Core template; application-owned or locally modified files
+are preserved or reported as explicit conflicts for review.
 
 ## Production
 

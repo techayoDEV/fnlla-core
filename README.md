@@ -9,7 +9,7 @@ cache, mail, queue and core CLI building blocks.
 
 Package: `techayodev/fnlla-core`
 Repository: `techayoDEV/fnlla-core`
-Version: `2.3.0`. This source is approved for the immutable official stable
+Version: `2.3.1`. This source is approved for the immutable official stable
 release channel; availability is established by the matching GitHub release.
 
 ## FNLLA Family
@@ -73,6 +73,11 @@ The generated project includes a small public homepage, routing, config,
 tests, lint/static-analysis scripts, the `fnlla` CLI launcher and a local
 `packages/fnlla-core` path package. It does not create the full FNLLA platform
 application; use `techayoDEV/fnlla` when you need that profile.
+
+When migrating a generated Core project to the full FNLLA source,
+`fnlla:upgrade` may replace files that still exactly match the installed Core
+template. Application-owned paths remain protected, and a modified Core-owned
+file is reported as a conflict for explicit review instead of being overwritten.
 
 ## Validate
 

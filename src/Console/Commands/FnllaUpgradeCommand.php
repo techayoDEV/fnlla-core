@@ -203,7 +203,13 @@ final class FnllaUpgradeCommand extends Command
             }
 
             if ($targetHash !== null) {
-                $conflicts[$relative] = "Target file exists with project-specific content; review before applying FNLLA.";
+                $coreSource = $this->coreTemplateSource($relative);
+                if ($coreSource !== null && $targetHash === hash_file("sha256", $coreSource)) {
+                    $updates[$relative] = ["source_hash" => $sourceHash, "current_hash" => $targetHash];
+                    continue;
+                }
+
+                $conflicts[$relative] = "Target file differs from the installed Core template; review before applying FNLLA.";
                 continue;
             }
 
@@ -319,6 +325,18 @@ final class FnllaUpgradeCommand extends Command
                 $applied++;
             }
 
+            foreach ((array) $report["updates"] as $relative => $_metadata) {
+                $source = $this->copySources[$relative] ?? null;
+                if ($source === null) {
+                    continue;
+                }
+                if (!is_file($source)) {
+                    throw new RuntimeException("Planned FNLLA source disappeared: " . $relative);
+                }
+                $this->replace($projectRoot, (string) $relative, (string) file_get_contents($source));
+                $applied++;
+            }
+
             foreach ($this->managedReplacements($sourceRoot) as $relative => $replacement) {
                 if (!isset($report["updates"][$relative])) {
                     continue;
@@ -400,6 +418,17 @@ final class FnllaUpgradeCommand extends Command
         }
 
         return false;
+    }
+
+    private function coreTemplateSource(string $relative): ?string
+    {
+        $path = dirname(__DIR__, 3)
+            . DIRECTORY_SEPARATOR . "resources"
+            . DIRECTORY_SEPARATOR . "project-templates"
+            . DIRECTORY_SEPARATOR . "core"
+            . DIRECTORY_SEPARATOR . str_replace("/", DIRECTORY_SEPARATOR, $relative);
+
+        return is_file($path) && !is_link($path) ? $path : null;
     }
 
     private function configAppCanRegisterFnlla(string $path): bool
