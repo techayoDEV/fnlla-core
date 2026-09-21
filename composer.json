@@ -1,6 +1,6 @@
 {
     "name": "techayodev/fnlla-core",
-    "description": "Open PHP framework core for FNLLA applications.",
+    "description": "Open web framework core for explicit, inspectable applications.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://fnlla.com",

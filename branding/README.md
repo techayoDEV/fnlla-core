@@ -3,15 +3,16 @@
 This directory carries the FNLLA identity for the standalone Core repository.
 It reuses the same outline mark, Blueprint Blue palette and maintainer credit as
 the full FNLLA product, while making the scope explicit: **FNLLA Core** is the
-open framework core package.
+open web framework core package.
 
 ## Name And Scope
 
 Use **FNLLA Core** in repository titles, README copy, package descriptions and
 public references to this package.
 
-Use **FNLLA** for the full product family, the platform repository and the wider
-application experience built around Core.
+Use **FNLLA** for the full product family and wider application experience built
+around Core. Public product references should point to
+[`fnlla.com`](https://fnlla.com), not to a private maintainer repository.
 
 Literal package and namespace identifiers stay unchanged:
 

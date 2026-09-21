@@ -2,7 +2,7 @@
 
 This is a minimal public application built on FNLLA Core. It starts with a
 small server-rendered homepage, routes, config, tests and the core CLI surface.
-The full FNLLA platform is available separately from `techayoDEV/fnlla`; this
+The full FNLLA platform is available separately at `https://fnlla.com`; this
 project intentionally stays focused on the open core runtime.
 
 ## Local Development
@@ -98,8 +98,8 @@ composer update techayodev/fnlla-core
 ```
 
 Commit `composer.lock` and run project tests. Keep the previous deployment for
-rollback. When a project needs the full FNLLA platform, start from
-`techayoDEV/fnlla` or migrate deliberately after reviewing the product boundary.
+rollback. When a project needs the full FNLLA platform, start at
+`https://fnlla.com` or migrate deliberately after reviewing the product boundary.
 The full Framework's `fnlla:upgrade` path may replace files that still exactly
 match the installed Core template; application-owned or locally modified files
 are preserved or reported as explicit conflicts for review.

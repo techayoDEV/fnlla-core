@@ -1,12 +1,12 @@
 # Contributing To FNLLA Core
 
 FNLLA Core accepts framework-level changes only. Keep proposals focused on the
-public PHP core package: routing, HTTP, container, validation, database, sessions,
+public web framework core: routing, HTTP, container, validation, database, sessions,
 cache, mail, queues, core CLI, docs, security and package maintenance.
 
 Contributions should keep Core useful as a standalone framework package. Ideas
-for the wider FNLLA product shell, project workflow or website experience are
-best discussed in the full FNLLA project context.
+for the wider FNLLA product, project workflow or website experience are best
+discussed through [fnlla.com](https://fnlla.com).
 
 ## Local Checks
 
@@ -27,6 +27,7 @@ the private reporting routes in [SECURITY.md](SECURITY.md).
 ## Product Boundary
 
 If a change introduces a reusable framework primitive, this repository is the
-right home. If it belongs to the wider FNLLA product experience, keep it in
-`techayoDEV/fnlla`. When the product needs a new Core primitive, add the public
-primitive here first and then consume it from the full product.
+right home. If it belongs to the wider FNLLA product experience, it belongs in
+the commercial product workflow described at [fnlla.com](https://fnlla.com).
+When the product needs a new Core primitive, add the public primitive here first
+and then consume it from the full product.

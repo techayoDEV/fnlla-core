@@ -24,14 +24,14 @@ to describe from the Core repository itself.
 
 `php fnlla make:project <target-path> "App Name"` creates a minimal public
 FNLLA Core application from this repository. The command only supports the Core
-profile; the full `techayoDEV/fnlla` repository owns the broader FNLLA platform
-profile.
+profile; the full FNLLA product owns the broader platform profile and is
+available through [fnlla.com](https://fnlla.com).
 
 ## Boundary
 
 Core documentation should describe reusable framework behavior, public package
 contracts and supported extension points. The wider FNLLA product documentation
-belongs with `techayoDEV/fnlla` and the public website at `https://fnlla.com`.
+belongs at [fnlla.com](https://fnlla.com).
 
 ## FNLLA Family
 

@@ -53,7 +53,7 @@ final class CoreProjectExporter
 
         $this->write($packageRoot . "/composer.json", json_encode([
             "name" => "techayodev/fnlla-core",
-            "description" => "Open PHP framework core for FNLLA applications.",
+            "description" => "Open web framework core for FNLLA applications.",
             "type" => "library",
             "license" => "MIT",
             "version" => $this->version(),

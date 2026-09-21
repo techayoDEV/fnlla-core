@@ -10,11 +10,11 @@ staying honest about being the open core.
 
 Primary name: **FNLLA Core**.
 
-Primary descriptor: **Open PHP framework core.**
+Primary descriptor: **Open web framework core.**
 
 Technical line: **Runtime primitives for FNLLA applications.**
 
-Short profile: FNLLA Core is the open PHP framework core used by FNLLA. It
+Short profile: FNLLA Core is the open web framework core used by FNLLA. It
 contains the runtime, routing, HTTP, container, validation, database, session,
 cache, mail, queue and core CLI building blocks. Created & maintained by
 TechAyo.

@@ -1,11 +1,20 @@
 # FNLLA Core
 
-![FNLLA Core lockup](branding/assets/logo/fnlla-core-lockup.svg)
+[![FNLLA Core — open web framework core](branding/assets/logo/fnlla-core-lockup.svg)](https://fnlla.com/core)
 
-FNLLA Core is the open PHP framework core used by FNLLA. It carries the same
-FNLLA identity system and maintainer attribution, with a framework-first promise:
-runtime primitives, routing, HTTP, container, validation, database, session,
-cache, mail, queue and core CLI building blocks.
+[![Release](https://img.shields.io/github/v/release/techayoDEV/fnlla-core?display_name=tag&sort=semver&style=flat-square&label=release&color=2563eb)](https://github.com/techayoDEV/fnlla-core/releases/latest)
+[![Core Quality](https://github.com/techayoDEV/fnlla-core/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/techayoDEV/fnlla-core/actions/workflows/quality.yml?query=branch%3Amain)
+[![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE.md)
+[![PHP 8.3+](https://img.shields.io/badge/runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
+[![FNLLA](https://img.shields.io/badge/FNLLA-full%20platform-18352f?style=flat-square)](https://fnlla.com)
+[![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
+
+**Open web framework core. Powered by PHP. Built for explicit, inspectable applications.**
+
+FNLLA Core is the free, public foundation used by FNLLA. It provides runtime
+primitives, routing, HTTP, container, validation, database, session, cache,
+mail, queue and CLI building blocks while keeping product-specific and
+commercial platform surfaces outside Core.
 
 Package: `techayodev/fnlla-core`
 Repository: `techayoDEV/fnlla-core`
@@ -14,14 +23,14 @@ release channel; availability is established by the matching GitHub release.
 
 ## FNLLA Family
 
-There are two public FNLLA tracks:
+There are two FNLLA tracks:
 
-- **FNLLA Core** - this repository, the open PHP framework core package.
-- **FNLLA** - the full product and application platform repository:
-  `techayoDEV/fnlla`.
+- **FNLLA Core** - this repository, the public MIT-licensed web framework core.
+- **FNLLA** - the full product and application platform available at
+  [fnlla.com](https://fnlla.com).
 
-[fnlla.com](https://fnlla.com) is the public website and documentation hub that
-ties FNLLA Core and FNLLA together.
+[fnlla.com](https://fnlla.com) is the canonical product, downloads and
+documentation hub for the FNLLA family.
 
 ## Origin And Maintainers
 
@@ -32,7 +41,9 @@ FNLLA Core is created and maintained by **TechAyo**.
 
 Lead Developer / Product Manager - **Marcin Kordyaczny**.
 
-Official public sources are the GitHub repositories under `techayoDEV` and
+The canonical public source for Core is
+[`techayoDEV/fnlla-core`](https://github.com/techayoDEV/fnlla-core). Product and
+documentation information for the wider FNLLA platform lives at
 [fnlla.com](https://fnlla.com).
 
 ## Scope
@@ -55,7 +66,7 @@ Install from the public GitHub VCS repository:
 
 ```powershell
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:~2.2.0
+composer require techayodev/fnlla-core:^2.3.1
 ```
 
 The package autoloads `Fnlla\Php\` from `src/` and includes the shared helper
@@ -72,12 +83,15 @@ php fnlla make:project ../my-core-app "My Core App"
 The generated project includes a small public homepage, routing, config,
 tests, lint/static-analysis scripts, the `fnlla` CLI launcher and a local
 `packages/fnlla-core` path package. It does not create the full FNLLA platform
-application; use `techayoDEV/fnlla` when you need that profile.
+application; visit [fnlla.com](https://fnlla.com) when you need that profile.
 
 When migrating a generated Core project to the full FNLLA source,
 `fnlla:upgrade` may replace files that still exactly match the installed Core
 template. Application-owned paths remain protected, and a modified Core-owned
 file is reported as a conflict for explicit review instead of being overwritten.
+
+For the full FNLLA platform, product documentation and access options, visit
+[fnlla.com](https://fnlla.com).
 
 ## Validate
 
@@ -178,6 +192,7 @@ as a business/provider idempotency key. See
 
 ## Documentation
 
+- [FNLLA documentation hub](https://fnlla.com/docs)
 - [Core package docs](docs/README.md)
 - [Runtime contracts](docs/framework/RUNTIME-CONTRACTS.md)
 - [Product Specification](docs/framework/PRODUCT-SPECIFICATION.md)
@@ -200,6 +215,7 @@ commands and namespaces literal, especially `techayodev/fnlla-core` and
 
 ## Maintenance
 
-This repository is generated from the maintained FNLLA source manifest. Keep
-changes aligned with the public framework-core scope so the package remains
-clear, reusable and professional on its own.
+Changes must remain aligned with the public Core boundary and preserve the
+standalone package contract. See [CONTRIBUTING.md](CONTRIBUTING.md),
+[SECURITY.md](SECURITY.md) and the [Code of Conduct](.github/CODE_OF_CONDUCT.md)
+before opening an issue or pull request.
