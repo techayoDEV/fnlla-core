@@ -40,5 +40,6 @@ application platform built around that core. `https://fnlla.com` is the public
 website and documentation hub for both.
 
 The FNLLA name comes from Finella Gardens in Dundee, Scotland. FNLLA Core is
-created and maintained by TechAyo, with Marcin Kordyaczny as Lead Developer /
-Product Manager.
+created and maintained by **TechAyo**.
+
+Lead Developer / Product Manager - **Marcin Kordyaczny**.

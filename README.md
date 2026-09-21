@@ -2,42 +2,48 @@
 
 [![FNLLA Core — open web framework core](branding/assets/logo/fnlla-core-lockup.svg)](https://fnlla.com/core)
 
-[![Release](https://img.shields.io/github/v/release/techayoDEV/fnlla-core?display_name=tag&sort=semver&style=flat-square&label=release&color=2563eb)](https://github.com/techayoDEV/fnlla-core/releases/latest)
-[![Core Quality](https://github.com/techayoDEV/fnlla-core/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/techayoDEV/fnlla-core/actions/workflows/quality.yml?query=branch%3Amain)
+[![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
+[![Release](https://img.shields.io/badge/release-2.3.1-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.3.1)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE.md)
 [![PHP 8.3+](https://img.shields.io/badge/runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
-[![FNLLA](https://img.shields.io/badge/FNLLA-full%20platform-18352f?style=flat-square)](https://fnlla.com)
 [![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
 
 **Open web framework core. Powered by PHP. Built for explicit, inspectable applications.**
 
-FNLLA Core is the free, public foundation used by FNLLA. It provides runtime
-primitives, routing, HTTP, container, validation, database, session, cache,
-mail, queue and CLI building blocks while keeping product-specific and
-commercial platform surfaces outside Core.
+FNLLA Core is a focused, MIT-licensed foundation for teams that want a readable
+web runtime without inheriting a full product platform. It provides routing,
+HTTP, dependency injection, validation, database, sessions, cache, mail, queues
+and CLI tooling through explicit contracts that remain approachable to both
+developers and coding agents.
 
-Package: `techayodev/fnlla-core`
-Repository: `techayoDEV/fnlla-core`
-Version: `2.3.1`. This source is approved for the immutable official stable
+[![FNLLA Core architecture: explicit framework primitives beneath an application-owned product layer](branding/assets/readme/core-architecture.svg)](docs/README.md)
+
+Your application owns its identity, data and business rules. Core supplies the
+framework primitives and safe defaults; the wider FNLLA product, documentation
+and licensed access live at [fnlla.com](https://fnlla.com).
+
+Package: `techayodev/fnlla-core`<br>
+Stable version: `2.3.1`. This source is approved for the immutable official stable
 release channel; availability is established by the matching GitHub release.
 
-## FNLLA Family
+## About FNLLA Core
 
-There are two FNLLA tracks:
+Core is the open foundation of the FNLLA family:
 
-- **FNLLA Core** - this repository, the public MIT-licensed web framework core.
-- **FNLLA** - the full product and application platform available at
-  [fnlla.com](https://fnlla.com).
+- **FNLLA Core** provides the public framework runtime, CLI and extension
+  contracts under the MIT License.
+- **FNLLA** adds the complete project workflow, delivery tooling and commercial
+  product experience available through [fnlla.com](https://fnlla.com).
 
-[fnlla.com](https://fnlla.com) is the canonical product, downloads and
-documentation hub for the FNLLA family.
+[fnlla.com](https://fnlla.com) is the canonical website for product information,
+documentation and access across the FNLLA family.
 
 ## Origin And Maintainers
 
 The FNLLA name comes from Finella Gardens in Dundee, Scotland, where the idea
 for the framework began.
 
-FNLLA Core is created and maintained by **TechAyo**.
+Created & maintained by **TechAyo** ([`techayo.co.uk`](https://techayo.co.uk)).
 
 Lead Developer / Product Manager - **Marcin Kordyaczny**.
 
@@ -47,6 +53,8 @@ documentation information for the wider FNLLA platform lives at
 [fnlla.com](https://fnlla.com).
 
 ## Scope
+
+[![FNLLA Core workflow: install, build and verify an application with explicit framework contracts](branding/assets/readme/core-workflow.svg)](docs/README.md)
 
 FNLLA Core is for framework-level code and package consumers who need the base
 runtime. The full FNLLA product builds on Core with the broader application

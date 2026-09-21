@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="410" viewBox="0 0 1200 410" role="img" aria-labelledby="title desc">
+  <title id="title">FNLLA Core workflow</title>
+  <desc id="desc">A three-step Core workflow: install, build and verify.</desc>
+  <rect width="1200" height="410" fill="#ffffff"/>
+  <text x="64" y="62" fill="#0b1220" font-family="Space Grotesk, Segoe UI, Arial, sans-serif" font-size="34" font-weight="600">A small core for serious applications.</text>
+  <g font-family="Space Grotesk, Segoe UI, Arial, sans-serif">
+    <line x1="64" y1="108" x2="340" y2="108" stroke="#d1d5db" stroke-width="2"/>
+    <text x="64" y="158" fill="#2563eb" font-family="JetBrains Mono, Consolas, monospace" font-size="44">01</text>
+    <text x="150" y="156" fill="#0b1220" font-size="28" font-weight="600">Install</text>
+    <text x="64" y="208" fill="#374151" font-size="19">Pin the public Core release.</text>
+    <text x="64" y="240" fill="#374151" font-size="19">Create a clean application.</text>
+    <line x1="462" y1="108" x2="738" y2="108" stroke="#d1d5db" stroke-width="2"/>
+    <text x="462" y="158" fill="#2563eb" font-family="JetBrains Mono, Consolas, monospace" font-size="44">02</text>
+    <text x="548" y="156" fill="#0b1220" font-size="28" font-weight="600">Build</text>
+    <text x="462" y="208" fill="#374151" font-size="19">Compose routes and actions.</text>
+    <text x="462" y="240" fill="#374151" font-size="19">Keep product logic yours.</text>
+    <line x1="860" y1="108" x2="1136" y2="108" stroke="#d1d5db" stroke-width="2"/>
+    <text x="860" y="158" fill="#2563eb" font-family="JetBrains Mono, Consolas, monospace" font-size="44">03</text>
+    <text x="946" y="156" fill="#0b1220" font-size="28" font-weight="600">Verify</text>
+    <text x="860" y="208" fill="#374151" font-size="19">Run tests, lint and analysis.</text>
+    <text x="860" y="240" fill="#374151" font-size="19">Ship with explicit evidence.</text>
+  </g>
+  <rect x="64" y="294" width="1072" height="62" rx="8" fill="#f3f4f6"/>
+  <text x="88" y="333" fill="#374151" font-family="JetBrains Mono, Consolas, monospace" font-size="18">CORE PROVIDES THE FRAMEWORK. YOUR APPLICATION PROVIDES THE PRODUCT.</text>
+</svg>

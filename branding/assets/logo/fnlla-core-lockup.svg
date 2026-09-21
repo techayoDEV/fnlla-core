@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
   <title id="title">FNLLA Core lockup</title>
-  <desc id="desc">FNLLA Core repository identity using the FNLLA brand colours.</desc>
+  <desc id="desc">FNLLA Core, the open web framework core. Created and maintained by TechAyo. Visit fnlla.com.</desc>
   <rect width="1200" height="360" fill="#FFFFFF"/>
   <g transform="translate(64 76) scale(0.22)">
     <path d="M 457.00 18.00 L 451.00 16.00 L 133.00 17.00 L 123.00 21.00 L 115.00 27.00 L 28.00 130.00 L 20.00 141.00 L 16.00 151.00 L 16.00 564.00 L 22.00 572.00 L 78.00 573.00 L 86.00 569.00 L 153.00 485.00 L 157.00 478.00 L 160.00 466.00 L 160.00 400.00 L 242.00 399.00 L 254.00 393.00 L 259.00 388.00 L 347.00 260.00 L 347.00 253.00 L 345.00 249.00 L 340.00 246.00 L 162.00 246.00 L 160.00 244.00 L 160.00 151.00 L 364.00 150.00 L 371.00 148.00 L 383.00 140.00 L 462.00 39.00 L 464.00 27.00 Z M 148.00 150.00 L 149.00 251.00 L 153.00 256.00 L 333.00 257.00 L 334.00 259.00 L 246.00 385.00 L 239.00 388.00 L 156.00 388.00 L 152.00 390.00 L 149.00 394.00 L 149.00 465.00 L 142.00 481.00 L 78.00 561.00 L 28.00 562.00 L 27.00 156.00 L 32.00 150.00 Z M 37.00 138.00 L 120.00 39.00 L 128.00 32.00 L 137.00 28.00 L 452.00 29.00 L 450.00 36.00 L 375.00 132.00 L 366.00 138.00 Z" fill="#2563EB" fill-rule="evenodd"/>
@@ -12,5 +12,6 @@
   <text x="500" y="165" fill="#0B1220" font-family="Space Grotesk, Segoe UI, Arial, sans-serif" font-size="86" font-weight="600">Core</text>
   <text x="504" y="222" fill="#374151" font-family="JetBrains Mono, Consolas, monospace" font-size="26">Open web framework core</text>
   <line x1="64" y1="286" x2="1136" y2="286" stroke="#E5E7EB" stroke-width="2"/>
-  <text x="64" y="322" fill="#6B7280" font-family="JetBrains Mono, Consolas, monospace" font-size="18">techayodev/fnlla-core</text>
+  <text x="64" y="322" fill="#2563EB" font-family="JetBrains Mono, Consolas, monospace" font-size="18">fnlla.com</text>
+  <text x="1136" y="322" text-anchor="end" fill="#374151" font-family="Space Grotesk, Segoe UI, Arial, sans-serif" font-size="18" font-weight="600">Created &amp; maintained by TechAyo</text>
 </svg>
