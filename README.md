@@ -68,6 +68,10 @@ Core also includes a limited `make:project` command. It creates a minimal public
 FNLLA Core application from this repository only. The full FNLLA repository owns
 the broader platform profile and project tooling.
 
+Core does not bundle an AI provider, search-provider integration or product
+growth workflow. The commercial FNLLA layer may add optional AI-assisted and
+SEO-assisted developer tooling while keeping Core contracts provider-neutral.
+
 ## Install
 
 Install from the public GitHub VCS repository:
