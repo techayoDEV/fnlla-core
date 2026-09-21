@@ -1,6 +1,12 @@
 # FNLLA Core Documentation
 
-FNLLA Core is the standalone public core package for the FNLLA framework family.
+FNLLA Core is the standalone public core package for the FNLLA framework family,
+built for developers working with AI. Its contribution is architectural:
+readable PHP, explicit contracts and verifiable behavior that developers and
+coding agents can inspect together. The developer remains responsible for
+direction, decisions and changes; Core requires no AI model or provider at
+runtime.
+
 These notes cover the package boundary and the runtime contracts that are safe
 to describe from the Core repository itself.
 

@@ -8,13 +8,23 @@
 [![PHP 8.3+](https://img.shields.io/badge/runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
 [![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
 
-**Open web framework core. Powered by PHP. Built for explicit, inspectable applications.**
+**Built for developers working with AI.**
+
+FNLLA Core is the open web framework foundation for AI-assisted software
+engineering. Powered by PHP and designed for explicit, inspectable
+applications, it keeps the developer in control while making the codebase easier
+for coding agents to understand and extend.
 
 FNLLA Core is a focused, MIT-licensed foundation for teams that want a readable
 web runtime without inheriting a full product platform. It provides routing,
 HTTP, dependency injection, validation, database, sessions, cache, mail, queues
 and CLI tooling through explicit contracts that remain approachable to both
 developers and coding agents.
+
+Core is the provider-neutral AI-engineering foundation of FNLLA: its readable
+architecture and stable contracts are designed to be inspected, changed and
+verified by developers working with coding agents. It does not bundle an AI
+model, provider SDK or autonomous product workflow.
 
 [![FNLLA Core architecture: explicit framework primitives beneath an application-owned product layer](branding/assets/readme/core-architecture.svg)](docs/README.md)
 
@@ -30,8 +40,8 @@ release channel; availability is established by the matching GitHub release.
 
 Core is the open foundation of the FNLLA family:
 
-- **FNLLA Core** provides the public framework runtime, CLI and extension
-  contracts under the MIT License.
+- **FNLLA Core** provides the public, provider-neutral AI-engineering runtime,
+  CLI and extension contracts under the MIT License.
 - **FNLLA** adds the complete project workflow, delivery tooling and commercial
   product experience available through [fnlla.com](https://fnlla.com).
 

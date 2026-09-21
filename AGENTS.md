@@ -7,6 +7,12 @@ role: provider-neutral open web framework runtime and public contracts
 license: MIT
 depends_on: []
 must_not_depend_on: [techayodev/fnlla, fnlla.com, ai-provider-sdk, search-provider-sdk]
+product_positioning:
+  primary: Built for developers working with AI.
+  architecture: provider-neutral AI-engineering foundation
+  human_authority: humans direct, decide, review and control changes
+  runtime_ai_required: false
+  avoid_as_primary: [AI-ready, agent-compatible]
 extensions:
   must_be: [generic, optional, backwards_reviewed, documented, tested]
   preferred_primitives: [container, config, routes, authorization, actions, events, queue]

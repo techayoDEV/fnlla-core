@@ -1,6 +1,6 @@
 {
     "name": "techayodev/fnlla-core",
-    "description": "Open web framework core for explicit, inspectable applications.",
+    "description": "Open web framework core built for developers working with AI through explicit, inspectable contracts.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://fnlla.com",
