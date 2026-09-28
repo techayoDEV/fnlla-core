@@ -32,6 +32,8 @@ final class FrameworkLock
     public const MIGRATION_LOCK_FILE = ".fnlla/legacy-framework-lock.json";
     private const PROJECT_OWNED_PATHS = [
         "config/app.php",
+        "config/panel_navigation.php",
+        "config/seo.php", "config/newsletter.php", "config/support_assistant.php",
         "public/assets/app.css",
         // Retired from new exports; existing projects may have replaced this logo.
         "public/assets/fnlla-logo.png",
@@ -271,7 +273,7 @@ final class FrameworkLock
             return false;
         }
 
-        if (in_array($relativePath, ["views/layouts/developer.php", "views/partials/framework-wordmark.php", "public/assets/app-base.css", "public/assets/developer-panel.css", "public/assets/developer-panel.js", "public/assets/debug-toolbar.css"], true)) {
+        if (in_array($relativePath, ["views/layouts/developer.php", "views/partials/framework-wordmark.php", "views/partials/panel-switcher.php", "public/assets/panel-switcher.css", "views/partials/public-support-widget.php", "views/partials/support-widget.php", "views/partials/support-widget-settings.php", "views/partials/seo-settings.php", "views/partials/newsletter-settings.php", "public/assets/support-widget.css", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-chat.css", "public/assets/support-assistant.js", "public/assets/app-base.css", "public/assets/developer-panel.css", "public/assets/developer-panel.js", "public/assets/debug-toolbar.css"], true)) {
             return true;
         }
 

@@ -42,20 +42,18 @@ final class VerifyCsrfToken implements MiddlewareInterface
             "ip" => $request->ip(),
         ]);
 
-        flash_set("status", [
-            "variant" => "danger",
-            "title" => "Session verification failed",
-            "text" => "Refresh the page and submit the form again.",
-            "toast" => false,
-        ]);
-        regenerate_csrf_token();
-
+        // A rejected request must not rotate the valid session token. In particular,
+        // stale polling tabs must not invalidate forms in other tabs.
         if ($request->expectsJson()) {
             return Response::json([
-                "error" => "CSRF token mismatch.",
+                "error" => "Your session changed. Refresh the page before submitting again.",
                 "request_id" => $request->requestId(),
-            ], 419);
+            ], 419, ["Cache-Control" => "private, no-store"]);
         }
+        flash_set("status", [
+            "variant" => "danger", "title" => "Session verification failed",
+            "text" => "Refresh the page and submit the form again.", "toast" => false,
+        ]);
 
         $referer = (string) $request->header("Referer", "");
         $fallbackPath = $referer !== "" ? (parse_url($referer, PHP_URL_PATH) ?: "/") : "/";

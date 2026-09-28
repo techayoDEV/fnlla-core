@@ -1,0 +1,30 @@
+{
+  "name": "fnlla-brand",
+  "version": "1.0.1",
+  "schema": "fnlla.brand-package.v1",
+  "profile": "core",
+  "manifest_sha256": "15d98e8a7d540e4db59ab978daf057c28c2637e07fdedcc422abe51658bdce85",
+  "files": {
+    "branding/tokens.json": "bdc409b970d4906d91875578841af5a3b81b0db5742ab4266bb57596bd1332bc",
+    "branding/assets/logo/favicon.svg": "e922010fe5c96f0ab1416ac757cd1bbdf64982ccc45697fe028c8371e332565f",
+    "branding/assets/logo/lockup.svg": "f7faf573ff27534a3d135d949d8280131887d358183ef9ed8f8e0c0c1c2d4436",
+    "branding/assets/logo/monogram.svg": "e922010fe5c96f0ab1416ac757cd1bbdf64982ccc45697fe028c8371e332565f",
+    "branding/assets/logo/outline/monogram-black.svg": "3e6085fb77f808be95b2f0bf7b512b4d0962582580a15c1409cdc6427418f332",
+    "branding/assets/logo/outline/monogram-blue.svg": "7e39c897a7fb917ea07a979330c9062c9344d959ad1afc5c8c9225465b402a43",
+    "branding/assets/logo/outline/monogram-grey.svg": "a8aaec00e899635f03d423aa1829e7d94e3f190126bf18eb4b692188fe66bd75",
+    "branding/assets/logo/outline/monogram-on-black.svg": "f2836afc9b50279f2c52d873cdefc36ce6c4064ea92cbd8b17f8499abd6314c7",
+    "branding/assets/logo/outline/monogram-on-blue.svg": "44d33e6ef76891d03b82ec80255d1fa9293ecc1534f59b5bd9e25bcd3bafae8f",
+    "branding/assets/logo/outline/monogram-on-grey.svg": "2df53c18262994c72e188583069baee50d3d4ad1023dc26d845c53a8ea718635",
+    "branding/assets/logo/outline/wordmark-black.svg": "23befceb3355f0d98570926413f7c94d7ff56aaffd7ad43fb9bed692f7134a5c",
+    "branding/assets/logo/outline/wordmark-blue.svg": "07da3908f95a37a4caeef0cc30ce07a16bc1e6226f68097345b96c39eb8bc15b",
+    "branding/assets/logo/outline/wordmark-grey.svg": "7a60e208b0b7b2136f329392e924f5a60b7072e7b17b458c0a0394ac2f04097f",
+    "branding/assets/logo/outline/wordmark-on-black.svg": "c3259df078b5bc4b6ec492b8e274417169716ed81cc57c1c93107528f6d014f7",
+    "branding/assets/logo/outline/wordmark-on-blue.svg": "45fcdd0efc933ce670be7bf2756439d29be904de63dd750be4f364ea1ccddc41",
+    "branding/assets/logo/outline/wordmark-on-grey.svg": "3067a7c113f25b9c48de84ec50e81d02538b48019b2d8a2dfcf4e9f745c457fa",
+    "branding/assets/logo/wordmark.svg": "2cfab2e56a35fd76bafc1ad05ece2f51260baa585a54077432ae2eeedfd8c620",
+    "branding/assets/logo/fnlla-core-lockup.svg": "6cf16b2599075ad05e13d823af80d17b1d9847ee68e14ca8fcec56d133021e42",
+    "branding/assets/readme/core-architecture.svg": "d369b5fb021febd9d34f3842e60ae89fde3cfdccc4bb1a6219049a17caf37741",
+    "branding/assets/readme/core-workflow.svg": "342f5905f3e8cdc046e205a298c948601ab0162ba646fa582ab2d9152735d30a",
+    "scripts/brand-consumer.py": "7e9abbc6b6c5445cb01110cf2d70ee78e4deb71576f07245cf6e2e8050b5defe"
+  }
+}

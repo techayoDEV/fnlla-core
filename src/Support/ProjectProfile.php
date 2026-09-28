@@ -46,6 +46,8 @@ final class ProjectProfile
             || str_starts_with($path, "public/assets/brand/fnlla/")
             || str_starts_with($path, "views/maintenance/") || str_starts_with($path, "src/Controllers/Developer")
             || in_array($path, ["routes/maintenance.php", "views/partials/framework-wordmark.php", "src/Controllers/CustomerAccessController.php",
+                "config/newsletter.php", "views/partials/public-support-widget.php", "views/partials/support-widget.php", "views/partials/support-widget-settings.php", "views/partials/seo-settings.php", "views/partials/newsletter-settings.php", "public/assets/support-widget.css",
+                "config/panel_navigation.php", "views/partials/panel-switcher.php", "public/assets/panel-switcher.css",
                 "src/Controllers/FrameworkUpdateController.php", "public/assets/developer-panel.css",
                 "public/assets/developer-panel.js", "public/assets/debug-toolbar.css"], true);
     }

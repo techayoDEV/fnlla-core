@@ -1,50 +1,38 @@
-# FNLLA Core Brand Kit
+# FNLLA brand consumer: core
 
-This directory carries the FNLLA identity for the standalone Core repository.
-It reuses the same outline mark, Blueprint Blue palette and maintainer credit as
-the full FNLLA product, while making the scope explicit: **FNLLA Core** is the
-open web framework core package.
+The maintained identity sources and authoring tools live in the **fnlla.com**
+repository under `branding/` and `scripts/branding/`. This directory contains
+versioned exports, not an independently editable brand kit.
 
-## Name And Scope
+`brand-lock.json` pins the installed `fnlla-brand` version, profile, manifest hash
+and SHA-256 of every managed file. Product versions remain independent.
 
-Use **FNLLA Core** in repository titles, README copy, package descriptions and
-public references to this package.
+## Verify locally
 
-Use **FNLLA** for the full product family and wider application experience built
-around Core. Public product references should point to
-[`fnlla.com`](https://fnlla.com), not to a private maintainer repository.
+```console
+python scripts/brand-consumer.py check
+```
 
-Literal package and namespace identifiers stay unchanged:
+No website checkout or network access is needed for this check, application
+runtime or normal project builds. Font licence files travel with web fonts.
 
-- `techayodev/fnlla-core`
-- `techayoDEV/fnlla-core`
-- `Fnlla\Php\`
+## Review and update
 
-## Asset Map
+Build the package in fnlla.com with `python scripts/branding/build-package.py`.
+Supply its unpacked version directory explicitly:
 
-| Location | Use |
-| --- | --- |
-| `assets/logo/fnlla-core-lockup.svg` | Preferred repository lockup when Core must be identified explicitly |
-| `assets/logo/wordmark.svg` | Canonical FNLLA outline wordmark |
-| `assets/logo/monogram.svg` | Compact FNLLA identity mark |
-| `assets/logo/favicon.svg` | Browser tab and tiny UI contexts |
-| `assets/logo/outline/` | Blue, black, grey and reversed SVG variants |
-| `tokens.json` | Shared colours, type choices and spacing tokens |
-| `BRAND-GUIDE.md` | Core-specific usage rules |
+```console
+python scripts/brand-consumer.py install --package /path/to/fnlla-brand/1.0.1 --profile core --dry-run
+python scripts/brand-consumer.py install --package /path/to/fnlla-brand/1.0.1 --profile core
+python scripts/brand-consumer.py check
+```
 
-The copied logo assets remain the canonical FNLLA geometry. Do not redraw them
-from screenshots, fill the outline interiors, stretch them or recolour them
-outside the approved treatments.
+Updates reject changed local files, checksum failures, path escapes and modified
+packages that reuse an installed version. Reconcile local changes in the
+canonical source and export a new version before retrying. Keep the previous
+package for rollback. Existing files are backed up on first adoption.
 
-## Attribution
-
-Created & maintained by **TechAyo**.
-
-Lead Developer / Product Manager - **Marcin Kordyaczny**.
-
-The FNLLA name comes from Finella Gardens in Dundee, Scotland, where the
-framework idea began. Official public references should point to the GitHub
-repositories under `techayoDEV` and `https://fnlla.com`.
-
-Use the legal license text from the repository `LICENSE.md`. Branding guidance
-is not a software release declaration.
+Core uses only its repository identity and documentation artwork. It has no
+runtime dependency on fnlla.com, the commercial Framework, a brand service or a
+font provider. The Core-specific mark and README artwork remain at their
+existing relative paths. Code and package licence terms are unchanged.

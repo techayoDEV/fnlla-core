@@ -230,7 +230,7 @@ FNLLA Core uses the same outline mark, Blueprint Blue palette and TechAyo
 attribution as FNLLA. When this repository is shown on its own, use the name
 **FNLLA Core** and the Core-specific lockup in `branding/assets/logo/`.
 
-The canonical brand notes live in [branding/README.md](branding/README.md) and
+The pinned brand consumer instructions live in [branding/README.md](branding/README.md) and
 [branding/BRAND-GUIDE.md](branding/BRAND-GUIDE.md). Keep package names,
 commands and namespaces literal, especially `techayodev/fnlla-core` and
 `Fnlla\Php\`.

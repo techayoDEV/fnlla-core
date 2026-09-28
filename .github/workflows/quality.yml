@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+      - name: Verify pinned brand assets
+        run: python3 scripts/brand-consumer.py check
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

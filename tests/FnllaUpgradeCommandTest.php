@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Fnlla\Php\Support\FrameworkUpdateTransaction;
+use Fnlla\Php\Support\FrameworkLock;
+use Fnlla\Php\Support\ProjectProfile;
 
 $upgradeRoot = dirname(__DIR__);
 spl_autoload_register(static function (string $class) use ($upgradeRoot): void {
@@ -21,6 +23,16 @@ $upgradeSource = $upgradeWorkspace . DIRECTORY_SEPARATOR . "framework";
 $cleanProject = $upgradeWorkspace . DIRECTORY_SEPARATOR . "clean-core";
 $modifiedProject = $upgradeWorkspace . DIRECTORY_SEPARATOR . "modified-core";
 $transactionProject = $upgradeWorkspace . DIRECTORY_SEPARATOR . "transaction-core";
+
+foreach (["views/partials/panel-switcher.php", "public/assets/panel-switcher.css", "views/developer/confirm-identity.php"] as $panelFile) {
+    fnlla_upgrade_assert_true(FrameworkLock::isFrameworkManagedPath($panelFile), "Panel dependency is missing from update tracking: " . $panelFile);
+    fnlla_upgrade_assert_true(ProjectProfile::isPanelFile($panelFile), "Panel dependency is missing from profile classification: " . $panelFile);
+}
+fnlla_upgrade_assert_true(!FrameworkLock::isFrameworkManagedPath("config/panel_navigation.php"), "Application panel destinations must remain application-owned.");
+fnlla_upgrade_assert_true(ProjectProfile::isPanelFile("config/panel_navigation.php"), "Panel destination configuration must not belong to the plain Core profile.");
+fnlla_upgrade_assert_true(!FrameworkLock::isFrameworkManagedPath("views/partials/custom-panel.php"), "An application-owned partial was claimed by the Framework.");
+fnlla_upgrade_assert_true(!FrameworkLock::isFrameworkManagedPath("public/assets/custom-panel.css"), "An application-owned stylesheet was claimed by the Framework.");
+fnlla_upgrade_assert_true(!FrameworkLock::isFrameworkManagedPath("../views/partials/panel-switcher.php"), "An unsafe managed path was accepted.");
 
 fnlla_upgrade_write_fixture($upgradeSource, $cleanProject, false, $upgradeRoot);
 

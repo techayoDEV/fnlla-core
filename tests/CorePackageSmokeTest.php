@@ -218,6 +218,16 @@ assert_same(0, $testExit, "Exported Core tests failed: " . $testOutput);
 
 remove_directory($target);
 
+assert_true(\Fnlla\Php\Support\FrameworkLock::isFrameworkManagedPath('views/partials/support-widget.php'), 'Shared support component must be managed.');
+assert_true(!\Fnlla\Php\Support\FrameworkLock::isFrameworkManagedPath('config/newsletter.php'), 'Newsletter identity must stay project-owned.');
+$uploadFixture = tempnam(sys_get_temp_dir(), 'core-upload-size-');
+file_put_contents($uploadFixture, str_repeat('x', 2048));
+try {
+    $upload = new \Fnlla\Php\Http\UploadedFile($uploadFixture, 'notes.txt', 'text/plain', 1, UPLOAD_ERR_OK);
+    expect_exception(RuntimeException::class, static fn () => $upload->validate(1024, ['text/plain']), 'Actual upload bytes must enforce the size limit even when metadata understates it.');
+    $upload->validate(4096, ['text/plain']);
+} finally { unlink($uploadFixture); }
+
 fwrite(STDOUT, "FNLLA Core package smoke test passed." . PHP_EOL);
 
 function assert_true(bool $condition, string $message): void

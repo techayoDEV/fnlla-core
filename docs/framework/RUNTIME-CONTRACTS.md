@@ -167,3 +167,11 @@ FNLLA Core owns public framework primitives. Full FNLLA builds on those
 primitives with the broader application platform, project workflow and product
 experience. Keep Core changes useful to standalone framework consumers and add
 shared primitives here before consuming them from the full product.
+
+The compatibility file classifier recognises the Framework's shared panel
+switcher template and stylesheet as managed panel dependencies. Application
+destination registration in `config/panel_navigation.php` is application-owned
+and must not be replaced by a Framework update. This classification adds no
+panel UI, account roles or commercial capabilities to Core. It changes no
+public method signatures and applies when the consuming application adopts
+the Core build containing it; existing released packages are not rewritten.

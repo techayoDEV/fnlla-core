@@ -8,3 +8,6 @@ a { color: var(--link); text-underline-offset: 3px; overflow-wrap: anywhere; }
 :focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
 code, pre { font-family: ui-monospace, monospace; }
 @media (prefers-color-scheme: dark) { :root { --ink: #e5e7eb; --paper: #16181d; --link: #60a5fa; } }
+
+/* Links use colour and focus outlines, without a hover underline. */
+a:hover, a:hover * { text-decoration-line: none !important; }

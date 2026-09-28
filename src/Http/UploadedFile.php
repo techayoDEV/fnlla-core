@@ -83,7 +83,9 @@ final class UploadedFile
         $maxBytes ??= max(1, (int) config("security.uploads.max_file_bytes", 5242880));
         $allowedMimeTypes ??= (array) config("security.uploads.allowed_mime_types", []);
 
-        if ($this->size > $maxBytes) {
+        clearstatcache(true, $this->tmpName);
+        $actualSize = is_link($this->tmpName) ? false : filesize($this->tmpName);
+        if ($actualSize === false || $this->size < 0 || $this->size > $maxBytes || $actualSize > $maxBytes) {
             throw new RuntimeException("Uploaded file exceeds the configured size limit.");
         }
 

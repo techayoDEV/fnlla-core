@@ -55,6 +55,18 @@ if (!mkdir($securityDirectory, 0700, true)) {
 }
 
 try {
+    $csrf = csrf_token();
+    $csrfMiddleware = new \Fnlla\Php\Middleware\VerifyCsrfToken();
+    $stalePoll = new Request('POST', '/support/poll', request: ['_token' => 'expired'], headers: ['accept' => 'application/json']);
+    for ($attempt = 0; $attempt < 3; $attempt++) {
+        if ($csrfMiddleware->handle($stalePoll, static fn (): Response => Response::text('unsafe'))->status() !== 419 || csrf_token() !== $csrf) {
+            sec_fail('Rejected background requests must preserve the valid session token.');
+        }
+    }
+    if (flash('status') !== null) { sec_fail('JSON CSRF rejection must not add a cross-tab flash.'); }
+    $validPost = new Request('POST', '/form', request: ['_token' => $csrf]);
+    if ($csrfMiddleware->handle($validPost, static fn (): Response => Response::text('accepted'))->body() !== 'accepted') { sec_fail('Valid CSRF token was invalidated.'); }
+
     config_set("auth.session_key", "auth.user_id");
     config_set("auth.providers.users.key", "id");
     config_set("security.authorization", [

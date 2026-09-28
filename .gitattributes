@@ -1,0 +1,3 @@
+# Shared brand export bytes have stable hashes across platforms.
+/branding/** text eol=lf
+/scripts/brand-consumer.py text eol=lf
