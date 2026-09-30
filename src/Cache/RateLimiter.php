@@ -31,6 +31,15 @@ final class RateLimiter
         return $this->attempts($key) >= $maxAttempts;
     }
 
+    /** @return array{allowed: bool, attempts: int, retry_after: int} */
+    public function acquire(string $key, int $maxAttempts, int $decaySeconds = 60): array
+    {
+        if (!$this->cache instanceof RateLimitStoreInterface) {
+            throw new \RuntimeException("Request throttling requires an atomic RateLimitStoreInterface store.");
+        }
+        return $this->cache->consume("rate-limit:" . $key, max(0, $maxAttempts), max(1, $decaySeconds));
+    }
+
     public function hit(string $key, int $decaySeconds = 60): int
     {
         $this->cache->put($key . ":timer", time() + $decaySeconds, $decaySeconds);
@@ -40,6 +49,7 @@ final class RateLimiter
 
     public function clear(string $key): void
     {
+        $this->cache->forget("rate-limit:" . $key);
         $this->cache->forget($key);
         $this->cache->forget($key . ":timer");
     }

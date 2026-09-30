@@ -20,6 +20,9 @@
         "ext-pdo_mysql": "Required by the maintained MySQL database connection.",
         "ext-redis": "Required only for Redis cache, queue or session drivers."
     },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1"
+    },
     "autoload": {
         "psr-4": {
             "Fnlla\\Php\\": "src/"

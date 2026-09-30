@@ -8,8 +8,9 @@ use Fnlla\Php\Database\DatabaseManager;
 use PDO;
 use RuntimeException;
 
-final class DatabaseActionStore implements ActionStoreInterface
+final class DatabaseActionStore implements ReliableOutboxStoreInterface
 {
+    use DatabaseOutboxDelivery;
     private string $receiptsTable;
     private string $outboxTable;
 
@@ -99,6 +100,9 @@ final class DatabaseActionStore implements ActionStoreInterface
 
     public function pending(int $limit = 100): array
     {
+        if ((bool) config("actions.reliable_outbox", false)) {
+            throw new RuntimeException("Reliable outbox publication requires claimDelivery().");
+        }
         if ($this->database->hasActiveManagedTransaction()) {
             throw new RuntimeException("Outbox publication must run after commit.");
         }
@@ -125,6 +129,9 @@ final class DatabaseActionStore implements ActionStoreInterface
 
     public function markPublished(string $id): void
     {
+        if ((bool) config("actions.reliable_outbox", false)) {
+            throw new RuntimeException("Reliable outbox acknowledgement requires a delivery token.");
+        }
         if ($this->database->hasActiveManagedTransaction()) {
             throw new RuntimeException("Outbox acknowledgement must run after commit.");
         }
@@ -142,6 +149,7 @@ final class DatabaseActionStore implements ActionStoreInterface
         if ($this->database->connection()->inTransaction()) {
             throw new RuntimeException("Install the action/outbox schema outside a transaction.");
         }
+        $this->installDeliverySchema();
         $this->database->statement(
             "CREATE TABLE IF NOT EXISTS `{$this->receiptsTable}` ("
             . "idempotency_key VARCHAR(64) PRIMARY KEY, action_id VARCHAR(128) NOT NULL, request_hash VARCHAR(64) NOT NULL, "

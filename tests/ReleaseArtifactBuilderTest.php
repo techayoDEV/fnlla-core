@@ -2,13 +2,26 @@
 
 declare(strict_types=1);
 
-$releaseArtifactRoot = dirname(__DIR__);
-$releaseArtifactVersion = trim((string) file_get_contents($releaseArtifactRoot . "/VERSION"));
-$releaseArtifactCase = $releaseArtifactRoot . "/dist/test-release-artifact-"
+$releaseArtifactSourceRoot = dirname(__DIR__);
+$releaseArtifactVersion = trim((string) file_get_contents($releaseArtifactSourceRoot . "/VERSION"));
+$releaseArtifactCase = $releaseArtifactSourceRoot . "/dist/test-release-artifact-"
     . getmypid() . "-" . bin2hex(random_bytes(4));
-$releaseArtifactOutput = $releaseArtifactCase . "/fnlla-core-" . $releaseArtifactVersion;
+$releaseArtifactRoot = $releaseArtifactCase . "/source";
+$releaseArtifactOutput = $releaseArtifactRoot . "/dist/fnlla-core-" . $releaseArtifactVersion;
 
 try {
+    foreach (["scripts/build-local-artifact.php", "scripts/lib/DeterministicZip.php", "composer.json", "VERSION", "resources/package-distribution.json"] as $relative) {
+        if (!is_dir(dirname($releaseArtifactRoot . "/" . $relative))) { mkdir(dirname($releaseArtifactRoot . "/" . $relative), 0700, true); }
+        copy($releaseArtifactSourceRoot . "/" . $relative, $releaseArtifactRoot . "/" . $relative);
+    }
+    file_put_contents($releaseArtifactRoot . "/.gitignore", "/dist/\n/ignored.tmp\n");
+    foreach ([["git", "init", "-q"], ["git", "config", "user.name", "Synthetic release test"],
+        ["git", "config", "user.email", "release-test@example.invalid"], ["git", "config", "core.autocrlf", "false"],
+        ["git", "add", "."], ["git", "-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "Synthetic stable fixture"]] as $command) {
+        [$code, $output] = release_artifact_run_process($command, $releaseArtifactRoot);
+        release_artifact_assert($code === 0, "Cannot prepare isolated release fixture: " . $output);
+    }
+    file_put_contents($releaseArtifactRoot . "/ignored.tmp", "must never ship");
     [$releaseArtifactExit, $releaseArtifactBuildOutput] = release_artifact_run_process(
         [
             PHP_BINARY,
@@ -55,6 +68,28 @@ try {
         && preg_match('/^[a-f0-9]{40}$/D', (string) ($provenance["base_commit"] ?? "")) === 1,
         "Provenance does not preserve the approved stable source identity."
     );
+    release_artifact_assert(($provenance["workspace_dirty"] ?? true) === false && !is_file($releaseArtifactOutput . "/ignored.tmp"),
+        "Stable artifact included dirty/ignored source.");
+    [$againCode] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . "/scripts/build-local-artifact.php",
+        $releaseArtifactVersion, $releaseArtifactRoot . "/dist/reproducible"], $releaseArtifactRoot);
+    release_artifact_assert($againCode === 0 && hash_file("sha256", $releaseArtifactOutput . ".zip")
+        === hash_file("sha256", $releaseArtifactRoot . "/dist/reproducible.zip"), "Stable artifacts are not reproducible.");
+    foreach ([
+        [$releaseArtifactOutput],
+        [$releaseArtifactRoot . "/dist/wrong-commit", "--expected-commit=" . str_repeat("0", 40)],
+    ] as $arguments) {
+        [$code] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . "/scripts/build-local-artifact.php", $releaseArtifactVersion, ...$arguments], $releaseArtifactRoot);
+        release_artifact_assert($code !== 0, "Stable output overwrite or mismatched commit accepted.");
+    }
+    file_put_contents($releaseArtifactRoot . "/unreviewed.php", "<?php // synthetic untracked input\n");
+    [$dirtyCode] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . "/scripts/build-local-artifact.php", $releaseArtifactVersion,
+        $releaseArtifactRoot . "/dist/dirty"], $releaseArtifactRoot);
+    release_artifact_assert($dirtyCode !== 0, "Untracked source was approved for stable release.");
+    unlink($releaseArtifactRoot . "/unreviewed.php");
+    file_put_contents($releaseArtifactRoot . "/VERSION", "0.0.0\n");
+    [$dirtyCode] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . "/scripts/build-local-artifact.php", $releaseArtifactVersion,
+        $releaseArtifactRoot . "/dist/modified"], $releaseArtifactRoot);
+    release_artifact_assert($dirtyCode !== 0, "Modified source was approved for stable release.");
 
     $composerCommand = PHP_OS_FAMILY === "Windows"
         ? "composer validate --strict --no-interaction"
@@ -78,23 +113,20 @@ try {
  */
 function release_artifact_run_process(array|string $command, string $workingDirectory): array
 {
-    $descriptorSpec = [
-        0 => ["pipe", "r"],
-        1 => ["pipe", "w"],
-        2 => ["pipe", "w"],
-    ];
+    $output = tmpfile();
+    if ($output === false) { throw new RuntimeException("Cannot allocate test output."); }
+    $descriptorSpec = [0 => ["pipe", "r"], 1 => $output, 2 => $output];
     $process = proc_open($command, $descriptorSpec, $pipes, $workingDirectory);
     if (!is_resource($process)) {
         throw new RuntimeException("Unable to start release artifact validation process.");
     }
 
     fclose($pipes[0]);
-    $stdout = stream_get_contents($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]);
-    fclose($pipes[1]);
-    fclose($pipes[2]);
-
-    return [proc_close($process), trim((string) $stdout . ($stderr !== "" ? PHP_EOL . $stderr : ""))];
+    $exit = proc_close($process);
+    rewind($output);
+    $text = stream_get_contents($output);
+    fclose($output);
+    return [$exit, trim((string) $text)];
 }
 
 /** @return array<string,mixed> */
@@ -119,6 +151,9 @@ function release_artifact_remove_tree(string $path): void
     if (!is_dir($path)) {
         return;
     }
+    $resolved = str_replace("\\", "/", (string) realpath($path));
+    $allowed = str_replace("\\", "/", (string) realpath(dirname(__DIR__) . "/dist")) . "/test-release-artifact-";
+    if (!str_starts_with(strtolower($resolved), strtolower($allowed))) { throw new RuntimeException("Unsafe fixture cleanup path."); }
     $iterator = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
         RecursiveIteratorIterator::CHILD_FIRST
@@ -127,6 +162,7 @@ function release_artifact_remove_tree(string $path): void
         if ($item->isDir() && !$item->isLink()) {
             rmdir($item->getPathname());
         } else {
+            chmod($item->getPathname(), 0600);
             unlink($item->getPathname());
         }
     }

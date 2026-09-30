@@ -20,7 +20,9 @@ Purpose:
 
 namespace Fnlla\Php\Cache;
 
-final class FileCacheStore implements CacheStoreInterface
+use RuntimeException;
+
+final class FileCacheStore implements CacheStoreInterface, RateLimitStoreInterface
 {
     public function __construct(
         private string $directory,
@@ -28,9 +30,10 @@ final class FileCacheStore implements CacheStoreInterface
         private ?CacheSerializerInterface $legacySerializer = null
     )
     {
-        if (!is_dir($this->directory)) {
-            mkdir($this->directory, 0777, true);
+        if (!is_dir($this->directory) && !mkdir($this->directory, 0700, true) && !is_dir($this->directory)) {
+            throw new RuntimeException("Cannot create cache directory.");
         }
+        $this->directory = (string) realpath($this->directory);
 
         $this->serializer ??= new JsonCacheSerializer();
         $this->legacySerializer ??= new PhpCacheSerializer();
@@ -38,17 +41,17 @@ final class FileCacheStore implements CacheStoreInterface
 
     public function get(string $key, mixed $default = null): mixed
     {
-        $payload = $this->read($key);
+        $payload = $this->locked($key, fn (): ?array => $this->read($key));
 
         return $payload["value"] ?? $default;
     }
 
     public function put(string $key, mixed $value, int $ttlSeconds = 3600): bool
     {
-        return $this->write($key, [
+        return $this->locked($key, fn (): bool => $this->write($key, [
             "expires_at" => time() + max(1, $ttlSeconds),
             "value" => $value,
-        ]);
+        ]));
     }
 
     public function remember(string $key, int $ttlSeconds, callable $callback): mixed
@@ -67,9 +70,7 @@ final class FileCacheStore implements CacheStoreInterface
 
     public function forget(string $key): bool
     {
-        $path = $this->path($key);
-
-        return !is_file($path) || unlink($path);
+        return $this->locked($key, fn (): bool => $this->remove($this->path($key)));
     }
 
     public function clear(): bool
@@ -81,8 +82,9 @@ final class FileCacheStore implements CacheStoreInterface
         }
 
         foreach ($files as $file) {
-            if (is_file($file)) {
-                unlink($file);
+            $hash = pathinfo($file, PATHINFO_FILENAME);
+            if (preg_match('/^[a-f0-9]{40}$/D', $hash) === 1) {
+                $this->lockedHash($hash, fn (): bool => $this->remove($file));
             }
         }
 
@@ -92,9 +94,9 @@ final class FileCacheStore implements CacheStoreInterface
     public function increment(string $key, int $value = 1, int $ttlSeconds = 3600): int
     {
         return $this->locked($key, function () use ($key, $value, $ttlSeconds): int {
-            $current = (int) $this->get($key, 0);
+            $current = (int) ($this->read($key, true)["value"] ?? 0);
             $current += $value;
-            $this->put($key, $current, $ttlSeconds);
+            $this->write($key, ["value" => $current, "expires_at" => time() + max(1, $ttlSeconds)]);
 
             return $current;
         });
@@ -105,18 +107,40 @@ final class FileCacheStore implements CacheStoreInterface
         return $this->increment($key, $value * -1, $ttlSeconds);
     }
 
-    private function read(string $key): ?array
+    public function consume(string $key, int $limit, int $decaySeconds): array
+    {
+        return $this->locked($key, function () use ($key, $limit, $decaySeconds): array {
+            $payload = $this->read($key, true);
+            $now = time();
+            $count = $payload["value"] ?? 0;
+            if (!is_int($count) || $count < 0) {
+                throw new RuntimeException("Invalid rate limit counter.");
+            }
+            $expires = $payload["expires_at"] ?? ($now + max(1, $decaySeconds));
+            $allowed = $count < max(0, $limit);
+            if ($allowed) {
+                $count++;
+                $this->write($key, ["value" => $count, "expires_at" => $expires]);
+            }
+            return ["allowed" => $allowed, "attempts" => $count, "retry_after" => max(0, $expires - $now)];
+        });
+    }
+
+    private function read(string $key, bool $strict = false): ?array
     {
         $path = $this->path($key);
+        if (is_link($path)) {
+            throw new RuntimeException("Cache entries cannot be symbolic links.");
+        }
 
         if (!is_file($path)) {
             return null;
         }
 
-        $contents = file_get_contents($path);
+        $contents = @file_get_contents($path);
 
-        if (!is_string($contents) || $contents === "") {
-            return null;
+        if (!is_string($contents)) {
+            throw new RuntimeException("Cannot read cache entry.");
         }
 
         $payload = $this->serializer?->unserialize($contents);
@@ -130,12 +154,15 @@ final class FileCacheStore implements CacheStoreInterface
             $payload = $this->legacySerializer?->unserialize($contents);
         }
 
-        if (!is_array($payload)) {
+        if (!is_array($payload) || !is_int($payload["expires_at"] ?? null) || !array_key_exists("value", $payload)) {
+            if ($strict) {
+                throw new RuntimeException("Cache counter is corrupt.");
+            }
             return null;
         }
 
-        if (($payload["expires_at"] ?? 0) < time()) {
-            unlink($path);
+        if ($payload["expires_at"] <= time()) {
+            $this->remove($path);
 
             return null;
         }
@@ -145,7 +172,33 @@ final class FileCacheStore implements CacheStoreInterface
 
     private function write(string $key, array $payload): bool
     {
-        return file_put_contents($this->path($key), $this->serializer?->serialize($payload) ?? "", LOCK_EX) !== false;
+        $path = $this->path($key);
+        if (is_link($path)) {
+            throw new RuntimeException("Cache entries cannot be symbolic links.");
+        }
+        $contents = $this->serializer?->serialize($payload) ?? "";
+        $temporary = @tempnam($this->directory, ".cache-");
+        if ($temporary === false) {
+            throw new RuntimeException("Cannot stage cache entry.");
+        }
+        try {
+            if (realpath(dirname($temporary)) !== $this->directory
+                || @file_put_contents($temporary, $contents) !== strlen($contents)
+                || !@rename($temporary, $path)) {
+                throw new RuntimeException("Cannot persist cache entry.");
+            }
+            return true;
+        } finally {
+            if (is_file($temporary)) { unlink($temporary); }
+        }
+    }
+
+    private function remove(string $path): bool
+    {
+        if (is_link($path) || (file_exists($path) && !@unlink($path))) {
+            throw new RuntimeException("Cannot remove cache entry.");
+        }
+        return true;
     }
 
     private function path(string $key): string
@@ -155,15 +208,27 @@ final class FileCacheStore implements CacheStoreInterface
 
     private function locked(string $key, callable $callback): mixed
     {
-        $lockPath = $this->directory . DIRECTORY_SEPARATOR . sha1($key) . ".lock";
-        $handle = fopen($lockPath, "c");
+        return $this->lockedHash(sha1($key), $callback);
+    }
+
+    private function lockedHash(string $hash, callable $callback): mixed
+    {
+        $lockPath = $this->directory . DIRECTORY_SEPARATOR . $hash . ".lock";
+        clearstatcache();
+        if (is_link($lockPath)) {
+            throw new RuntimeException("Cache locks cannot be symbolic links.");
+        }
+        $handle = @fopen($lockPath, "c+b");
 
         if (!is_resource($handle)) {
-            return $callback();
+            throw new RuntimeException("Cannot open cache lock.");
         }
 
         try {
-            flock($handle, LOCK_EX);
+            if (!flock($handle, LOCK_EX)) {
+                throw new RuntimeException("Cannot acquire cache lock.");
+            }
+            clearstatcache();
 
             return $callback();
         } finally {

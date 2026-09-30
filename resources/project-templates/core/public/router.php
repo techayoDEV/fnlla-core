@@ -40,6 +40,17 @@ foreach ($pathSegments as $segment) {
     }
 }
 
+// Existing uploads may predate the safe storage-name contract. Never delegate
+// an active file below uploads to the PHP development server.
+if (strcasecmp((string) ($pathSegments[0] ?? ""), "uploads") === 0
+    && preg_match('~\.(?:php[0-9]*|phtml|phar|pht|cgi|pl|py|rb|sh|asp|aspx|jsp|html?|xhtml|svg|m?js)(?:[./]|$)~i', implode("/", $pathSegments)) === 1) {
+    http_response_code(404);
+    header("Content-Type: text/plain; charset=UTF-8");
+    echo "Not Found";
+
+    return true;
+}
+
 $publicFile = __DIR__ . ($pathSegments !== [] ? DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $pathSegments) : "");
 
 if ($pathSegments !== [] && is_file($publicFile)) {

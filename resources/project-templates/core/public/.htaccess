@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Prevent old or manually placed active files in public/uploads from executing.
+RewriteRule ^uploads/.*\.(?:php[0-9]*|phtml|phar|pht|cgi|pl|py|rb|sh|asp|aspx|jsp|html?|xhtml|svg|m?js)(?:[./]|$) - [F,L,NC]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]

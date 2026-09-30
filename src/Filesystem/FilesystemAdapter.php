@@ -31,9 +31,14 @@ final class FilesystemAdapter
     ) {
         $this->root = rtrim($this->normalizeAbsolutePath($this->root), "\\/");
 
-        if (!is_dir($this->root)) {
-            mkdir($this->root, 0777, true);
+        if (!is_dir($this->root) && !mkdir($this->root, 0777, true) && !is_dir($this->root)) {
+            throw new RuntimeException("Unable to create filesystem disk root.");
         }
+        $canonicalRoot = realpath($this->root);
+        if ($canonicalRoot === false) {
+            throw new RuntimeException("Unable to resolve filesystem disk root.");
+        }
+        $this->root = rtrim($canonicalRoot, "\\/");
     }
 
     public function put(string $path, string $contents): bool
@@ -45,12 +50,19 @@ final class FilesystemAdapter
             mkdir($directory, 0777, true);
         }
 
+        $resolved = $this->path($path);
         return file_put_contents($resolved, $contents, LOCK_EX) !== false;
     }
 
     public function putFile(string $directory, UploadedFile $file, ?string $name = null): string
     {
-        $filename = $name ?? $file->hashName();
+        $file->validate();
+        $generatedName = $file->hashName();
+        $filename = $name ?? $generatedName;
+        if ($name !== null && (preg_match('/\A[A-Za-z0-9_-]+\.[A-Za-z0-9]+\z/D', $name) !== 1
+            || strtolower(pathinfo($name, PATHINFO_EXTENSION)) !== pathinfo($generatedName, PATHINFO_EXTENSION))) {
+            throw new RuntimeException("Uploaded file name must use its validated storage extension.");
+        }
         $relativePath = trim($directory, "\\/") . "/" . $filename;
         $resolved = $this->path($relativePath);
         $targetDirectory = dirname($resolved);
@@ -59,6 +71,7 @@ final class FilesystemAdapter
             mkdir($targetDirectory, 0777, true);
         }
 
+        $resolved = $this->path($relativePath);
         if (!$file->move($resolved)) {
             throw new RuntimeException("Unable to move uploaded file.");
         }
@@ -112,6 +125,21 @@ final class FilesystemAdapter
 
         if ($normalized !== $this->root && !str_starts_with($normalized, $rootPrefix)) {
             throw new RuntimeException("Filesystem path resolves outside the disk root.");
+        }
+
+        $cursor = $this->root;
+        foreach ($segments as $segment) {
+            $cursor .= DIRECTORY_SEPARATOR . $segment;
+            if (is_link($cursor)) {
+                throw new RuntimeException("Filesystem path cannot traverse a symbolic link.");
+            }
+            if (file_exists($cursor)) {
+                $canonical = realpath($cursor);
+                if ($canonical === false || ($canonical !== $this->root
+                    && !str_starts_with($canonical, $rootPrefix))) {
+                    throw new RuntimeException("Filesystem path resolves outside the disk root.");
+                }
+            }
         }
 
         return $normalized;

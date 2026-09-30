@@ -14,6 +14,7 @@ final class RedisQueueStore implements ReliableQueueStoreInterface
     private string $failedKey;
     private string $reservedKey;
     private string $leasesKey;
+    private string $delayedKey;
     private string $idempotencyPrefix;
 
     public function __construct(array $config)
@@ -27,6 +28,7 @@ final class RedisQueueStore implements ReliableQueueStoreInterface
         $this->failedKey = $prefix . "failed";
         $this->reservedKey = $prefix . "reserved";
         $this->leasesKey = $prefix . "leases";
+        $this->delayedKey = $prefix . "delayed";
         $this->idempotencyPrefix = $prefix . "idempotency:";
         $this->redis = new Redis();
         $this->redis->connect((string) ($config["host"] ?? "127.0.0.1"), (int) ($config["port"] ?? 6379), (float) ($config["timeout"] ?? 1.5));
@@ -62,20 +64,32 @@ final class RedisQueueStore implements ReliableQueueStoreInterface
     public function pop(int $poisonDepth = 0): ?array
     {
         // Use Redis time and one atomic script for recovery plus reservation.
+        $deadline = hrtime(true) + 2_000_000_000;
+        do {
         $payload = $this->redis->eval(<<<'LUA'
 local now = tonumber(redis.call('TIME')[1])
+local due = redis.call('ZRANGEBYSCORE', KEYS[5], '-inf', now, 'LIMIT', 0, 100)
+for _, raw in ipairs(due) do
+    redis.call('RPUSH', KEYS[1], raw)
+    redis.call('ZREM', KEYS[5], raw)
+end
 local expired = redis.call('ZRANGEBYSCORE', KEYS[4], '-inf', now, 'LIMIT', 0, 100)
 for _, id in ipairs(expired) do
     local raw = redis.call('HGET', KEYS[3], id)
     if raw then
-        local job = cjson.decode(raw)
-        job.reservation = nil
-        job.reserved_until = nil
-        if job.attempts >= job.max_attempts then
-            job.last_error = 'Reservation expired after the final attempt.'
-            redis.call('RPUSH', KEYS[2], cjson.encode(job))
+        local decoded, job = pcall(cjson.decode, raw)
+        if not decoded or type(job) ~= 'table' or job.id ~= id
+            or not tonumber(job.attempts) or not tonumber(job.max_attempts) then
+            redis.call('RPUSH', KEYS[2], raw)
         else
-            redis.call('RPUSH', KEYS[1], cjson.encode(job))
+            job.reservation = nil
+            job.reserved_until = nil
+            if tonumber(job.attempts) >= tonumber(job.max_attempts) then
+                job.last_error = 'Reservation expired after the final attempt.'
+                redis.call('RPUSH', KEYS[2], cjson.encode(job))
+            else
+                redis.call('RPUSH', KEYS[1], cjson.encode(job))
+            end
         end
         redis.call('HDEL', KEYS[3], id)
     end
@@ -84,27 +98,47 @@ end
 local count = math.min(redis.call('LLEN', KEYS[1]), 100)
 for i = 1, count do
     local raw = redis.call('LINDEX', KEYS[1], 0)
-    local job = cjson.decode(raw)
-    if type(job.id) ~= 'string' or type(job.job) ~= 'string' or type(job.payload) ~= 'table' then
-        return redis.error_reply('Invalid queued job; queue was not consumed')
-    end
-    if tonumber(job.available_at or 0) <= now then
-        job.attempts = tonumber(job.attempts or 0) + 1
-        job.max_attempts = tonumber(job.max_attempts or ARGV[2])
+    local decoded, job = pcall(cjson.decode, raw)
+    local available = decoded and type(job) == 'table' and tonumber(job.available_at or 0)
+    local attempts = decoded and type(job) == 'table' and tonumber(job.attempts or 0)
+    local maximum = decoded and type(job) == 'table' and tonumber(job.max_attempts or ARGV[2])
+    if not decoded or type(job) ~= 'table' or type(job.id) ~= 'string'
+        or type(job.job) ~= 'string' or type(job.payload) ~= 'table'
+        or #job.id < 1 or #job.id > 160
+        or not available or not attempts or not maximum or maximum < 1
+        or attempts < 0 or attempts ~= math.floor(attempts) or maximum ~= math.floor(maximum) then
+        redis.call('RPUSH', KEYS[2], raw)
+        redis.call('LPOP', KEYS[1])
+    elseif redis.call('HEXISTS', KEYS[3], job.id) == 1 or attempts >= maximum then
+        redis.call('RPUSH', KEYS[2], raw)
+        redis.call('LPOP', KEYS[1])
+    elseif available <= now then
+        job.attempts = attempts + 1
+        job.max_attempts = maximum
         job.reservation = ARGV[1]
+        job.idempotency_claimed = nil
         job.reserved_until = now + tonumber(ARGV[3])
         local encoded = cjson.encode(job)
         redis.call('HSET', KEYS[3], job.id, encoded)
         redis.call('ZADD', KEYS[4], job.reserved_until, job.id)
         redis.call('LPOP', KEYS[1])
         return encoded
+    else
+        -- Migrate legacy delayed entries without cycling them through ready work.
+        redis.call('ZADD', KEYS[5], available, raw)
+        redis.call('LPOP', KEYS[1])
     end
-    redis.call('RPOPLPUSH', KEYS[1], KEYS[1])
 end
+if redis.call('LLEN', KEYS[1]) > 0 or redis.call('ZCOUNT', KEYS[5], '-inf', now) > 0
+    or redis.call('ZCOUNT', KEYS[4], '-inf', now) > 0 then return '__fnlla_scan__' end
 return false
-LUA, [$this->pendingKey, $this->failedKey, $this->reservedKey, $this->leasesKey,
+LUA, [$this->pendingKey, $this->failedKey, $this->reservedKey, $this->leasesKey, $this->delayedKey,
             bin2hex(random_bytes(16)), max(1, (int) config("queue.max_attempts", 1)),
-            max(1, (int) config("queue.visibility_timeout_seconds", 300))], 4);
+            max(1, (int) config("queue.visibility_timeout_seconds", 300))], 5);
+            if ($payload === "__fnlla_scan__" && hrtime(true) >= $deadline) {
+                throw new RuntimeException("Redis queue migration budget exhausted; retry reservation.");
+            }
+        } while ($payload === "__fnlla_scan__");
 
         if ($payload === false) {
             return null;
@@ -171,13 +205,18 @@ if not raw then return false end
 local queued = cjson.decode(raw)
 local now = tonumber(redis.call('TIME')[1])
 if queued.reservation ~= ARGV[2] or tonumber(queued.reserved_until or 0) <= now then return false end
-queued.reserved_until = now + tonumber(ARGV[3])
+local expiry = math.max(tonumber(queued.reserved_until), now + tonumber(ARGV[3]))
+if queued.idempotency_claimed then
+    if redis.call('GET', KEYS[3]) ~= 'processing:' .. ARGV[2] then return false end
+    redis.call('EXPIRE', KEYS[3], expiry - now)
+end
+queued.reserved_until = expiry
 local encoded = cjson.encode(queued)
 redis.call('HSET', KEYS[1], ARGV[1], encoded)
 redis.call('ZADD', KEYS[2], queued.reserved_until, ARGV[1])
 return encoded
-LUA, [$this->reservedKey, $this->leasesKey, (string) ($job["id"] ?? ""),
-            (string) ($job["reservation"] ?? ""), max(1, $leaseSeconds)], 2);
+LUA, [$this->reservedKey, $this->leasesKey, $this->idempotencyKey($job) ?? $this->reservedKey,
+            (string) ($job["id"] ?? ""), (string) ($job["reservation"] ?? ""), max(1, $leaseSeconds)], 3);
         if (!is_string($payload) || $payload === "") {
             throw new RuntimeException("Queue lease is expired, missing or owned by another worker.");
         }
@@ -195,13 +234,20 @@ LUA, [$this->reservedKey, $this->leasesKey, (string) ($job["id"] ?? ""),
             return "untracked";
         }
         $result = $this->redis->eval(<<<'LUA'
+local raw = redis.call('HGET', KEYS[2], ARGV[2])
+if not raw then return 'busy' end
+local queued = cjson.decode(raw)
+local now = tonumber(redis.call('TIME')[1])
+if queued.reservation ~= ARGV[1] or tonumber(queued.reserved_until or 0) <= now then return 'busy' end
 local current = redis.call('GET', KEYS[1])
 if current == 'completed' then return 'completed' end
 if current then return 'busy' end
-redis.call('SETEX', KEYS[1], tonumber(ARGV[2]), 'processing:' .. ARGV[1])
+queued.idempotency_claimed = true
+local encoded = cjson.encode(queued)
+redis.call('SETEX', KEYS[1], tonumber(queued.reserved_until) - now, 'processing:' .. ARGV[1])
+redis.call('HSET', KEYS[2], ARGV[2], encoded)
 return 'claimed'
-LUA, [$key, (string) ($job["reservation"] ?? ""),
-            max(1, (int) config("queue.visibility_timeout_seconds", 300))], 1);
+LUA, [$key, $this->reservedKey, (string) ($job["reservation"] ?? ""), (string) ($job["id"] ?? "")], 2);
         return in_array($result, ["claimed", "busy", "completed"], true) ? $result : "busy";
     }
 
@@ -212,12 +258,17 @@ LUA, [$key, (string) ($job["reservation"] ?? ""),
             return;
         }
         $result = $this->redis->eval(<<<'LUA'
+local raw = redis.call('HGET', KEYS[2], ARGV[3])
+if not raw then return 0 end
+local queued = cjson.decode(raw)
+local now = tonumber(redis.call('TIME')[1])
+if queued.reservation ~= ARGV[1] or tonumber(queued.reserved_until or 0) <= now then return 0 end
 local expected = 'processing:' .. ARGV[1]
 if redis.call('GET', KEYS[1]) ~= expected then return 0 end
 redis.call('SETEX', KEYS[1], tonumber(ARGV[2]), 'completed')
 return 1
-LUA, [$key, (string) ($job["reservation"] ?? ""),
-            max(1, (int) config("queue.idempotency_ttl_seconds", 86400))], 1);
+LUA, [$key, $this->reservedKey, (string) ($job["reservation"] ?? ""),
+            max(1, (int) config("queue.idempotency_ttl_seconds", 86400)), (string) ($job["id"] ?? "")], 2);
         if ($result !== 1) {
             throw new RuntimeException("Queue idempotency claim is missing or owned by another worker.");
         }
@@ -238,7 +289,8 @@ LUA, [$key, (string) ($job["reservation"] ?? "")], 1);
 
     public function pendingCount(): int
     {
-        return (int) $this->redis->lLen($this->pendingKey) + (int) $this->redis->hLen($this->reservedKey);
+        return (int) $this->redis->lLen($this->pendingKey) + (int) $this->redis->hLen($this->reservedKey)
+            + (int) $this->redis->zCard($this->delayedKey);
     }
 
     public function failedCount(): int
@@ -259,17 +311,19 @@ if ARGV[3] == 'fail' or ARGV[3] == 'reject' then
     job.reserved_until = nil
     job.last_error = ARGV[4]
     job.available_at = now + tonumber(ARGV[5])
-    local destination = KEYS[1]
-    if ARGV[3] == 'reject' or job.attempts >= job.max_attempts then destination = KEYS[2] end
-    redis.call('RPUSH', destination, cjson.encode(job))
+    if ARGV[3] == 'reject' or job.attempts >= job.max_attempts then
+        redis.call('RPUSH', KEYS[2], cjson.encode(job))
+    else
+        redis.call('ZADD', KEYS[5], job.available_at, cjson.encode(job))
+    end
 end
 redis.call('HDEL', KEYS[3], ARGV[1])
 redis.call('ZREM', KEYS[4], ARGV[1])
 return 1
-LUA, [$this->pendingKey, $this->failedKey, $this->reservedKey, $this->leasesKey,
+LUA, [$this->pendingKey, $this->failedKey, $this->reservedKey, $this->leasesKey, $this->delayedKey,
             (string) ($job["id"] ?? ""), (string) ($job["reservation"] ?? ""), $mode,
             substr((string) ($job["last_error"] ?? "Job failed."), 0, 4000),
-            max(1, (int) config("queue.retry_backoff_seconds", 30))], 4);
+            max(1, (int) config("queue.retry_backoff_seconds", 30))], 5);
         if ($result !== 1) {
             throw new RuntimeException("Queue reservation is missing, expired or owned by another worker.");
         }

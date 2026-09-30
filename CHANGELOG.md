@@ -1,5 +1,52 @@
 # FNLLA Core Changelog
 
+## Unreleased
+
+## 2.4.0 — 2026-10-01
+
+- Require clean committed sources for stable packages, build from Git blobs and
+  verify deterministic archives plus fresh Composer consumers on Windows/Linux.
+  Add an exact-commit CI gate and a released 2.3.1 upgrade/crash/rollback drill.
+- Extend `runtime:inspect` with versioned routes, source provenance, public
+  contract signatures, dependency versions and configuration origins. CLI
+  inspection no longer connects a queue for counts. Add bounded, redacted
+  `runtime:doctor` probes and optional explicit `openapi:export` (OpenAPI 3.1.1).
+- Add optional leased MySQL outbox delivery, poison quarantine, bounded retry,
+  `outbox:work`, `outbox:status` and explicit `outbox:retry`. Enabling reliable
+  delivery requires a side-table migration and coordinated publisher restart.
+- Separate Redis ready and delayed work, migrate legacy delayed entries during
+  reservation and reject false-empty scans. Stop old workers before upgrading;
+  older versions cannot consume the new delayed sorted set.
+- Publish cache/reliable-queue adapter conformance checks; add Windows quality
+  jobs, real concurrent outbox checks and a synthetic four-task agent evaluator.
+  See `docs/framework/DEVELOPER-WORKFLOW.md` and `OUTBOX-OPERATIONS.md` for limits.
+- Expand shared maintainer/application agent guidance with ownership, runtime
+  boundaries and verification paths. Add Claude Code and Copilot entrypoints to
+  the repository and new Core applications; no runtime API changes.
+- Renew queue processing idempotency markers with their leases, rejecting lost
+  claims; add long-running job regression coverage for file and Redis stores.
+- Add optional atomic fixed-window rate-limit admission and use it in HTTP
+  throttling. Preserve the existing cache interface and legacy counter methods.
+- Lock file-cache reads and mutations consistently, publish complete entries
+  atomically, and fail closed on counter corruption or persistence failure.
+- Exercise Apache/PHP upload denial including PATH_INFO, require symlink coverage
+  in Linux CI, and expose an explicitly unapproved local-review artifact mode.
+  See `docs/framework/CONCURRENCY-AND-RATE-LIMITS.md` for upgrade impact.
+- Derive public upload names from detected MIME types, validate direct disk
+  uploads, and reject nested symlinks; generated projects deny active upload
+  paths through Apache and the PHP development router. See
+  `docs/HTTP-UPLOAD-VALIDATION.md` for compatibility and deployment impact.
+- Quarantine malformed Redis pending jobs and expired leases without blocking
+  valid work queued behind them.
+- Add development-only PHPStan analysis and an isolated MySQL/Redis CI gate,
+  including concurrent process reservation and durable idempotency checks.
+- Keep the reliable queue store type explicit inside the worker and exclude
+  generated analysis cache files from PHP lint.
+- Preserve Core exception logging when the optional full-FNLLA issue tracker is
+  absent, and report a clear error if panel branding is requested without its
+  optional extension.
+- Document 2.4.0 public contracts, compatibility and operational upgrade steps.
+
 ## 2.3.1
 
 ### Release Summary

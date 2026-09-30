@@ -1,0 +1,7 @@
+parameters:
+    level: 3
+    paths:
+        - src
+    bootstrapFiles:
+        - scripts/phpstan-bootstrap.php
+    tmpDir: storage/phpstan

@@ -91,7 +91,8 @@ final class QueueManager
 
     public function work(int $maxJobs = 50, ?int $maxSeconds = null): int
     {
-        if (!$this->store instanceof ReliableQueueStoreInterface) {
+        $store = $this->store;
+        if (!$store instanceof ReliableQueueStoreInterface) {
             return $this->workLegacy($maxJobs, $maxSeconds);
         }
 
@@ -109,20 +110,20 @@ final class QueueManager
                     break;
                 }
             }
-            $queuedJob = $this->store->pop();
+            $queuedJob = $store->pop();
 
             if ($queuedJob === null) {
                 break;
             }
 
             try {
-                $this->container->withinScope(function (Container $scope) use ($queuedJob): void {
+                $this->container->withinScope(function (Container $scope) use ($queuedJob, $store): void {
                     $this->assertRegisteredEnvelope($queuedJob);
-                    $context = new JobContext($this->store, $queuedJob);
+                    $context = new JobContext($store, $queuedJob);
                     $scope->scopedInstance(JobContext::class, $context);
                     $context->assertLeaseOwned();
 
-                    $idempotency = $this->store->beginIdempotent($queuedJob);
+                    $idempotency = $store->beginIdempotent($queuedJob);
                     if ($idempotency === "completed") {
                         return;
                     }
@@ -130,7 +131,7 @@ final class QueueManager
                         throw new RuntimeException("Queue idempotency key is currently owned by another worker.");
                     }
 
-                    $execute = function () use ($scope, $context, $queuedJob): void {
+                    $execute = function () use ($scope, $context, $queuedJob, $store): void {
                         $jobClass = (string) $queuedJob["job"];
                         $parameters = (array) $queuedJob["payload"];
                         if (!class_exists($jobClass)) {
@@ -147,7 +148,7 @@ final class QueueManager
                         $context->assertLeaseOwned();
                         $scope->call([$job, "handle"]);
                         $context->assertLeaseOwned();
-                        $this->store->completeIdempotent($queuedJob);
+                        $store->completeIdempotent($queuedJob);
                     };
 
                     try {
@@ -157,15 +158,15 @@ final class QueueManager
                             $execute();
                         }
                     } catch (Throwable $exception) {
-                        $this->store->releaseIdempotent($queuedJob);
+                        $store->releaseIdempotent($queuedJob);
                         throw $exception;
                     }
                 });
             } catch (QueuePayloadException $exception) {
                 $failedPath = "lease-lost";
                 try {
-                    if ($this->store->owns($queuedJob)) {
-                        $failedPath = $this->store->reject($queuedJob, $exception->getMessage());
+                    if ($store->owns($queuedJob)) {
+                        $failedPath = $store->reject($queuedJob, $exception->getMessage());
                     }
                 } catch (Throwable $settlement) {
                     Logger::exception($settlement, ["queue_job_id" => $queuedJob["id"]]);
@@ -177,15 +178,15 @@ final class QueueManager
                 continue;
             } catch (Throwable $exception) {
                 try {
-                    $this->store->releaseIdempotent($queuedJob);
+                    $store->releaseIdempotent($queuedJob);
                 } catch (Throwable $settlement) {
                     Logger::exception($settlement, ["queue_job_id" => $queuedJob["id"]]);
                 }
                 $failedPath = "lease-lost";
                 try {
-                    if ($this->store->owns($queuedJob)) {
+                    if ($store->owns($queuedJob)) {
                         $queuedJob["last_error"] = $exception->getMessage();
-                        $failedPath = $this->store->fail($queuedJob);
+                        $failedPath = $store->fail($queuedJob);
                     }
                 } catch (Throwable $settlement) {
                     Logger::exception($settlement, ["queue_job_id" => $queuedJob["id"]]);
@@ -201,7 +202,7 @@ final class QueueManager
                 // Idempotency is marked before acknowledgement. A crash between an
                 // external effect and that mark may still repeat the effect; FNLLA
                 // therefore promises at-least-once handling, never exactly-once.
-                $this->store->complete($queuedJob);
+                $store->complete($queuedJob);
                 $processed++;
             } catch (Throwable $exception) {
                 Logger::exception($exception, ["queue_job_id" => $queuedJob["id"]]);

@@ -229,6 +229,7 @@ function config(?string $key = null, mixed $default = null): mixed
 
 function config_set(string $key, mixed $value): void
 {
+    $GLOBALS["fnlla_config_override_count"] = (int) ($GLOBALS["fnlla_config_override_count"] ?? 0) + 1;
     $config = $GLOBALS["fnlla_config"] ?? $GLOBALS["fnlla_php_config"] ?? [];
     $segments = explode(".", $key);
     $cursor = &$config;
@@ -258,6 +259,7 @@ function load_config_directory(string $directory): array
         $config = require $cachedConfig;
 
         if (is_array($config)) {
+            $GLOBALS["fnlla_config_source"] = "bootstrap_cache";
             // Credentials must not outlive a password rotation in the bootstrap cache.
             $accessConfigPath = rtrim($directory, "\\/") . DIRECTORY_SEPARATOR . "developer_access.php";
             if (isset($config["developer_access"]) && is_file($accessConfigPath)) {
@@ -269,6 +271,7 @@ function load_config_directory(string $directory): array
     }
 
     $config = [];
+    $GLOBALS["fnlla_config_source"] = "config_files";
     $files = glob(rtrim($directory, "\\/") . DIRECTORY_SEPARATOR . "*.php");
 
     if ($files === false) {
@@ -486,7 +489,15 @@ function project_brand_logo_asset(?string $path = null): ?string
 
 function panel_branding(): array
 {
-    return \Fnlla\Php\Support\PanelBranding::state();
+    $extension = "Fnlla\\Php\\Support\\PanelBranding";
+    if (!is_callable([$extension, "state"])) {
+        throw new RuntimeException("Panel branding requires the optional FNLLA extension.");
+    }
+    $state = call_user_func([$extension, "state"]);
+    if (!is_array($state)) {
+        throw new RuntimeException("Panel branding extension returned an invalid state.");
+    }
+    return $state;
 }
 
 

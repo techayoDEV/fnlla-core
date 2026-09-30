@@ -13,7 +13,8 @@ foreach ($iterator as $fileInfo) {
 
     $path = $fileInfo->getPathname();
     if (str_contains($path, DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR)
-        || str_contains($path, DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR)) {
+        || str_contains($path, DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR)
+        || str_contains($path, DIRECTORY_SEPARATOR . "storage" . DIRECTORY_SEPARATOR)) {
         continue;
     }
 

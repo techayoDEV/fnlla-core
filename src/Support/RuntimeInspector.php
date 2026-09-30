@@ -7,11 +7,12 @@ namespace Fnlla\Php\Support;
 use Fnlla\Php\Container\Container;
 use Fnlla\Php\Queue\JobEnvelope;
 use Fnlla\Php\Queue\QueueStoreInterface;
+use Fnlla\Php\Routing\Router;
 use Throwable;
 
 final class RuntimeInspector
 {
-    public function __construct(private Container $container, private ?QueueStoreInterface $queue = null)
+    public function __construct(private Container $container, private ?QueueStoreInterface $queue = null, private ?Router $router = null)
     {
     }
 
@@ -46,6 +47,7 @@ final class RuntimeInspector
         $versionPath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . "VERSION";
         return [
             "schema" => "fnlla.runtime.inspection.v1",
+            "context" => (new RuntimeSourceMap())->report($this->router),
             "runtime" => [
                 "name" => RuntimeIdentity::get("name"),
                 "version" => is_file($versionPath) ? trim((string) file_get_contents($versionPath)) : "unknown",

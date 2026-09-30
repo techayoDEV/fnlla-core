@@ -12,6 +12,12 @@ to describe from the Core repository itself.
 
 ## Start Here
 
+- [Core 2.4.0 upgrade notes](releases/2.4.0.md) and the
+  [maintainer release procedure](RELEASING.md).
+- [Developer workflow](framework/DEVELOPER-WORKFLOW.md): source-derived context,
+  bounded readiness, explicit OpenAPI and reproducible coding-agent tasks.
+- [Outbox operations](framework/OUTBOX-OPERATIONS.md): leases, quarantine, retries
+  and Redis queue migration requirements.
 - [Runtime contracts](framework/RUNTIME-CONTRACTS.md) describe the core CLI,
   HTTP, routing, validation, session, cache, database and queue promises.
 - [Product Specification](framework/PRODUCT-SPECIFICATION.md) defines the

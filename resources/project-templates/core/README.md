@@ -14,10 +14,20 @@ project intentionally stays focused on the open core runtime.
 3. Run `php scripts/test.php`, `php scripts/lint.php` and `php fnlla route:list`.
 4. Start `php -S 127.0.0.1:8080 -t public public/router.php` using an available port.
 
+Keep `public/uploads` non-executable in production. The included Apache
+`.htaccess` and local PHP router reject active file types there; configure the
+equivalent deny rule before the PHP handler on other web servers. Existing
+uploads with script extensions should be reviewed before deployment.
+
 Application code belongs in `app/` (`App\`), routes in `routes/`, templates in `views/`.
 The core (`Fnlla\Php\`) is a separate Composer library. Do not modify `vendor/`.
 Database access is lazy: the homepage and `/api/health` do not require a database.
 The health endpoint is liveness only, not database or deployment readiness.
+Use `php fnlla runtime:inspect` for the installed source context and
+`php fnlla runtime:doctor` for bounded service probes. Explicit API contracts can
+be exported with `php fnlla openapi:export`. Read the bundled Core documents
+`docs/framework/DEVELOPER-WORKFLOW.md` and `OUTBOX-OPERATIONS.md` for capabilities,
+required outbox migration and delivery limits.
 Composer metadata, `.env.example`, `phpunit.xml`, `phpstan.neon`, `README.md`,
 `LICENSE.md` and the `fnlla` launcher remain at root because common PHP tooling
 discovers them there by default.

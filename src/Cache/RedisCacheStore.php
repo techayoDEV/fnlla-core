@@ -7,7 +7,7 @@ namespace Fnlla\Php\Cache;
 use Redis;
 use RuntimeException;
 
-final class RedisCacheStore implements CacheStoreInterface
+final class RedisCacheStore implements CacheStoreInterface, RateLimitStoreInterface
 {
     private Redis $redis;
     private string $prefix;
@@ -97,11 +97,38 @@ final class RedisCacheStore implements CacheStoreInterface
 
     public function increment(string $key, int $value = 1, int $ttlSeconds = 3600): int
     {
-        $redisKey = $this->key($key);
-        $result = (int) $this->redis->incrBy($redisKey, $value);
-        $this->redis->expire($redisKey, max(1, $ttlSeconds));
-
+        $result = $this->redis->eval(<<<'LUA'
+local result = redis.call('INCRBY', KEYS[1], ARGV[1])
+redis.call('EXPIRE', KEYS[1], ARGV[2])
+return result
+LUA, [$this->key($key), $value, max(1, $ttlSeconds)], 1);
+        if (!is_int($result)) {
+            throw new RuntimeException("Cannot increment Redis cache counter.");
+        }
         return $result;
+    }
+
+    public function consume(string $key, int $limit, int $decaySeconds): array
+    {
+        $result = $this->redis->eval(<<<'LUA'
+local raw = redis.call('GET', KEYS[1])
+local count = raw and tonumber(raw) or 0
+local ttl = redis.call('PTTL', KEYS[1])
+if raw and (not tonumber(raw) or count < 0 or count ~= math.floor(count) or ttl < 0) then
+    return redis.error_reply('Invalid rate limit counter or expiry')
+end
+if count >= tonumber(ARGV[1]) then return {0, count, math.max(0, math.ceil(ttl / 1000))} end
+count = redis.call('INCR', KEYS[1])
+if not raw then
+    ttl = tonumber(ARGV[2]) * 1000
+    redis.call('PEXPIRE', KEYS[1], ttl)
+end
+return {1, count, math.max(0, math.ceil(ttl / 1000))}
+LUA, [$this->key($key), max(0, $limit), max(1, $decaySeconds)], 1);
+        if (!is_array($result) || count($result) !== 3) {
+            throw new RuntimeException("Cannot acquire Redis rate limit slot.");
+        }
+        return ["allowed" => $result[0] === 1, "attempts" => (int) $result[1], "retry_after" => (int) $result[2]];
     }
 
     public function decrement(string $key, int $value = 1, int $ttlSeconds = 3600): int

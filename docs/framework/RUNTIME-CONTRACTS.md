@@ -1,8 +1,8 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the public runtime surface in the unreleased FNLLA
-Core 2.3 candidate. The published baseline remains 2.2.4. Full FNLLA builds on
-the same primitives and adds the integrated project operations layer separately.
+These contracts describe the public runtime surface in FNLLA Core 2.4.0.
+Full FNLLA builds on the same primitives and adds the integrated project
+operations layer separately.
 
 ## Application Generators
 
@@ -39,6 +39,11 @@ oversized or malformed payloads.
 
 `Fnlla\Php\Http\Response` normalizes headers and rejects control line breaks or
 null bytes in header values.
+
+Core 2.4.0 upload hardening validates bytes in both `UploadedFile::store()` and
+`FilesystemAdapter::putFile()`. Storage names use MIME-compatible inert extensions;
+explicit names with incompatible extensions are rejected. Disk paths reject nested
+symlinks, while a configured disk root may itself resolve through a symlink.
 
 ## Container
 
@@ -97,8 +102,17 @@ Core cache helpers publish PHP array cache files atomically and preserve a valid
 previous file on failed rebuilds. Cache files may contain sensitive values and
 must stay outside the public document root.
 
+Core 2.4.0 request throttling uses atomic fixed-window admission through the
+optional `RateLimitStoreInterface`, implemented by the built-in cache stores and
+the tenant wrapper. File-cache operations share per-key locks and publish entries
+by atomic replacement; persistence errors fail closed. See
+[concurrency and rate limits](CONCURRENCY-AND-RATE-LIMITS.md) for custom-store
+compatibility, counter migration and verification commands.
+
 The queue manager supports file and Redis stores with expiring reservations,
 renewal, retry/backoff metadata, poison quarantine and stale-token rejection.
+Core 2.4.0 Redis hardening also quarantines malformed pending and expired-lease
+payloads so a damaged item cannot block later jobs.
 Jobs use the `fnlla.queue.v1` envelope and an explicit `queue.job_types`
 registry. A bounded legacy reader is enabled only until FNLLA Core 3.0.0.
 
@@ -114,8 +128,9 @@ extension. Core never reports those protections as successful on a legacy store.
 Each job receives an isolated `JobContext` containing correlation, tenant,
 actor, attempt and idempotency identifiers. Handlers must call
 `assertLeaseOwned()` immediately before external effects and may call
-`renewLease()` during long work. Durable idempotency markers suppress a replay
-after successful handling but cannot close the crash window between an external
+`renewLease()` during long work. Core 2.4.0 renewal extends the processing marker
+with the lease and rejects a lost marker. Durable idempotency markers suppress
+replay after successful handling but cannot close the crash window between an external
 provider accepting an effect and the local completion marker. Delivery is
 at-least-once; exactly-once is not claimed.
 
@@ -162,6 +177,13 @@ left prefixes cannot override the trust boundary. Trusted ingress must overwrite
 forwarded protocol headers with one canonical value.
 
 ## Upgrade Boundary
+
+Core 2.4.0 adds route/contract/version context to `runtime:inspect`,
+isolated `runtime:doctor` probes, explicit OpenAPI export and adapter conformance
+checks. See [Developer workflow](DEVELOPER-WORKFLOW.md) for schemas and limits.
+Reliable outbox delivery is opt-in and needs a side-table migration; Redis delayed
+work changes require a coordinated worker restart. See
+[Outbox operations](OUTBOX-OPERATIONS.md) before enabling or rolling back either.
 
 FNLLA Core owns public framework primitives. Full FNLLA builds on those
 primitives with the broader application platform, project workflow and product

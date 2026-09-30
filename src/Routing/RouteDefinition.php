@@ -60,6 +60,13 @@ final class RouteDefinition
         return $this;
     }
 
+    /** Declare documentation only; this does not replace validation or authorization. */
+    public function openapi(array $operation): self
+    {
+        json_encode($operation, JSON_THROW_ON_ERROR);
+        return $this->setMetadata("openapi", $operation);
+    }
+
     public function throttle(int $maxAttempts, int $decayMinutes = 1): self
     {
         $this->setMetadata("throttle.max_attempts", max(1, $maxAttempts));

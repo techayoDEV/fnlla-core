@@ -96,10 +96,24 @@ final class UploadedFile
 
     public function hashName(): string
     {
-        $extension = $this->extension();
-        $suffix = $extension !== "" ? "." . $extension : "";
+        $extensions = match ($this->detectedMimeType()) {
+            "image/jpeg" => ["jpg", "jpeg"],
+            "image/png" => ["png"],
+            "image/webp" => ["webp"],
+            "application/pdf" => ["pdf"],
+            "text/plain" => ["txt", "csv"],
+            "text/csv" => ["csv"],
+            "application/zip" => ["zip", "docx", "xlsx"],
+            "application/msword" => ["doc"],
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => ["docx"],
+            "application/vnd.ms-excel" => ["xls"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => ["xlsx"],
+            default => ["bin"],
+        };
+        $originalExtension = $this->extension();
+        $extension = in_array($originalExtension, $extensions, true) ? $originalExtension : $extensions[0];
 
-        return sha1($this->originalName . "|" . $this->tmpName . "|" . microtime(true)) . $suffix;
+        return bin2hex(random_bytes(16)) . "." . $extension;
     }
 
     public function move(string $targetPath): bool

@@ -6,6 +6,7 @@ namespace Fnlla\Php\Console\Commands;
 
 use Fnlla\Php\Console\Command;
 use Fnlla\Php\Support\RuntimeInspector;
+use Fnlla\Php\Support\RuntimeRouteLoader;
 
 final class RuntimeInspectCommand extends Command
 {
@@ -26,7 +27,7 @@ final class RuntimeInspectCommand extends Command
             return 1;
         }
         $this->line(json_encode(
-            $this->container->make(RuntimeInspector::class)->report(),
+            (new RuntimeInspector($this->container, null, RuntimeRouteLoader::load($this->container)))->report(),
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
         ));
         return 0;

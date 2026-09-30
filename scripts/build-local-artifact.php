@@ -7,9 +7,10 @@ require __DIR__ . "/lib/DeterministicZip.php";
 $root = dirname(__DIR__);
 $version = trim((string) ($argv[1] ?? ""));
 $output = $argv[2] ?? ($root . "/dist/local/fnlla-core-" . $version);
+$localReview = in_array("--local-review", $argv, true);
 
 if (preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/D', $version) !== 1) {
-    fwrite(STDERR, "Usage: php scripts/build-local-artifact.php <semver> [output-directory]" . PHP_EOL);
+    fwrite(STDERR, "Usage: php scripts/build-local-artifact.php <semver> [output-directory] [--local-review]" . PHP_EOL);
     exit(2);
 }
 
@@ -28,6 +29,14 @@ foreach ([$output, $archive, $archive . ".sha256"] as $path) {
 }
 
 $policy = json_decode((string) file_get_contents($root . "/resources/package-distribution.json"), true, 512, JSON_THROW_ON_ERROR);
+if ($localReview) {
+    if (!str_contains($version, "-") || $version === ($policy["published_baseline"] ?? null)) {
+        throw new RuntimeException("Local review requires a distinct prerelease version.");
+    }
+    $policy["candidate"] = $version;
+    $policy["channel"] = "local-review";
+    $policy["release_approved"] = false;
+}
 $channel = $policy["channel"] ?? null;
 $releaseApproved = $policy["release_approved"] ?? null;
 $stableVersion = preg_match('/^\d+\.\d+\.\d+$/D', $version) === 1;
@@ -48,8 +57,26 @@ $patch = run(["git", "diff", "--binary", "HEAD", "--", "."], $root);
 $status = run(["git", "status", "--porcelain=v1", "--untracked-files=all", "--", ".", ":(exclude)dist"], $root);
 $builtAt = gmdate(DATE_ATOM, $commitEpoch);
 
+if ($releaseApproved) {
+    if (trim($status) !== "" || trim((string) file_get_contents($root . "/VERSION")) !== $version) {
+        throw new RuntimeException("Stable artifacts require clean committed sources and a matching VERSION.");
+    }
+    foreach (array_slice($argv, 3) as $argument) {
+        if (str_starts_with($argument, "--expected-commit=") && substr($argument, 18) !== $baseCommit) {
+            throw new RuntimeException("Stable artifact commit does not match the requested source commit.");
+        }
+    }
+}
+
 $iterator = new RecursiveIteratorIterator(
-    new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
+    new RecursiveCallbackFilterIterator(
+        new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
+        static function (SplFileInfo $item) use ($root): bool {
+            $relative = ltrim(str_replace("\\", "/", substr($item->getPathname(), strlen($root))), "/");
+            // Prune excluded trees before traversal, especially large consumer snapshots.
+            return preg_match('~^(?:\\.git|vendor|dist|storage)(?:/|$)~i', $relative) !== 1;
+        }
+    ),
     RecursiveIteratorIterator::LEAVES_ONLY
 );
 $files = [];
@@ -74,15 +101,37 @@ foreach ($iterator as $item) {
 }
 ksort($files, SORT_STRING);
 
+if ($releaseApproved) {
+    // Commit blobs, rather than checkout bytes, make Windows/Linux builds identical
+    // and prevent ignored or untracked files from entering an approved package.
+    $files = [];
+    foreach (explode("\0", run(["git", "ls-tree", "-r", "-z", $baseCommit], $root)) as $entry) {
+        if ($entry === "") { continue; }
+        if (preg_match('/^(100644|100755) blob ([a-f0-9]{40})\t(.+)$/sD', $entry, $match) !== 1) {
+            throw new RuntimeException("Stable source cannot contain symlinks or submodules.");
+        }
+        $relative = $match[3];
+        if (preg_match('~^(?:vendor|dist|storage)(?:/|$)~i', $relative) === 1 || is_sensitive_path($relative)) { continue; }
+        if (preg_match('~^[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$~D', $relative) !== 1) {
+            throw new RuntimeException("Unsafe committed artifact path.");
+        }
+        $files[$relative] = $match[2];
+    }
+    ksort($files, SORT_STRING);
+}
+
 foreach ($files as $relative => $source) {
     $target = $output . "/" . $relative;
     if (!is_dir(dirname($target)) && !mkdir(dirname($target), 0755, true) && !is_dir(dirname($target))) {
         throw new RuntimeException("Cannot create artifact directory: " . dirname($target));
     }
-    $contents = (string) file_get_contents($source);
+    $contents = $releaseApproved ? run(["git", "cat-file", "blob", $source], $root) : (string) file_get_contents($source);
     assert_no_secret($relative, $contents);
     if ($relative === "VERSION") {
-        $contents = $version . PHP_EOL;
+        $contents = $version . "\n";
+    }
+    if ($localReview && $relative === "resources/package-distribution.json") {
+        $contents = json_encode($policy, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n";
     }
     write_file($target, $contents);
 }
@@ -107,7 +156,7 @@ $provenance = [
 ];
 write_file(
     $output . "/FNLLA-PROVENANCE.json",
-    json_encode($provenance, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL
+    json_encode($provenance, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n"
 );
 
 $packageMetadata = [
@@ -129,7 +178,7 @@ $packageMetadata = [
 ];
 write_file(
     $output . "/FNLLA-PACKAGE.json",
-    json_encode($packageMetadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL
+    json_encode($packageMetadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n"
 );
 
 $hashes = [];
@@ -147,7 +196,7 @@ foreach ($manifestIterator as $item) {
 ksort($hashes, SORT_STRING);
 $manifest = "";
 foreach ($hashes as $relative => $hash) {
-    $manifest .= $hash . "  " . $relative . PHP_EOL;
+    $manifest .= $hash . "  " . $relative . "\n";
 }
 write_file($output . "/FNLLA-MANIFEST.sha256", $manifest);
 
@@ -166,7 +215,7 @@ foreach ($archiveIterator as $item) {
 }
 DeterministicZip::create($archive, $archiveEntries);
 $archiveHash = hash_file("sha256", $archive);
-write_file($archive . ".sha256", $archiveHash . "  " . basename($archive) . PHP_EOL);
+write_file($archive . ".sha256", $archiveHash . "  " . basename($archive) . "\n");
 
 fwrite(STDOUT, json_encode([
     "artifact" => $output,
@@ -189,7 +238,7 @@ function is_sensitive_path(string $relative): bool
     if (in_array($name, ["auth.json", ".npmrc", ".pypirc", "id_rsa", "id_ed25519"], true)) {
         return true;
     }
-    return in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ["key", "pem", "p12", "pfx", "sql", "sqlite", "sqlite3", "bak", "log", "tmp", "zip"], true);
+    return in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ["key", "pem", "p12", "pfx", "sql", "sqlite", "sqlite3", "bak", "log", "tmp", "zip", "pyc", "pyo"], true);
 }
 
 function assert_no_secret(string $relative, string $contents): void
@@ -241,18 +290,30 @@ function normalize_path(string $path): string
 /** @param list<string> $command */
 function run(array $command, string $cwd): string
 {
-    $descriptorSpec = [1 => ["pipe", "w"], 2 => ["pipe", "w"]];
-    $process = proc_open($command, $descriptorSpec, $pipes, $cwd);
-    if (!is_resource($process)) {
-        throw new RuntimeException("Cannot start: " . implode(" ", $command));
+    // File-backed output avoids stdout/stderr pipe deadlocks on Windows.
+    $stdout = tmpfile(); $stderr = tmpfile();
+    if ($stdout === false || $stderr === false) { throw new RuntimeException("Cannot allocate process output."); }
+    $process = null;
+    try {
+        $process = proc_open($command, [1 => $stdout, 2 => $stderr], $pipes, $cwd, null, ["bypass_shell" => true]);
+        if (!is_resource($process)) { throw new RuntimeException("Cannot start artifact input command."); }
+        $deadline = microtime(true) + 120;
+        do {
+            $state = proc_get_status($process);
+            if (microtime(true) > $deadline || fstat($stdout)["size"] > 33554432 || fstat($stderr)["size"] > 1048576) {
+                throw new RuntimeException("Artifact input command exceeded time/output limits.");
+            }
+            if ($state["running"]) { usleep(10000); }
+        } while ($state["running"]);
+        $closed = proc_close($process); $process = null;
+        $exit = $state["exitcode"] >= 0 ? $state["exitcode"] : $closed;
+        rewind($stdout); rewind($stderr);
+        if ($exit !== 0) {
+            throw new RuntimeException(trim((string) stream_get_contents($stderr, 1048576)) ?: "Artifact input command failed.");
+        }
+        return (string) stream_get_contents($stdout, 33554432);
+    } finally {
+        if (is_resource($process)) { proc_terminate($process, 9); proc_close($process); }
+        fclose($stdout); fclose($stderr);
     }
-    $stdout = stream_get_contents($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]);
-    fclose($pipes[1]);
-    fclose($pipes[2]);
-    $exit = proc_close($process);
-    if ($exit !== 0) {
-        throw new RuntimeException(trim((string) $stderr) !== "" ? trim((string) $stderr) : "Command failed: " . implode(" ", $command));
-    }
-    return (string) $stdout;
 }

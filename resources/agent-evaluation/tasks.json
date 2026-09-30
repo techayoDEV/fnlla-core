@@ -1,0 +1,40 @@
+{
+  "schema": "fnlla.agent_evaluation.tasks.v1",
+  "tasks": [
+    {
+      "id": "route-json",
+      "title": "Add a typed JSON endpoint",
+      "allowed": [
+        "app/",
+        "routes/web.php"
+      ],
+      "prompt": "Add GET /api/catalog returning exactly {\"items\":[{\"id\":\"item-1\",\"name\":\"Example\"}]} with HTTP 200 and application/json, through an application controller. Preserve existing routes. Use FNLLA Core APIs from the installed code. Do not edit dependencies, tests, bootstrap or configuration."
+    },
+    {
+      "id": "tenant-policy",
+      "title": "Enforce resource ownership",
+      "allowed": [
+        "app/"
+      ],
+      "prompt": "Implement invokable App\\Policies\\WorkOrderPolicy with arguments (array actor, mixed resource, string permission, ?Fnlla\\Php\\Tenancy\\TenantContext tenant): bool. Allow only work-orders.update with an organization tenant context, an active actor (active defaults to true, revoked_at must be empty), matching actor id / resource owner_id and matching context tenant ID / resource tenant_id. Deny missing or mismatching data. Reuse Core's OwnershipPolicy for ownership. This policy does not grant roles; AccessControl remains responsible for role permissions. Do not edit dependencies, tests or configuration."
+    },
+    {
+      "id": "after-commit",
+      "title": "Respect transaction side effects",
+      "allowed": [
+        "app/"
+      ],
+      "prompt": "Implement App\\Services\\CommitNotifier::schedule(Fnlla\\Php\\Database\\DatabaseManager database, callable notification): void. Use the maintained after-commit API: invoke after the outer transaction commits, never on rollback, and handle nested transactions correctly. Do not maintain a parallel transaction state. Do not edit dependencies or tests."
+    },
+    {
+      "id": "openapi-route",
+      "title": "Declare an API contract",
+      "allowed": [
+        "app/",
+        "routes/web.php",
+        "config/openapi.php"
+      ],
+      "prompt": "Add GET /api/echo/{id} through an application controller returning JSON {\"id\":the path parameter}. Declare an explicit public OpenAPI operation benchmark.echo with the required string path parameter id and a 200 JSON response schema requiring id. Use existing routing and OpenAPI contracts. Preserve existing routes. Do not edit dependencies, tests or bootstrap."
+    }
+  ]
+}

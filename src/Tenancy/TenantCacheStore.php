@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Fnlla\Php\Tenancy;
 
 use Fnlla\Php\Cache\CacheStoreInterface;
+use Fnlla\Php\Cache\RateLimitStoreInterface;
 use RuntimeException;
 
-final class TenantCacheStore implements CacheStoreInterface
+final class TenantCacheStore implements CacheStoreInterface, RateLimitStoreInterface
 {
     public function __construct(private CacheStoreInterface $store, private TenantResourceScope $scope)
     {
@@ -23,5 +24,13 @@ final class TenantCacheStore implements CacheStoreInterface
     public function clear(): bool
     {
         throw new RuntimeException("Tenant cache clear is unsupported because the underlying store cannot enumerate one tenant safely.");
+    }
+
+    public function consume(string $key, int $limit, int $decaySeconds): array
+    {
+        if (!$this->store instanceof RateLimitStoreInterface) {
+            throw new RuntimeException("Tenant request throttling requires an atomic RateLimitStoreInterface store.");
+        }
+        return $this->store->consume($this->scope->cacheKey($key), $limit, $decaySeconds);
     }
 }

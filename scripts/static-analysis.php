@@ -25,4 +25,16 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "Static analysis baseline passed." . PHP_EOL);
+$phpstan = $root . "/vendor/phpstan/phpstan/phpstan";
+if (!is_file($phpstan)) {
+    fwrite(STDERR, "PHPStan is missing. Run composer install before analysis." . PHP_EOL);
+    exit(1);
+}
+
+passthru(
+    escapeshellarg(PHP_BINARY) . " " . escapeshellarg($phpstan)
+    . " analyse --configuration=" . escapeshellarg($root . "/phpstan.neon.dist")
+    . " --memory-limit=512M --no-progress",
+    $exitCode
+);
+exit($exitCode);

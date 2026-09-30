@@ -39,8 +39,9 @@ final class ThrottleRequests implements MiddlewareInterface
         $decaySeconds = max(1, $decayMinutes) * 60;
         $key = sha1($request->ip() . "|" . $request->path() . "|" . $request->method());
 
-        if ($this->limiter->tooManyAttempts($key, $maxAttempts)) {
-            $retryAfter = $this->limiter->availableIn($key);
+        $admission = $this->limiter->acquire($key, $maxAttempts, $decaySeconds);
+        if (!$admission["allowed"]) {
+            $retryAfter = $admission["retry_after"];
             SecurityEventLogger::write("throttle_blocked", [
                 "method" => $request->method(),
                 "path" => $request->path(),
@@ -59,7 +60,7 @@ final class ThrottleRequests implements MiddlewareInterface
             ]);
         }
 
-        $attempts = $this->limiter->hit($key, $decaySeconds);
+        $attempts = $admission["attempts"];
         $remaining = max(0, $maxAttempts - $attempts);
         $result = $next($request);
 

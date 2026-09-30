@@ -23,6 +23,7 @@ spl_autoload_register(static function (string $class) use ($root): void {
 require_once $root . "/src/Support/helpers.php";
 
 use Fnlla\Php\Container\Container;
+use Fnlla\Php\Exceptions\ExceptionHandler;
 use Fnlla\Php\Console\Application as ConsoleApplication;
 use Fnlla\Php\Console\Commands\MakeProjectCommand;
 use Fnlla\Php\Database\QueryBuilder;
@@ -95,6 +96,19 @@ assert_same("/payload", $request->path(), "JSON request path mismatch.");
 assert_same("Core", $request->json("name"), "JSON request body mismatch.");
 assert_same("core-request-1", $request->requestId(), "Request ID mismatch.");
 
+$logPath = sys_get_temp_dir() . "/fnlla-core-exception-" . bin2hex(random_bytes(8)) . ".log";
+$GLOBALS["fnlla_config"]["app"]["log_path"] = $logPath;
+try {
+    (new ExceptionHandler())->report(new RuntimeException("core-standalone-report"), $request);
+    assert_true(is_file($logPath) && str_contains((string) file_get_contents($logPath), "core-standalone-report"),
+        "Core exception reporting was lost without the optional FNLLA issue tracker.");
+} finally {
+    unset($GLOBALS["fnlla_config"]["app"]["log_path"]);
+    if (is_file($logPath)) { unlink($logPath); }
+}
+expect_exception(RuntimeException::class, static fn (): array => panel_branding(),
+    "Panel branding should report its optional extension requirement in Core-only projects.");
+
 $router = new Router($container);
 $router->get("/projects/{slug}", static fn (Request $request, string $slug): Response => Response::json([
     "slug" => $slug,
@@ -149,6 +163,9 @@ $console->register(MakeProjectCommand::class);
 $exitCode = $console->run(["fnlla", "make:project", $target, "Core Smoke"]);
 assert_same(0, $exitCode, "make:project should export a Core project.");
 assert_true(is_file($target . "/composer.json"), "Core project composer.json missing.");
+assert_true(is_file($target . "/public/.htaccess"), "Core project Apache upload boundary missing.");
+assert_true(str_contains((string) file_get_contents($target . "/public/.htaccess"), "^uploads/"),
+    "Core project Apache upload boundary was not exported.");
 assert_true(is_file($target . "/fnlla"), "Core project CLI launcher missing.");
 assert_true(is_file($target . "/packages/fnlla-core/src/Application.php"), "Bundled Core package missing.");
 assert_true(is_file($target . "/packages/fnlla-core/resources/product-specification/fnlla.product.v1.schema.json"), "Bundled Product Specification schema missing.");
@@ -159,6 +176,9 @@ assert_true(is_file($target . "/config/actions.php"), "Exported Core action/outb
 assert_true(is_file($target . "/AGENTS.md"), "Exported Core product guidance missing.");
 assert_true(str_contains((string) file_get_contents($target . "/AGENTS.md"), "php fnlla route:list"), "Core product guidance does not use the Core CLI.");
 assert_true(!str_contains((string) file_get_contents($target . "/AGENTS.md"), "project:claim"), "Core product guidance names a full-Framework command.");
+assert_same("@AGENTS.md", strtok((string) file_get_contents($target . "/CLAUDE.md"), "\r\n"), "Claude entrypoint must import the exported application guidance.");
+assert_true(str_contains((string) file_get_contents($target . "/.github/copilot-instructions.md"), "[AGENTS.md](../AGENTS.md)"), "Copilot entrypoint must reference the exported application guidance.");
+assert_true(!str_contains((string) file_get_contents($target . "/AGENTS.md"), "## Cross-repository delivery"), "Maintainer-only guidance leaked into the application export.");
 assert_true(str_contains((string) file_get_contents($target . "/bootstrap/router.php"), '"tenant"'), "Exported Core tenant middleware alias missing.");
 assert_true(str_contains((string) file_get_contents($target . "/.env.example"), "TENANCY_MODE=none"), "Exported Core tenancy default missing.");
 assert_same(

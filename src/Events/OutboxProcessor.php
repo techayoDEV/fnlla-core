@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fnlla\Php\Events;
 
 use Fnlla\Php\Actions\ActionStoreInterface;
+use Fnlla\Php\Actions\ReliableOutboxStoreInterface;
 use Fnlla\Php\Audit\AuditEvent;
 use Fnlla\Php\Audit\AuditLoggerInterface;
 use RuntimeException;
@@ -20,6 +21,9 @@ final class OutboxProcessor
 
     public function publishPending(int $limit = 100): int
     {
+        if ($this->store instanceof ReliableOutboxStoreInterface && (bool) config("actions.reliable_outbox", false)) {
+            return (new OutboxWorker($this->store, $this->audit, $this->events))->work($limit)["published"];
+        }
         $published = 0;
         foreach ($this->store->pending($limit) as $message) {
             if ($message["kind"] === "audit") {

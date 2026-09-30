@@ -65,6 +65,7 @@ final class FileQueueStore implements ReliableQueueStoreInterface
                 $payload["attempts"] = $attempts + 1;
                 $payload["max_attempts"] = $maximum;
                 $payload["state"] = "reserved";
+                unset($payload["idempotency_claimed"]);
                 $payload["reservation"] = bin2hex(random_bytes(16));
                 $payload["reserved_until"] = time() + max(1, (int) config("queue.visibility_timeout_seconds", 300));
                 $this->write($file, $payload);
@@ -123,7 +124,16 @@ final class FileQueueStore implements ReliableQueueStoreInterface
     {
         return $this->locked(function () use ($job, $leaseSeconds): array {
             [$file, $payload] = $this->owned($job);
-            $payload["reserved_until"] = time() + max(1, $leaseSeconds);
+            $payload["reserved_until"] = max((int) $payload["reserved_until"], time() + max(1, $leaseSeconds));
+            if (($payload["idempotency_claimed"] ?? false) === true) {
+                $path = $this->idempotencyPath((string) $this->idempotencyKey($payload));
+                $record = $this->readIdempotency($path);
+                $this->assertIdempotencyOwned($payload, $record);
+                $record["expires_at"] = $payload["reserved_until"];
+                // Persist the duplicate guard first: a failed lease write must never
+                // leave a live lease whose duplicate guard expires earlier.
+                $this->writeIdempotency($path, $record);
+            }
             $this->write($file, $payload);
             return array_merge($payload, [
                 "id" => (string) $job["id"],
@@ -139,6 +149,7 @@ final class FileQueueStore implements ReliableQueueStoreInterface
             return "untracked";
         }
         return $this->locked(function () use ($job, $key): string {
+            [$file, $payload] = $this->owned($job);
             $path = $this->idempotencyPath($key);
             $record = $this->readIdempotency($path);
             if (($record["state"] ?? null) === "completed" && (int) ($record["expires_at"] ?? 0) > time()) {
@@ -150,8 +161,10 @@ final class FileQueueStore implements ReliableQueueStoreInterface
             $this->writeIdempotency($path, [
                 "state" => "processing",
                 "reservation" => (string) ($job["reservation"] ?? ""),
-                "expires_at" => time() + max(1, (int) config("queue.visibility_timeout_seconds", 300)),
+                "expires_at" => (int) $payload["reserved_until"],
             ]);
+            $payload["idempotency_claimed"] = true;
+            $this->write($file, $payload);
             return "claimed";
         });
     }
@@ -163,12 +176,10 @@ final class FileQueueStore implements ReliableQueueStoreInterface
             return;
         }
         $this->locked(function () use ($job, $key): void {
+            $this->owned($job);
             $path = $this->idempotencyPath($key);
             $record = $this->readIdempotency($path);
-            if (($record["state"] ?? null) !== "processing"
-                || !hash_equals((string) ($record["reservation"] ?? ""), (string) ($job["reservation"] ?? ""))) {
-                throw new RuntimeException("Queue idempotency claim is missing or owned by another worker.");
-            }
+            $this->assertIdempotencyOwned($job, $record);
             $this->writeIdempotency($path, [
                 "state" => "completed",
                 "expires_at" => time() + max(1, (int) config("queue.idempotency_ttl_seconds", 86400)),
@@ -305,6 +316,15 @@ final class FileQueueStore implements ReliableQueueStoreInterface
             (string) ($job["context"]["tenant_id"] ?? ""),
             $value,
         ]));
+    }
+
+    private function assertIdempotencyOwned(array $job, array $record): void
+    {
+        if (($record["state"] ?? null) !== "processing"
+            || (int) ($record["expires_at"] ?? 0) <= time()
+            || !hash_equals((string) ($record["reservation"] ?? ""), (string) ($job["reservation"] ?? ""))) {
+            throw new RuntimeException("Queue idempotency claim is expired, missing or owned by another worker.");
+        }
     }
 
     private function idempotencyPath(string $key): string
