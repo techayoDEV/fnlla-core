@@ -62,7 +62,7 @@ def main():
                                             "shasum": hashlib.sha1(archive.read_bytes()).hexdigest()})
         config = {"name": "fnlla-test/release-consumer", "description": "Synthetic release check",
                   "license": "MIT", "repositories": [{"type": "package", "package": package}],
-                  "require": {"techayodev/fnlla-core": version},
+                  "require": {"techayodev/fnlla-core": "^" + version},
                   "config": {"allow-plugins": False}}
         (consumer / "composer.json").write_text(json.dumps(config, indent=2) + "\n")
         composer = [shutil.which("composer") or "composer"]
