@@ -49,6 +49,7 @@ $plan = json_decode($planOutput, true, 512, JSON_THROW_ON_ERROR);
 fnlla_upgrade_assert_same("upgrade-ready", $plan["status"] ?? null, "Clean generated Core was not classified as upgrade-ready.");
 fnlla_upgrade_assert_true(isset($plan["updates"]["config/actions.php"]), "Clean Core-owned configuration was not classified as an update.");
 fnlla_upgrade_assert_true(!isset($plan["conflicts"]["config/actions.php"]), "Clean Core-owned configuration was classified as a conflict.");
+fnlla_upgrade_assert_true(isset($plan["updates"]["fnlla.cmd"]), "Pristine installed Core launcher was not recognized across distinct Framework template bytes.");
 
 $projectRoute = (string) file_get_contents($cleanProject . DIRECTORY_SEPARATOR . "routes" . DIRECTORY_SEPARATOR . "web.php");
 [$applyExit, $applyOutput] = fnlla_upgrade_run_process([
@@ -90,6 +91,7 @@ $conflictPlan = json_decode($conflictOutput, true, 512, JSON_THROW_ON_ERROR);
 fnlla_upgrade_assert_same("conflicts", $conflictPlan["status"] ?? null, "Modified Core-owned configuration did not produce a conflict plan.");
 fnlla_upgrade_assert_true(isset($conflictPlan["updates"]["config/actions.php"]), "Mixed plan lost the clean Core-owned update.");
 fnlla_upgrade_assert_true(isset($conflictPlan["conflicts"]["config/auth.php"]), "Mixed plan did not protect modified Core-owned content.");
+fnlla_upgrade_assert_true(isset($conflictPlan["conflicts"]["fnlla.cmd"]), "Modified launcher must not be overwritten during upgrade.");
 fnlla_upgrade_assert_same("<?php return ['owner' => 'application'];\n", (string) file_get_contents($modifiedProject . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "auth.php"), "Conflict planning changed application content.");
 
 fnlla_upgrade_write($transactionProject . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "actions.php", "original\n");
@@ -135,6 +137,9 @@ function fnlla_upgrade_write_fixture(string $source, string $project, bool $modi
     fnlla_upgrade_write($source . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "project-templates" . DIRECTORY_SEPARATOR . "v1" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "phpstan.neon", "parameters:\n    level: 5\n");
 
     fnlla_upgrade_write($project . DIRECTORY_SEPARATOR . ".fnlla" . DIRECTORY_SEPARATOR . "project-profile", "core\n");
+    fnlla_upgrade_write($project . DIRECTORY_SEPARATOR . "fnlla.cmd",
+        (string) file_get_contents($root . "/resources/project-templates/core/fnlla.cmd")
+        . ($modified ? "REM application-owned edit\r\n" : ""));
     fnlla_upgrade_write($project . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "actions.php", (string) file_get_contents($root . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "project-templates" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "actions.php"));
     fnlla_upgrade_write(
         $project . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "auth.php",

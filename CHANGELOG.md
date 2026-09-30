@@ -4,6 +4,9 @@
 
 ## 2.4.0 — 2026-10-01
 
+- Recognize pristine installed Core launcher bytes when upgrading to Framework,
+  including packages built with different checkout line endings; retain conflicts
+  for application edits.
 - Require clean committed sources for stable packages, build from Git blobs and
   verify deterministic archives plus fresh Composer consumers on Windows/Linux.
   Add an exact-commit CI gate and a released 2.3.1 upgrade/crash/rollback drill.

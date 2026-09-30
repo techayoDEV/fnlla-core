@@ -389,7 +389,8 @@ final class FnllaUpgradeCommand extends Command
             ],
             "fnlla.cmd" => [
                 "source" => $sourceRoot . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "project-templates" . DIRECTORY_SEPARATOR . "v1" . DIRECTORY_SEPARATOR . "fnlla.cmd",
-                "core_source" => $sourceRoot . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "project-templates" . DIRECTORY_SEPARATOR . "v1" . DIRECTORY_SEPARATOR . "fnlla.cmd",
+                "core_source" => $this->coreTemplateSource("fnlla.cmd")
+                    ?? $sourceRoot . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "project-templates" . DIRECTORY_SEPARATOR . "v1" . DIRECTORY_SEPARATOR . "fnlla.cmd",
             ],
             "phpstan.neon" => [
                 "source" => $sourceRoot . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "project-templates" . DIRECTORY_SEPARATOR . "v1" . DIRECTORY_SEPARATOR . "phpstan.neon",
