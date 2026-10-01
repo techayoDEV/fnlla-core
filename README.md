@@ -10,10 +10,15 @@
 
 **Built for developers working with AI.**
 
-FNLLA Core is the open web framework foundation for AI-assisted software
-engineering. Powered by PHP and designed for explicit, inspectable
-applications, it keeps the developer in control while making the codebase easier
-for coding agents to understand and extend.
+[Quick start](docs/framework/GETTING-STARTED.md) ·
+[First capability](docs/framework/FIRST-CAPABILITY.md) ·
+[Architecture](docs/framework/ARCHITECTURE.md) ·
+[Documentation](docs/README.md) ·
+[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.5.0)
+
+**Build with AI. Stay in control.** FNLLA Core is a PHP application foundation
+with explicit contracts that developers and coding agents can inspect. You
+direct the work, review changes and maintain the result. No runtime AI required.
 
 FNLLA Core is a focused, MIT-licensed foundation for teams that want a readable
 web runtime without inheriting a full product platform. It provides routing,
@@ -21,10 +26,9 @@ HTTP, dependency injection, validation, database, sessions, cache, mail, queues
 and CLI tooling through explicit contracts that remain approachable to both
 developers and coding agents.
 
-Core is the provider-neutral AI-engineering foundation of FNLLA: its readable
-architecture and stable contracts are designed to be inspected, changed and
-verified by developers working with coding agents. It does not bundle an AI
-model, provider SDK or autonomous product workflow.
+| Build | Inspect | Stay in control |
+| --- | --- | --- |
+| PHP runtime, application Actions and module contracts | Routes, capabilities and machine-readable application metadata | Explicit permissions, validation, tests and reviewable changes |
 
 [![FNLLA Core architecture: explicit framework primitives beneath an application-owned product layer](branding/assets/readme/core-architecture.svg)](docs/README.md)
 
@@ -40,7 +44,8 @@ release. Read the [upgrade notes](docs/releases/2.5.0.md) before deploying.
 
 Give coding agents context, review their changes and maintain the result. The
 [developer workflow](docs/framework/DEVELOPER-WORKFLOW.md) documents source-based
-inspection, readiness, explicit OpenAPI and repeatable coding tasks in Core 2.4.0.
+inspection, readiness, explicit OpenAPI and repeatable coding tasks available
+since Core 2.4.0 and included in 2.5.0.
 Core and generated PHP applications work without runtime AI.
 
 Core 2.5.0 adds [application capabilities](docs/framework/CAPABILITIES.md): one
@@ -95,6 +100,9 @@ growth workflow. The commercial FNLLA layer may add optional AI-assisted and
 SEO-assisted developer tooling while keeping Core contracts provider-neutral.
 
 ## Install
+
+New application? Follow the [getting-started guide](docs/framework/GETTING-STARTED.md).
+For the package boundary, read [architecture](docs/framework/ARCHITECTURE.md).
 
 Install from the public GitHub VCS repository:
 
@@ -229,6 +237,11 @@ as a business/provider idempotency key. See
 
 - [FNLLA documentation hub](https://fnlla.com/docs)
 - [Core package docs](docs/README.md)
+- [Getting started](docs/framework/GETTING-STARTED.md)
+- [Architecture and ownership](docs/framework/ARCHITECTURE.md)
+- [Your first capability](docs/framework/FIRST-CAPABILITY.md)
+- [Capability reference](docs/framework/CAPABILITIES.md)
+- [Operations and recovery](docs/framework/OPERATIONS.md)
 - [Runtime contracts](docs/framework/RUNTIME-CONTRACTS.md)
 - [Product Specification](docs/framework/PRODUCT-SPECIFICATION.md)
 - [Security primitives](docs/framework/SECURITY-PRIMITIVES.md)

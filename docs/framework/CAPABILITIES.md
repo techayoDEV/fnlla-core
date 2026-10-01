@@ -2,6 +2,26 @@
 
 Status: introduced in Core 2.5.0; not part of the immutable 2.4.0 package. This foundation introduces no REST, MCP or SDK adapter.
 
+[Documentation index](../README.md) · [Tutorial](FIRST-CAPABILITY.md) ·
+[Architecture](ARCHITECTURE.md) · [Failure recovery](OPERATIONS.md#command-failures-and-recovery)
+
+## Public types at a glance
+
+All types below use the `Fnlla\Php\Actions` namespace.
+
+| Type | Responsibility |
+| --- | --- |
+| `ActionDefinition` | Identifier, permission, validator, handler, events and optional resource resolver |
+| `ActionMetadata` | Description, input/output shape, kind, visibility, contract version and identity domains |
+| `ActionRegistry` | Single registry shared with legacy definitions; rejects duplicate IDs |
+| `ApplicationContextProviderInterface` | Supplies freshly authenticated server-owned context |
+| `ApplicationContext` | Identity and tenant snapshot; constructing it grants no authority |
+| `ActionExecutor` | Validates and authorizes a capability, executes it and projects its result |
+| `ActionResult` | Validated result value, subject, events and replay status |
+| `ActionMutation` | Command handler result plus subject, audit values and domain events |
+| `ApplicationSchema` | Caller-filtered or local projection of the registry |
+| `ActionException` | Safe protocol-independent failure reason |
+
 ## Ownership and execution
 
 `Actions\ActionRegistry` is the single registry for legacy Actions and new
@@ -163,8 +183,10 @@ text and must not contain secrets. Legacy definitions are not inferred or expose
 
 `runtime:inspect` includes the local projection as `application_schema` while
 retaining its v1 envelope. Full can reuse it in `app:map --schema=v2` when this
-Core capability is installed. Existing OpenAPI export is unchanged; shape-to-
-OpenAPI/MCP/SDK conversion is future work.
+Core capability is installed. Existing route-based OpenAPI export is unchanged.
+Capability-to-OpenAPI/MCP/SDK projection belongs to downstream adapters such as
+Full; none of these transports is installed by Core. See the
+[ownership matrix](ARCHITECTURE.md#core-application-and-full).
 
 ## Plugins and lifecycle
 

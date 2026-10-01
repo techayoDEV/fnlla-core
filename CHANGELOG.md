@@ -1,5 +1,11 @@
 # FNLLA Core Changelog
 
+## Unreleased
+
+- Reorganize the documentation around application setup, architectural ownership,
+  a complete capability example and operational recovery. Clarify Core versus
+  Full transport responsibilities and immutable-release documentation boundaries.
+
 ## 2.5.0 — 2026-10-01
 
 - Harden HTTP mail against redirects and oversized replies; revalidate persisted

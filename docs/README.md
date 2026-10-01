@@ -7,10 +7,35 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-These notes cover the package boundary and the runtime contracts that are safe
-to describe from the Core repository itself.
+This is the maintained documentation for **Core 2.5.0**. Guides describe the
+implemented contracts and their limits. The documentation on the development
+branch may be newer than the files in an immutable release ZIP; updating a guide
+does not replace that release or upgrade an installed dependency.
 
-## Start Here
+## Choose your path
+
+| Goal | Read first | Continue with |
+| --- | --- | --- |
+| Create a PHP application | [Getting started](framework/GETTING-STARTED.md) | [Runtime contracts](framework/RUNTIME-CONTRACTS.md) |
+| Understand Core and Full | [Architecture](framework/ARCHITECTURE.md) | [Capability reference](framework/CAPABILITIES.md) |
+| Write a reusable application operation | [First capability](framework/FIRST-CAPABILITY.md) | [Actions and events](framework/ACTIONS-AND-DOMAIN-EVENTS.md) |
+| Configure permissions and tenancy | [Security primitives](framework/SECURITY-PRIMITIVES.md) | [Runtime hardening](framework/AUDIT-HARDENING.md) |
+| Operate or upgrade an application | [Operations](framework/OPERATIONS.md) | [2.5.0 upgrade notes](releases/2.5.0.md), [outbox](framework/OUTBOX-OPERATIONS.md) |
+| Work with coding agents | [Developer workflow](framework/DEVELOPER-WORKFLOW.md) | Repository [AGENTS.md](../AGENTS.md) |
+| Build a trusted extension | [Product Specification](framework/PRODUCT-SPECIFICATION.md) | [Capability lifecycle](framework/CAPABILITIES.md#plugins-and-lifecycle) |
+
+## Core and the API platform
+
+Core defines application capabilities, validates their inputs and outputs,
+enforces permissions, executes actions and projects machine-readable metadata.
+FNLLA Full owns optional REST, capability discovery, MCP and SDK tooling.
+Applications own domain handlers, identity and explicit exposure decisions.
+
+Installing Core does not enable an HTTP API or add a Developer Panel. Core's
+explicit route OpenAPI exporter remains available independently. See the
+[responsibility matrix](framework/ARCHITECTURE.md#core-application-and-full).
+
+## Reference library
 
 - [Core 2.5.0 upgrade notes](releases/2.5.0.md) and the
   [maintainer release procedure](RELEASING.md).

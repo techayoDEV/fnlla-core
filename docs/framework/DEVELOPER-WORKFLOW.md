@@ -5,8 +5,10 @@ Humans define the task, inspect the proposed changes and maintain the applicatio
 Coding agents can use the same local contracts and checks. No runtime AI, model
 account, provider SDK or commercial FNLLA package is required.
 
-The features below are available in Core 2.4.0. Consumers of Core 2.3.1 must
-upgrade their immutable dependency before using these commands and contracts.
+The developer tools below were introduced in Core 2.4.0 and remain available in
+2.5.0. Core 2.5.0 additionally supplies the [capability schema](CAPABILITIES.md)
+in local inspection. Use the [getting-started guide](GETTING-STARTED.md) for a
+new application and upgrade older immutable dependencies before adopting contracts.
 
 ## A repeatable development cycle
 
