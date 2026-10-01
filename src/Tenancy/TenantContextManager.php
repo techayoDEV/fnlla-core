@@ -52,7 +52,7 @@ final class TenantContextManager
     public function runForAuthenticated(callable $callback, ?string $serverTenantId = null): mixed
     {
         $actor = $this->auth->user();
-        if ($actor === null || ($actor["active"] ?? true) !== true || !empty($actor["revoked_at"])) {
+        if (!\Fnlla\Php\Auth\ActorStatus::active($actor)) {
             throw new AuthorizationException("An active authenticated actor is required.");
         }
         $actorId = $this->actorId($actor);
@@ -80,6 +80,21 @@ final class TenantContextManager
             throw new AuthorizationException("Queued tenant context is no longer authorized.");
         }
         return $this->within(new TenantContext($mode, $tenantId, $actorId, $job->correlationId()), $callback);
+    }
+
+    /** Restore persisted work identity without inheriting the caller's tenant or bypass. */
+    public function runForIdentity(?string $actorId, ?string $tenantId, string $correlationId, callable $callback): mixed
+    {
+        $mode = $this->mode();
+        $actor = $actorId !== null ? $this->identities->findActor($actorId) : null;
+        if ($actorId !== null && (!\Fnlla\Php\Auth\ActorStatus::active($actor) || $this->actorId($actor) !== $actorId)) {
+            throw new AuthorizationException("Deferred actor identity is no longer authorized.");
+        }
+        if ($mode === "none" ? $tenantId !== null : ($actor === null || $tenantId === null
+            || $this->identities->resolveTenant($actor, $mode, $tenantId) !== $tenantId)) {
+            throw new AuthorizationException("Deferred tenant context is no longer authorized.");
+        }
+        return $this->within(new TenantContext($mode, $tenantId, $actorId, $correlationId), $callback);
     }
 
     public function runBypass(string $tenantId, string $reason, callable $callback, string $source = "system"): mixed

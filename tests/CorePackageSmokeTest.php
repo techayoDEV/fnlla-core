@@ -100,7 +100,7 @@ $logPath = sys_get_temp_dir() . "/fnlla-core-exception-" . bin2hex(random_bytes(
 $GLOBALS["fnlla_config"]["app"]["log_path"] = $logPath;
 try {
     (new ExceptionHandler())->report(new RuntimeException("core-standalone-report"), $request);
-    assert_true(is_file($logPath) && str_contains((string) file_get_contents($logPath), "core-standalone-report"),
+    assert_true(is_file($logPath) && str_contains((string) file_get_contents($logPath), "RuntimeException") && str_contains((string) file_get_contents($logPath), "core-request-1"),
         "Core exception reporting was lost without the optional FNLLA issue tracker.");
 } finally {
     unset($GLOBALS["fnlla_config"]["app"]["log_path"]);

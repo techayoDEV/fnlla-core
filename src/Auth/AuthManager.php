@@ -60,7 +60,7 @@ final class AuthManager
         if ($id === null) { return null; }
         $user = $this->provider->findById($id);
         $key = (string) config("auth.providers.users.key", "id");
-        if ($user === null || !self::validId($user[$key] ?? null) || (string) $user[$key] !== (string) $id) {
+        if (!ActorStatus::active($user) || !self::validId($user[$key] ?? null) || (string) $user[$key] !== (string) $id) {
             $this->session->forget((string) config("auth.session_key", "auth.user_id"));
             return null;
         }
@@ -72,7 +72,7 @@ final class AuthManager
         $user = $this->provider->findByCredentials($credentials);
         $passwordField = (string) config("auth.providers.users.password", "password");
 
-        if ($user === null || !isset($credentials["password"], $user[$passwordField])) {
+        if (!ActorStatus::active($user) || !isset($credentials["password"], $user[$passwordField])) {
             return false;
         }
 
@@ -89,6 +89,7 @@ final class AuthManager
     {
         $key = (string) config("auth.providers.users.key", "id");
         $id = $user[$key] ?? null;
+        if (!ActorStatus::active($user)) { throw new \InvalidArgumentException("Authenticated user must be active and not revoked."); }
         if (!self::validId($id)) { throw new \InvalidArgumentException("Authenticated user must have a non-empty string or integer identity."); }
         // Do not install a privileged identity if session rotation fails.
         $this->session->regenerate();

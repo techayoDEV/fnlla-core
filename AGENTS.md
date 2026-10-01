@@ -99,6 +99,8 @@ Start with [the documentation index](docs/README.md), then use:
   actor/tenant resolution, ownership, scoped resources and audit.
 - [Actions and events](docs/framework/ACTIONS-AND-DOMAIN-EVENTS.md): mutation,
   receipt, outbox and after-commit delivery boundaries.
+- [Capabilities](docs/framework/CAPABILITIES.md): optional Action metadata,
+  trusted context, executor, safe discovery, shapes and module registration.
 - [Product Specification](docs/framework/PRODUCT-SPECIFICATION.md): schemas,
   module declarations, validation and trusted extension registration.
 - [Concurrency and rate limits](docs/framework/CONCURRENCY-AND-RATE-LIMITS.md):

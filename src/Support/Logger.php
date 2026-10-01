@@ -42,6 +42,8 @@ final class Logger
 
     public static function write(string $level, string $message, array $context = []): void
     {
+        $message = self::safeText($message);
+        $level = substr(preg_replace('/[^a-zA-Z0-9_-]/', '', $level) ?? 'error', 0, 32);
         $logPath = self::configuredPath();
         $directory = dirname($logPath);
 
@@ -76,22 +78,24 @@ final class Logger
 
     public static function exception(Throwable $exception, array $context = []): void
     {
-        self::write("error", $exception->getMessage(), array_merge($context, [
+        self::write("error", "Unhandled exception", array_merge($context, [
             "exception" => [
                 "type" => $exception::class,
-                "message" => $exception->getMessage(),
                 "code" => $exception->getCode(),
                 "file" => $exception->getFile(),
                 "line" => $exception->getLine(),
             ],
-            "trace" => $exception->getTraceAsString(),
+            // Exception text and trace arguments can contain unlabelled credentials.
+            "trace" => array_map(static fn (array $frame): array => array_intersect_key($frame,
+                array_flip(["file", "line", "class", "type", "function"])), array_slice($exception->getTrace(), 0, 30)),
         ]));
     }
 
     private static function redact(mixed $value, ?string $key = null, int $depth = 0): mixed
     {
         if ($depth >= 10) { return "[depth limit]"; }
-        $redactKeys = (array) config("logging.redact_keys", []);
+        $redactKeys = array_merge(["password", "passwd", "secret", "token", "authorization", "cookie", "api_key", "apikey"],
+            (array) config("logging.redact_keys", []));
         $normalizedKey = is_string($key) ? strtolower($key) : "";
 
         foreach ($redactKeys as $redactKey) {
@@ -113,11 +117,22 @@ final class Logger
 
         // Do not invoke arbitrary serializers or expose private object properties in logs.
         if ($value instanceof Throwable) {
-            return ["type" => $value::class, "message" => $value->getMessage(), "code" => $value->getCode()];
+            return ["type" => $value::class, "code" => $value->getCode()];
         }
         if (is_object($value)) { return ["type" => $value::class]; }
         if (is_resource($value)) { return "[resource]"; }
-        return $value;
+        return is_string($value) ? self::safeText($value) : $value;
+    }
+
+    private static function safeText(string $value): string
+    {
+        // Decode encoded key/value delimiters before filtering common credential formats.
+        $value = substr($value, 0, 16384);
+        for ($i = 0; $i < 2; $i++) { $value = rawurldecode($value); }
+        $value = preg_replace('/\b(Bearer|Basic)\s+[^\s,;]+/i', '$1 [redacted]', $value) ?? '[redacted]';
+        $value = preg_replace('~(https?://)[^\s/@]+:[^\s/@]+@~i', '$1[redacted]@', $value) ?? '[redacted]';
+        $value = preg_replace('/\b(password|passwd|pwd|secret|token|access_token|refresh_token|api[_-]?key|authorization|cookie)\b["\x27]?\s*[:=]\s*(?:"[^"\r\n]*"|\x27[^\x27\r\n]*\x27|[^\s&,;]+)/i', '$1=[redacted]', $value) ?? '[redacted]';
+        return mb_strcut($value, 0, 4096, 'UTF-8');
     }
 
     private static function rotateIfNeeded(string $logPath): void

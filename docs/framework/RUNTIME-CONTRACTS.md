@@ -1,6 +1,7 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the public runtime surface in FNLLA Core 2.4.0.
+These contracts describe the public runtime surface in FNLLA Core 2.5.0.
+See [2.5.0 upgrade notes](../releases/2.5.0.md) for capability and security changes.
 Full FNLLA builds on the same primitives and adds the integrated project
 operations layer separately.
 

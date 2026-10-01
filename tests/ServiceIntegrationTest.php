@@ -34,6 +34,7 @@ if ((!$redisOnly && !extension_loaded("pdo_mysql")) || !extension_loaded("redis"
 
 if (!$redisOnly) {
 require __DIR__ . "/OutboxServiceTest.php";
+require __DIR__ . "/CapabilityServiceTest.php";
 $dsn = getenv("FNLLA_CORE_TEST_MYSQL_DSN");
 if (!is_string($dsn) || !str_starts_with($dsn, "mysql:")) {
     throw new RuntimeException("FNLLA_CORE_TEST_MYSQL_DSN must name an isolated MySQL database.");

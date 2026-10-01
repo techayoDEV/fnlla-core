@@ -1,6 +1,34 @@
 # FNLLA Core Changelog
 
-## Unreleased
+## 2.5.0 — 2026-10-01
+
+- Harden HTTP mail against redirects and oversized replies; revalidate persisted
+  domain-event actor/tenant identities before listener delivery; reject inactive
+  sessions and authentication attempts using one shared status policy.
+- Reject mail, queue and after-commit effects inside unmanaged PDO transactions;
+  restore transaction bookkeeping and invalidate connections after rollback
+  failure. Failed nested rollback cannot be swallowed to commit its parent.
+- Reject unknown validation rules and invalid parameters, enforce required before
+  nullable and measure declared strings by length. Publish effective capability
+  array bounds and reject impossible definitions. Replace module state without
+  deleting the previous snapshot; synchronize readers and writers.
+- Bound and redact log text; omit raw exception messages and trace arguments.
+  See `docs/framework/AUDIT-HARDENING.md` for compatibility and operational changes.
+- Add optional ActionMetadata, strict bounded input/output shapes, a trusted
+  ApplicationContext provider, ActionExecutor and an ApplicationSchema projection
+  over the existing ActionRegistry. Capabilities default to internal; discovery
+  checks permissions and outputs omit hidden fields. No transport is added.
+- Share the legacy transaction/receipt/outbox implementation with capability
+  commands; retain legacy receipt keys and add separate versioned capability
+  receipt scopes. Output violations roll back; callback failures after commit
+  receive an explicit safe error. Queries avoid mutation transactions.
+- Add an optional Product Module action registration interface. Shared bootstrap
+  now registers enabled module services/actions in CLI and HTTP; disabling a
+  module invalidates its registered actions. Reload bootstrap for service changes.
+- Include local capability metadata in runtime inspection. Transactional command
+  identities remain restricted to the application domain; authenticated custom
+  query identities require a trusted context provider. See CAPABILITIES.md for
+  the schema subset, security boundary and compatibility limitations.
 
 ## 2.4.0 — 2026-10-01
 

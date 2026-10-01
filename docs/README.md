@@ -12,7 +12,7 @@ to describe from the Core repository itself.
 
 ## Start Here
 
-- [Core 2.4.0 upgrade notes](releases/2.4.0.md) and the
+- [Core 2.5.0 upgrade notes](releases/2.5.0.md) and the
   [maintainer release procedure](RELEASING.md).
 - [Developer workflow](framework/DEVELOPER-WORKFLOW.md): source-derived context,
   bounded readiness, explicit OpenAPI and reproducible coding-agent tasks.
@@ -26,6 +26,10 @@ to describe from the Core repository itself.
   RBAC/policies, tenant context/isolation and the neutral audit event contract.
 - [Actions and domain events](framework/ACTIONS-AND-DOMAIN-EVENTS.md) define the
   permission-first mutation, transactional receipt/outbox and delivery boundary.
+- [Application capabilities](framework/CAPABILITIES.md) define shared actions,
+  trusted contexts and safe metadata for downstream interfaces.
+- [Runtime hardening](framework/AUDIT-HARDENING.md) explains identity, transaction,
+  validation, logging and module-state compatibility changes in 2.5.0.
 - [Trademark notice](framework/TRADEMARKS.md) explains how the FNLLA name and
   marks may be referenced.
 - [Support policy](framework/SUPPORT.md) defines the public, best-effort support

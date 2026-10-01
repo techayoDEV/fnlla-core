@@ -141,11 +141,16 @@ final class Container
 
     public function has(string $abstract): bool
     {
+        return $this->bound($abstract) || class_exists($abstract);
+    }
+
+    /** Explicit bindings only; does not promise that an arbitrary class can be built. */
+    public function bound(string $abstract): bool
+    {
         $index = array_key_last($this->scopes);
         return ($index !== null && array_key_exists($abstract, $this->scopes[$index]))
             || array_key_exists($abstract, $this->instances)
-            || array_key_exists($abstract, $this->bindings)
-            || class_exists($abstract);
+            || array_key_exists($abstract, $this->bindings);
     }
 
     public function make(string $abstract, array $parameters = []): mixed

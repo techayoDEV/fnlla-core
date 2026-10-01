@@ -36,7 +36,7 @@ final class Mailer
 
     public function send(array|string $recipients, string $subject, string $html, string $text = ""): void
     {
-        if ($this->database?->hasActiveManagedTransaction()) {
+        if ($this->database?->hasActiveTransaction()) {
             throw new RuntimeException("Mail delivery inside a transaction must use sendAfterCommit().");
         }
         $this->sendNow($recipients, $subject, $html, $text);
@@ -260,14 +260,16 @@ final class Mailer
                 "header" => implode("\r\n", $headers),
                 "content" => json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
                 "ignore_errors" => true,
+                "follow_location" => 0,
+                "max_redirects" => 0,
                 "timeout" => max(1, (int) config("mail.http.timeout_seconds", 10)),
             ],
         ]);
         $http_response_header = [];
-        $response = @file_get_contents($endpoint, false, $context);
+        $response = @file_get_contents($endpoint, false, $context, 0, 1048577);
         $status = $this->httpStatusCode($http_response_header);
 
-        if ($response === false || $status < 200 || $status >= 300) {
+        if ($response === false || strlen($response) > 1048576 || $status < 200 || $status >= 300) {
             throw new RuntimeException("HTTP mail transport failed with status " . ($status > 0 ? (string) $status : "unknown") . ".");
         }
     }
@@ -284,7 +286,7 @@ final class Mailer
         $scheme = strtolower((string) ($parts["scheme"] ?? ""));
         $host = strtolower((string) ($parts["host"] ?? ""));
 
-        if (!in_array($scheme, ["http", "https"], true) || $host === "") {
+        if (!in_array($scheme, ["http", "https"], true) || $host === "" || isset($parts["user"]) || isset($parts["pass"]) || isset($parts["fragment"])) {
             throw new RuntimeException("MAIL_HTTP_ENDPOINT must be an absolute HTTP(S) URL.");
         }
 

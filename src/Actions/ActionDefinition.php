@@ -19,7 +19,9 @@ final readonly class ActionDefinition
         public string $subjectType,
         public mixed $validator,
         public mixed $handler,
-        public array $events = []
+        public array $events = [],
+        public ?ActionMetadata $metadata = null,
+        public mixed $resourceResolver = null
     ) {
         foreach (["action" => $this->id, "permission" => $this->permission, "subject type" => $this->subjectType] as $label => $value) {
             if (preg_match('/^[a-z][a-z0-9._-]{0,127}$/D', $value) !== 1) {
@@ -33,6 +35,18 @@ final readonly class ActionDefinition
             if (!is_string($event) || preg_match('/^[a-z][a-z0-9._-]{0,127}$/D', $event) !== 1) {
                 throw new InvalidArgumentException("Invalid declared action event.");
             }
+        }
+        if ($resourceResolver !== null && !self::isContainerCallable($resourceResolver)) {
+            throw new InvalidArgumentException('Action resource resolver must be callable.');
+        }
+        if ($resourceResolver !== null && $metadata === null) {
+            throw new InvalidArgumentException('A capability resource resolver requires ActionMetadata.');
+        }
+        if (($metadata?->resourceRequired ?? false) && $resourceResolver === null) {
+            throw new InvalidArgumentException('Resource-scoped capabilities require a trusted resolver.');
+        }
+        if ($metadata?->kind === 'query' && $events !== []) {
+            throw new InvalidArgumentException('Queries cannot declare mutation events.');
         }
     }
 

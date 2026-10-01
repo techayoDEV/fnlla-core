@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 $releaseArtifactSourceRoot = dirname(__DIR__);
-$releaseArtifactVersion = trim((string) file_get_contents($releaseArtifactSourceRoot . "/VERSION"));
+// Exercise stable publication using an isolated synthetic identity even when
+// this suite is running from a prerelease package.
+$releaseArtifactVersion = "9.8.7";
 $releaseArtifactCase = $releaseArtifactSourceRoot . "/dist/test-release-artifact-"
     . getmypid() . "-" . bin2hex(random_bytes(4));
 $releaseArtifactRoot = $releaseArtifactCase . "/source";
@@ -14,6 +16,13 @@ try {
         if (!is_dir(dirname($releaseArtifactRoot . "/" . $relative))) { mkdir(dirname($releaseArtifactRoot . "/" . $relative), 0700, true); }
         copy($releaseArtifactSourceRoot . "/" . $relative, $releaseArtifactRoot . "/" . $relative);
     }
+    file_put_contents($releaseArtifactRoot . "/VERSION", $releaseArtifactVersion . "\n");
+    $fixturePolicy = release_artifact_json($releaseArtifactRoot . "/resources/package-distribution.json");
+    $fixturePolicy["candidate"] = $releaseArtifactVersion;
+    $fixturePolicy["channel"] = "stable";
+    $fixturePolicy["release_approved"] = true;
+    file_put_contents($releaseArtifactRoot . "/resources/package-distribution.json",
+        json_encode($fixturePolicy, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
     file_put_contents($releaseArtifactRoot . "/.gitignore", "/dist/\n/ignored.tmp\n");
     foreach ([["git", "init", "-q"], ["git", "config", "user.name", "Synthetic release test"],
         ["git", "config", "user.email", "release-test@example.invalid"], ["git", "config", "core.autocrlf", "false"],

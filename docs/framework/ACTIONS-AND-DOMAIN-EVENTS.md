@@ -1,5 +1,8 @@
 # Actions And Domain Events
 
+The optional [application capability contract](CAPABILITIES.md) extends these
+primitives in Core 2.5.0. Legacy definitions remain supported.
+
 FNLLA Core provides a single mutation path for application commands. It is a
 framework contract, not an ORM, event-sourcing system or commercial evidence
 store. Read-only queries do not have to use Actions.

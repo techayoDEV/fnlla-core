@@ -25,6 +25,9 @@ final class ProductModuleRegistry
     private array $extensions = [];
     private bool $servicesRegistered = false;
     private bool $routesRegistered = false;
+    private bool $actionsRegistered = false;
+    /** @var list<\Fnlla\Php\Actions\ActionDefinition> */
+    private array $registeredActions = [];
 
     /**
      * @param list<string>|null $modulePaths
@@ -117,6 +120,24 @@ final class ProductModuleRegistry
         return $result;
     }
 
+    /**
+     * Trusted extension objects in dependency order; disabled modules are excluded.
+     * Consumers may discover optional extension interfaces without constructing a
+     * second set of extensions. This is local application code, never public metadata.
+     * @return array<string, ProductModuleExtensionInterface>
+     */
+    public function enabledExtensions(): array
+    {
+        $this->assertValid();
+        $snapshot = $this->snapshot();
+        $enabled = array_fill_keys($this->readState($snapshot['modules']), true);
+        $result = [];
+        foreach ($this->topologicalOrder($snapshot['modules']) as $id) {
+            if (isset($enabled[$id], $this->extensions[$id])) { $result[$id] = $this->extensions[$id]; }
+        }
+        return $result;
+    }
+
     /** @return array<string, mixed> */
     public function inspect(string $id): array
     {
@@ -136,6 +157,7 @@ final class ProductModuleRegistry
             "services" => $module["services"],
             "routes" => $module["routes"],
             "assets" => $module["assets"],
+            "actions" => $module["actions"],
             "disable_is_uninstall" => false,
             "data_behavior" => "preserve",
         ];
@@ -166,6 +188,32 @@ final class ProductModuleRegistry
             $after = array_values(array_diff($enabled, [$id]));
             return [$this->orderedEnabled($after, $modules), in_array($id, $enabled, true) ? [$id] : []];
         }, "disabled");
+    }
+
+    /** Register enabled modules atomically into the existing ActionRegistry. */
+    public function registerActions(): void
+    {
+        if ($this->actionsRegistered) { return; }
+        $this->assertValid();
+        $snapshot = $this->snapshot();
+        $enabled = array_fill_keys($this->readState($snapshot['modules']), true);
+        $definitions = [];
+        foreach ($this->topologicalOrder($snapshot['modules']) as $moduleId) {
+            $extension = $this->extensions[$moduleId] ?? null;
+            if (!isset($enabled[$moduleId]) || !$extension instanceof ProductModuleActionsInterface) { continue; }
+            foreach ($extension->actionDefinitions() as $definition) {
+                if (!$definition instanceof \Fnlla\Php\Actions\ActionDefinition || $definition->metadata === null
+                    || !in_array($definition->id, $snapshot['modules'][$moduleId]['actions'], true)) {
+                    throw new RuntimeException('Module capability must have metadata and belong to its declaration.');
+                }
+                $definitions[] = $definition;
+            }
+        }
+        if ($definitions !== []) {
+            $this->container->make(\Fnlla\Php\Actions\ActionRegistry::class)->registerMany($definitions);
+        }
+        $this->registeredActions = $definitions;
+        $this->actionsRegistered = true;
     }
 
     public function registerServices(): void
@@ -466,6 +514,25 @@ final class ProductModuleRegistry
      */
     private function readState(array $modules): array
     {
+        if (!is_dir(dirname($this->statePath))) { return $this->readStateUnlocked($modules); }
+        $lock = fopen($this->statePath . ".lock", "c+");
+        if ($lock === false || !flock($lock, LOCK_SH)) {
+            if (is_resource($lock)) { fclose($lock); }
+            throw new RuntimeException("Unable to lock Product Module state for reading.");
+        }
+        try {
+            return $this->readStateUnlocked($modules);
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /** @param array<string, array<string, mixed>> $modules
+     *  @return list<string>
+     */
+    private function readStateUnlocked(array $modules): array
+    {
         if (!is_file($this->statePath)) {
             $set = [];
             foreach ($modules as $id => $module) {
@@ -520,19 +587,15 @@ final class ProductModuleRegistry
             throw new RuntimeException("Unable to lock Product Module state.");
         }
         try {
-            $enabled = $this->readState($snapshot["modules"]);
+            $enabled = $this->readStateUnlocked($snapshot["modules"]);
             [$after, $changed] = $mutation($enabled, $snapshot["modules"]);
             $payload = json_encode([
                 "schema" => "fnlla.product-module-state.v1",
                 "enabled" => $after,
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL;
             $temporary = $this->statePath . ".tmp-" . bin2hex(random_bytes(6));
-            if (file_put_contents($temporary, $payload, LOCK_EX) === false) {
+            if (file_put_contents($temporary, $payload, LOCK_EX) !== strlen($payload)) {
                 throw new RuntimeException("Unable to write Product Module state staging file.");
-            }
-            if (PHP_OS_FAMILY === "Windows" && is_file($this->statePath) && !unlink($this->statePath)) {
-                @unlink($temporary);
-                throw new RuntimeException("Unable to replace Product Module state.");
             }
             if (!rename($temporary, $this->statePath)) {
                 @unlink($temporary);
@@ -545,6 +608,11 @@ final class ProductModuleRegistry
             $this->snapshot = null;
             $this->servicesRegistered = false;
             $this->routesRegistered = false;
+            foreach ($this->registeredActions as $definition) {
+                $this->container->make(\Fnlla\Php\Actions\ActionRegistry::class)->forgetDefinition($definition);
+            }
+            $this->registeredActions = [];
+            $this->actionsRegistered = false;
             return [
                 "schema" => "fnlla.product-module-transition.v1",
                 "operation" => $operation,
@@ -555,6 +623,7 @@ final class ProductModuleRegistry
                 "effective_on" => "next_bootstrap",
             ];
         } finally {
+            if (isset($temporary) && is_file($temporary)) { @unlink($temporary); }
             flock($lock, LOCK_UN);
             fclose($lock);
         }

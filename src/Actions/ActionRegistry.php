@@ -24,6 +24,35 @@ final class ActionRegistry
         return $this->definitions[$id] ?? throw new RuntimeException("Action is not registered: {$id}.");
     }
 
+    /** Atomic registration batch for trusted providers and Product Module extensions.
+     * @param list<ActionDefinition> $definitions
+     */
+    public function registerMany(array $definitions): void
+    {
+        $candidate = $this->definitions;
+        foreach ($definitions as $definition) {
+            if (!$definition instanceof ActionDefinition || isset($candidate[$definition->id])) {
+                throw new RuntimeException('Invalid or duplicate action registration.');
+            }
+            $candidate[$definition->id] = $definition;
+        }
+        $this->definitions = $candidate;
+    }
+
+    /** @return list<ActionDefinition> */
+    public function definitions(): array
+    {
+        $definitions = $this->definitions;
+        ksort($definitions, SORT_STRING);
+        return array_values($definitions);
+    }
+
+    /** @internal Remove only the exact definition owned by a disabled module. */
+    public function forgetDefinition(ActionDefinition $definition): void
+    {
+        if (($this->definitions[$definition->id] ?? null) === $definition) { unset($this->definitions[$definition->id]); }
+    }
+
     /** @return list<array{id:string,permission:string,subject_type:string,events:list<string>}> */
     public function inspect(): array
     {

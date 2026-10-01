@@ -15,7 +15,9 @@ final class UserProviderTenantIdentityResolver implements TenantIdentityResolver
     public function findActor(string $actorId): ?array
     {
         $actor = $this->users->findById($actorId);
-        return $this->active($actor) ? $actor : null;
+        $key = (string) config("auth.providers.users.key", "id");
+        $id = $actor[$key] ?? null;
+        return $this->active($actor) && (is_string($id) || is_int($id)) && (string) $id === $actorId ? $actor : null;
     }
 
     public function resolveTenant(array $actor, string $mode, ?string $serverTenantId = null): ?string
@@ -55,7 +57,7 @@ final class UserProviderTenantIdentityResolver implements TenantIdentityResolver
 
     private function active(?array $actor): bool
     {
-        return $actor !== null && ($actor["active"] ?? true) === true && empty($actor["revoked_at"]);
+        return \Fnlla\Php\Auth\ActorStatus::active($actor);
     }
 
     private function validId(string $value): bool

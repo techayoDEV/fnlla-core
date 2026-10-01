@@ -37,6 +37,21 @@ final class DomainEventBus
 
     public function publish(DomainEvent $event): array
     {
+        $publish = fn (): array => $this->publishListeners($event);
+        if ($this->container->bound(\Fnlla\Php\Tenancy\TenantContextManager::class)) {
+            $tenants = $this->container->make(\Fnlla\Php\Tenancy\TenantContextManager::class);
+            return $tenants->runForIdentity($event->context->actorId, $event->context->tenantId,
+                $event->context->correlationId, $publish);
+        }
+        if (config("security.tenancy.mode", "none") !== "none" || $event->context->tenantId !== null
+            || $event->context->actorId !== null) {
+            throw new RuntimeException("Domain event identity requires a tenant context manager.");
+        }
+        return $publish();
+    }
+
+    private function publishListeners(DomainEvent $event): array
+    {
         $results = [];
         foreach ($this->listeners[$event->name] ?? [] as $listenerId => $definition) {
             if ($definition["version"] !== $event->payloadVersion) {

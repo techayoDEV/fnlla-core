@@ -22,7 +22,7 @@ final class AccessControl
     ): bool {
         self::permission($permission);
         $actor ??= $this->auth->user();
-        if ($actor === null || ($actor["active"] ?? true) !== true || !empty($actor["revoked_at"])) {
+        if (!\Fnlla\Php\Auth\ActorStatus::active($actor)) {
             return false;
         }
 

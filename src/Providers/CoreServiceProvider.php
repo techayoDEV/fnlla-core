@@ -103,6 +103,11 @@ class CoreServiceProvider extends ServiceProvider
         $this->container->singleton(DomainEventBus::class);
         $this->container->singleton(OutboxProcessor::class);
         $this->container->singleton(ActionRunner::class);
+        $this->container->singleton(\Fnlla\Php\Actions\ApplicationContextProviderInterface::class, \Fnlla\Php\Actions\SessionApplicationContextProvider::class);
+        $this->container->singleton(\Fnlla\Php\Actions\ActionAccess::class);
+        $this->container->singleton(\Fnlla\Php\Actions\ActionTransaction::class);
+        $this->container->singleton(\Fnlla\Php\Actions\ActionExecutor::class);
+        $this->container->singleton(\Fnlla\Php\Actions\ApplicationSchema::class);
         $this->container->singleton(Translator::class);
         $this->container->singleton(Mailer::class);
 

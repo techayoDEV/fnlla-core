@@ -31,6 +31,7 @@ final class DatabaseManager
     /** @var array<string, self> */
     private array $named = [];
     private int $managedTransactionDepth = 0;
+    private bool $transactionBroken = false;
     /** @var list<list<callable>> */
     private array $afterCommitFrames = [];
 
@@ -63,10 +64,11 @@ final class DatabaseManager
             $this->forConnection($name)->purge();
             return;
         }
-        if ($this->pdo?->inTransaction()) {
+        if ($this->managedTransactionDepth > 0 || $this->pdo?->inTransaction()) {
             throw new RuntimeException("Cannot purge a connection with an active transaction.");
         }
         $this->pdo = null;
+        $this->transactionBroken = false;
     }
 
     public static function using(PDO $connection): self
@@ -83,6 +85,7 @@ final class DatabaseManager
         if ($name !== null) {
             return $this->forConnection($name)->connection();
         }
+        if ($this->transactionBroken) { throw new RuntimeException("Database connection requires purge after transaction failure."); }
         if ($this->pdo instanceof PDO) {
             return $this->pdo;
         }
@@ -164,16 +167,16 @@ final class DatabaseManager
         // Unique names also isolate calls inside transactions owned by application code.
         $savepoint = "fnlla_" . bin2hex(random_bytes(12));
         if ($nested) {
-            $pdo->exec("SAVEPOINT " . $savepoint);
+            if ($pdo->exec("SAVEPOINT " . $savepoint) === false) { throw new RuntimeException("Unable to create transaction savepoint."); }
         } else {
-            $pdo->beginTransaction();
+            if (!$pdo->beginTransaction()) { throw new RuntimeException("Unable to begin transaction."); }
         }
 
         $this->managedTransactionDepth++;
         $this->afterCommitFrames[] = [];
         try {
             $result = $callback($this);
-            if (!$pdo->inTransaction()) {
+            if ($this->transactionBroken || !$pdo->inTransaction()) {
                 throw new RuntimeException("Transaction ended inside its callback. Do not commit, roll back or execute implicit-commit DDL inside transaction().");
             }
             $callbacks = array_pop($this->afterCommitFrames) ?? [];
@@ -181,28 +184,36 @@ final class DatabaseManager
                 throw new RuntimeException("Cannot defer external effects from a transaction owned outside DatabaseManager.");
             }
             if ($nested) {
-                $pdo->exec("RELEASE SAVEPOINT " . $savepoint);
+                if ($pdo->exec("RELEASE SAVEPOINT " . $savepoint) === false) { throw new RuntimeException("Unable to release transaction savepoint."); }
             } else {
-                $pdo->commit();
+                if (!$pdo->commit()) { throw new RuntimeException("Unable to commit transaction."); }
             }
         } catch (\Throwable $exception) {
             if (count($this->afterCommitFrames) >= $this->managedTransactionDepth) {
                 array_pop($this->afterCommitFrames);
             }
-            // Deadlocks and connection failures may already have ended the transaction.
-            if ($pdo->inTransaction()) {
-                try {
+            try {
+                // Deadlocks and connection failures may already have ended the transaction.
+                if ($pdo->inTransaction()) {
                     if ($nested) {
-                        $pdo->exec("ROLLBACK TO SAVEPOINT " . $savepoint);
-                        $pdo->exec("RELEASE SAVEPOINT " . $savepoint);
+                        if ($pdo->exec("ROLLBACK TO SAVEPOINT " . $savepoint) === false
+                            || $pdo->exec("RELEASE SAVEPOINT " . $savepoint) === false) {
+                            throw new RuntimeException("Unable to roll back transaction savepoint.");
+                        }
                     } else {
-                        $pdo->rollBack();
+                        if (!$pdo->rollBack()) { throw new RuntimeException("Unable to roll back transaction."); }
                     }
-                } catch (\Throwable $rollbackError) {
-                    throw new RuntimeException("Transaction rollback failed: " . $rollbackError->getMessage(), 0, $exception);
+                }
+            } catch (\Throwable) {
+                $this->transactionBroken = true;
+                throw new RuntimeException("Transaction rollback failed; connection invalidated.", 0, $exception);
+            } finally {
+                $this->managedTransactionDepth--;
+                if ($this->transactionBroken && $this->managedTransactionDepth === 0) {
+                    $this->pdo = null;
+                    $this->afterCommitFrames = [];
                 }
             }
-            $this->managedTransactionDepth--;
             throw $exception;
         }
 
@@ -233,7 +244,11 @@ final class DatabaseManager
 
     public function afterCommit(callable $callback): void
     {
+        if ($this->transactionBroken) { throw new RuntimeException("Cannot defer effects on an invalidated connection."); }
         if ($this->managedTransactionDepth === 0) {
+            if ($this->pdo?->inTransaction()) {
+                throw new RuntimeException("Cannot defer external effects from a transaction owned outside DatabaseManager.");
+            }
             $callback();
             return;
         }
@@ -242,6 +257,12 @@ final class DatabaseManager
             throw new RuntimeException("Managed transaction callback stack is unavailable.");
         }
         $this->afterCommitFrames[$index][] = $callback;
+    }
+
+    /** Does not open a connection merely to check an effect boundary. */
+    public function hasActiveTransaction(): bool
+    {
+        return $this->transactionBroken || $this->managedTransactionDepth > 0 || ($this->pdo?->inTransaction() ?? false);
     }
 
     public function hasActiveManagedTransaction(): bool

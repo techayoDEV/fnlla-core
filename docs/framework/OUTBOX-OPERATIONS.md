@@ -67,6 +67,11 @@ tokens, poison messages, rollback, bounded retries and explicit retry.
 
 ## Redis ready and delayed work
 
+Before upgrading the publisher, review the
+[persisted-event identity requirements](AUDIT-HARDENING.md). Domain listeners now
+run in a freshly authorized event context, and revoked actors block delivery.
+Historical audit messages remain deliverable after revocation.
+
 The reliable Redis queue now uses a ready list plus a delayed sorted set at
 `<prefix>delayed`. Retry delays are scored by their availability timestamp. Due
 work is promoted atomically; future work does not rotate through the ready list.

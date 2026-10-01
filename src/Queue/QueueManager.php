@@ -46,7 +46,7 @@ final class QueueManager
 
     public function push(string $jobClass, array $payload = [], array $context = []): string
     {
-        if ($this->database?->hasActiveManagedTransaction()) {
+        if ($this->database?->hasActiveTransaction()) {
             throw new RuntimeException("Queue dispatch inside a transaction must use pushAfterCommit().");
         }
         return $this->pushNow($jobClass, $payload, $context);

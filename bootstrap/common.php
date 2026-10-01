@@ -155,4 +155,11 @@ foreach ($providers as $provider) {
     $provider->boot();
 }
 
+// Optional trusted capability extensions use identical registration in CLI and HTTP.
+if ($container->has(\Fnlla\Php\Product\ProductModuleRegistry::class)) {
+    $modules = $container->make(\Fnlla\Php\Product\ProductModuleRegistry::class);
+    $modules->registerServices();
+    $modules->registerActions();
+}
+
 return $container;

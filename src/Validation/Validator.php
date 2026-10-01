@@ -37,9 +37,16 @@ final class Validator
 
     public function validate(): array
     {
+        $this->errors = [];
+        $definitions = [];
         foreach ($this->rules as $field => $rules) {
-            $this->validateField($field, is_array($rules) ? $rules : explode("|", (string) $rules));
+            if (!is_string($field) || (!is_array($rules) && !is_string($rules))) {
+                throw new \InvalidArgumentException("Invalid validation rule definition.");
+            }
+            $definitions[$field] = is_array($rules) ? $rules : explode("|", $rules);
+            foreach ($definitions[$field] as $rule) { $this->assertRule($rule); }
         }
+        foreach ($definitions as $field => $rules) { $this->validateField($field, $rules); }
 
         if ($this->errors !== []) {
             throw new ValidationException($this->errors);
@@ -66,6 +73,10 @@ final class Validator
         $value = $this->data[$field] ?? null;
         $nullable = in_array("nullable", $rules, true);
 
+        if (in_array("required", $rules, true) && ($value === null || $value === "" || $value === [])) {
+            $this->assert($field, false, "This field is required.");
+            return;
+        }
         if ($nullable && ($value === null || $value === "")) {
             return;
         }
@@ -81,8 +92,8 @@ final class Validator
                 "integer" => $this->assert($field, filter_var($value, FILTER_VALIDATE_INT) !== false, "This field must be an integer."),
                 "numeric" => $this->assert($field, is_numeric($value), "This field must be numeric."),
                 "url" => $this->assert($field, is_string($value) && filter_var($value, FILTER_VALIDATE_URL) !== false, "This field must be a valid URL."),
-                "min" => $this->assert($field, $this->size($value) >= (float) $parameter, "This field must be at least " . (string) $parameter . "."),
-                "max" => $this->assert($field, $this->size($value) <= (float) $parameter, "This field must not exceed " . (string) $parameter . "."),
+                "min" => $this->assert($field, $this->size($value, $rules) >= (float) $parameter, "This field must be at least " . (string) $parameter . "."),
+                "max" => $this->assert($field, $this->size($value, $rules) <= (float) $parameter, "This field must not exceed " . (string) $parameter . "."),
                 "boolean" => $this->assert($field, in_array($value, [true, false, 0, 1, "0", "1"], true), "This field must be boolean."),
                 "confirmed" => $this->assert($field, ($this->data[$field . "_confirmation"] ?? null) === $value, "This field confirmation does not match."),
                 "file" => $this->assert($field, $value instanceof UploadedFile && $value->isValid(), "This field must contain a valid uploaded file."),
@@ -91,13 +102,25 @@ final class Validator
 
             if ($parameter !== null && $name === "in") {
                 $allowed = explode(",", $parameter);
-                $this->assert($field, in_array((string) $value, $allowed, true), "This field contains an invalid value.");
+                $this->assert($field, (is_string($value) || is_int($value) || is_float($value)) && in_array((string) $value, $allowed, true), "This field contains an invalid value.");
             }
 
             if (isset($this->errors[$field])) {
                 break;
             }
         }
+    }
+
+    private function assertRule(mixed $rule): void
+    {
+        if (!is_string($rule)) { throw new \InvalidArgumentException("Validation rules must be strings."); }
+        [$name, $parameter] = array_pad(explode(":", $rule, 2), 2, null);
+        $plain = ["required", "nullable", "string", "array", "email", "integer", "numeric", "url", "boolean", "confirmed", "file"];
+        if (in_array($name, $plain, true) && $parameter === null) { return; }
+        if (in_array($name, ["min", "max"], true) && $parameter !== null
+            && is_numeric($parameter) && is_finite((float) $parameter)) { return; }
+        if ($name === "in" && $parameter !== null && $parameter !== "") { return; }
+        throw new \InvalidArgumentException("Unknown validation rule or invalid parameter.");
     }
 
     private function assert(string $field, bool $condition, string $message): void
@@ -107,7 +130,7 @@ final class Validator
         }
     }
 
-    private function size(mixed $value): float|int
+    private function size(mixed $value, array $rules): float|int
     {
         if ($value instanceof UploadedFile) {
             return $value->size();
@@ -117,10 +140,11 @@ final class Validator
             return count($value);
         }
 
+        if (in_array("string", $rules, true)) { return is_string($value) ? mb_strlen($value) : 0; }
         if (is_numeric($value)) {
             return (float) $value;
         }
 
-        return mb_strlen((string) $value);
+        return is_string($value) ? mb_strlen($value) : 0;
     }
 }

@@ -48,6 +48,7 @@ final class RuntimeInspector
         return [
             "schema" => "fnlla.runtime.inspection.v1",
             "context" => (new RuntimeSourceMap())->report($this->router),
+            "application_schema" => $this->container->make(\Fnlla\Php\Actions\ApplicationSchema::class)->inspect(),
             "runtime" => [
                 "name" => RuntimeIdentity::get("name"),
                 "version" => is_file($versionPath) ? trim((string) file_get_contents($versionPath)) : "unknown",

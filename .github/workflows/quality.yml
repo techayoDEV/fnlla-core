@@ -85,6 +85,9 @@ jobs:
       - name: Lint PHP
         run: php scripts/lint.php
 
+      - name: Verify HTTP mail security
+        run: python scripts/test-mail-http.py
+
       - name: Verify coding task evaluator
         run: python scripts/agent-eval.py self-test
 

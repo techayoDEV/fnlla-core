@@ -169,7 +169,8 @@ try {
 
     $auth->login($users->users["missing"]);
     sec_assert_throws(fn () => $contexts->runForAuthenticated(static fn (): bool => true), AuthorizationException::class, "Missing multi-tenant context was accepted.");
-    $auth->login($users->users["revoked"]);
+    sec_assert_throws(fn () => $auth->login($users->users["revoked"]), InvalidArgumentException::class, "Revoked actor logged in.");
+    $_SESSION[(string) config("auth.session_key")] = "revoked";
     sec_assert_true(!$access->allows("records.read"), "Revoked actor retained a permission.");
     sec_assert_throws(fn () => $contexts->runForAuthenticated(static fn (): bool => true), AuthorizationException::class, "Revoked actor resolved a tenant.");
 

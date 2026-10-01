@@ -3,7 +3,7 @@
 [![FNLLA Core — open web framework core](branding/assets/logo/fnlla-core-lockup.svg)](https://fnlla.com/core)
 
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
-[![Release](https://img.shields.io/badge/release-2.4.0-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.4.0)
+[![Release](https://img.shields.io/badge/release-2.5.0-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.5.0)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE.md)
 [![PHP 8.3+](https://img.shields.io/badge/runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
 [![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
@@ -33,8 +33,8 @@ framework primitives and safe defaults; the wider FNLLA product, documentation
 and licensed access live at [fnlla.com](https://fnlla.com).
 
 Package: `techayodev/fnlla-core`<br>
-Stable version: `2.4.0`. Availability is established by the matching immutable
-release. Read the [upgrade notes](docs/releases/2.4.0.md) before deploying.
+Stable version: `2.5.0`. Availability is established by the matching immutable
+release. Read the [upgrade notes](docs/releases/2.5.0.md) before deploying.
 
 ### Build with AI. Stay in control.
 
@@ -42,6 +42,11 @@ Give coding agents context, review their changes and maintain the result. The
 [developer workflow](docs/framework/DEVELOPER-WORKFLOW.md) documents source-based
 inspection, readiness, explicit OpenAPI and repeatable coding tasks in Core 2.4.0.
 Core and generated PHP applications work without runtime AI.
+
+Core 2.5.0 adds [application capabilities](docs/framework/CAPABILITIES.md): one
+action registry, executor and permission-filtered schema for downstream
+interfaces. Business rules remain in application actions; transports belong to
+consumers such as FNLLA Full.
 
 ## About FNLLA Core
 
@@ -95,7 +100,7 @@ Install from the public GitHub VCS repository:
 
 ```powershell
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.4.0
+composer require techayodev/fnlla-core:^2.5.0
 ```
 
 The package autoloads `Fnlla\Php\` from `src/` and includes the shared helper
