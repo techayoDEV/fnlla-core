@@ -1,6 +1,6 @@
 # FNLLA Core
 
-[![FNLLA Core — open web framework core](branding/assets/logo/fnlla-core-lockup.svg)](https://fnlla.com/core)
+[![FNLLA Core 2.5.0 — the open PHP foundation](branding/assets/readme/github-cover.svg)](https://fnlla.com/core)
 
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
 [![Release](https://img.shields.io/badge/release-2.5.0-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.5.0)
