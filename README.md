@@ -3,7 +3,7 @@
 [![FNLLA Core 2.5.0 — the open PHP foundation](branding/assets/readme/github-cover.svg)](https://fnlla.com/core)
 
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
-[![Release](https://img.shields.io/badge/release-2.5.0-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.5.0)
+[![Release](https://img.shields.io/badge/release-2.6.0-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.6.0)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE.md)
 [![PHP 8.3+](https://img.shields.io/badge/runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
 [![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
@@ -14,7 +14,7 @@
 [First capability](docs/framework/FIRST-CAPABILITY.md) ·
 [Architecture](docs/framework/ARCHITECTURE.md) ·
 [Documentation](docs/README.md) ·
-[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.5.0)
+[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.6.0)
 
 **Build with AI. Stay in control.** FNLLA Core is a PHP application foundation
 with explicit contracts that developers and coding agents can inspect. You
@@ -37,8 +37,8 @@ framework primitives and safe defaults; the wider FNLLA product, documentation
 and licensed access live at [fnlla.com](https://fnlla.com).
 
 Package: `techayodev/fnlla-core`<br>
-Stable version: `2.5.0`. Availability is established by the matching immutable
-release. Read the [upgrade notes](docs/releases/2.5.0.md) before deploying.
+Release target: `2.6.0`. Availability is established by the matching immutable
+release. Read the [upgrade notes](docs/releases/2.6.0.md) before deploying.
 
 ### Build with AI. Stay in control.
 
@@ -108,7 +108,7 @@ Install from the public GitHub VCS repository:
 
 ```powershell
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.5.0
+composer require techayodev/fnlla-core:^2.6.0
 ```
 
 The package autoloads `Fnlla\Php\` from `src/` and includes the shared helper

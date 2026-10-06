@@ -518,7 +518,7 @@ function app_environment(): string
 
 function app_debug(): bool
 {
-    return (bool) config("app.debug", false);
+    return strtolower(trim(app_environment())) !== 'production' && (bool) config("app.debug", false);
 }
 
 function request_id(): string

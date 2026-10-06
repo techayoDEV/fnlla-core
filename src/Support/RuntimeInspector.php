@@ -53,6 +53,14 @@ final class RuntimeInspector
                 "name" => RuntimeIdentity::get("name"),
                 "version" => is_file($versionPath) ? trim((string) file_get_contents($versionPath)) : "unknown",
             ],
+            'resilience' => [
+                'available' => true,
+                'enabled' => (bool) config('resilience.enabled', false),
+                'public_page_cache' => (bool) config('resilience.page_cache.enabled', false),
+                'health_endpoints' => (bool) config('resilience.health.enabled', false),
+                'request_state' => $this->container->bound(\Fnlla\Php\Resilience\DependencyHealth::class)
+                    ? $this->container->make(\Fnlla\Php\Resilience\DependencyHealth::class)->status() : 'healthy',
+            ],
             "container" => [
                 "active_scope" => $this->container->hasActiveScope(),
                 "bindings" => $this->container->inspectBindings(),

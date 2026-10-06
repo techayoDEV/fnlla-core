@@ -7,6 +7,12 @@ project intentionally stays focused on the open core runtime.
 
 ## Local Development
 
+The starter includes optional [FNLLA Navigation](docs/framework/NAVIGATION.md).
+Ordinary anchors use enhanced navigation; `data-fnlla-reload` requests a full
+browser visit. Routes still return complete PHP-rendered documents and forms
+keep native submission. Local assets are included; `npm ci` and `npm run build`
+rebuild them when needed, without adding an npm requirement to PHP serving.
+
 1. Copy `.env.example` to `.env` and set the application name and database credentials.
 2. Run `composer install`. Core is a local `packages/fnlla-core` path package;
    the default install stays small and the fallback bootstrap works offline

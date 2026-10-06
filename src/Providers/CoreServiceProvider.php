@@ -71,6 +71,7 @@ class CoreServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        \Fnlla\Php\Resilience\ResilienceServices::register($this->container);
         $this->container->instance(Container::class, $this->container);
         $this->container->singleton(ExceptionHandler::class);
         $this->container->singleton(DatabaseManager::class);

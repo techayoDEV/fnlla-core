@@ -74,7 +74,7 @@ $iterator = new RecursiveIteratorIterator(
         static function (SplFileInfo $item) use ($root): bool {
             $relative = ltrim(str_replace("\\", "/", substr($item->getPathname(), strlen($root))), "/");
             // Prune excluded trees before traversal, especially large consumer snapshots.
-            return preg_match('~^(?:\\.git|vendor|dist|storage)(?:/|$)~i', $relative) !== 1;
+            return preg_match('~^(?:\\.git|vendor|node_modules|dist|storage)(?:/|$)~i', $relative) !== 1;
         }
     ),
     RecursiveIteratorIterator::LEAVES_ONLY
@@ -88,7 +88,7 @@ foreach ($iterator as $item) {
         throw new RuntimeException("Distribution does not follow symbolic links: " . $item->getPathname());
     }
     $relative = ltrim(str_replace("\\", "/", substr($item->getPathname(), strlen($root))), "/");
-    if ($relative === "" || preg_match('~^(?:\.git|vendor|dist|storage)(?:/|$)~i', $relative) === 1) {
+    if ($relative === "" || preg_match('~^(?:\.git|vendor|node_modules|dist|storage)(?:/|$)~i', $relative) === 1) {
         continue;
     }
     if (is_sensitive_path($relative)) {
@@ -111,7 +111,7 @@ if ($releaseApproved) {
             throw new RuntimeException("Stable source cannot contain symlinks or submodules.");
         }
         $relative = $match[3];
-        if (preg_match('~^(?:vendor|dist|storage)(?:/|$)~i', $relative) === 1 || is_sensitive_path($relative)) { continue; }
+        if (preg_match('~^(?:vendor|node_modules|dist|storage)(?:/|$)~i', $relative) === 1 || is_sensitive_path($relative)) { continue; }
         if (preg_match('~^[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$~D', $relative) !== 1) {
             throw new RuntimeException("Unsafe committed artifact path.");
         }

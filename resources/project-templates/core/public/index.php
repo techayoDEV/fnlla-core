@@ -19,6 +19,10 @@ Purpose:
 */
 
 $root = dirname(__DIR__);
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+$emergency = require $root . '/bootstrap/emergency.php';
+if ($emergency($root)) { exit; }
 $gatePath = $root . "/bootstrap/update-gate.php";
 $gate = is_file($gatePath) ? (require $gatePath)($root) : ["ready" => true, "lock" => null];
 if (!$gate["ready"]) {
@@ -36,6 +40,9 @@ try {
     $GLOBALS["fnlla_update_read_lease"] = ["root" => $root, "stream" => $gate["lock"]];
     $application = require $root . "/bootstrap/app.php";
     $application->run();
+} catch (\Throwable) {
+    @error_log('FNLLA application bootstrap failed; serving emergency response.');
+    $emergency($root, true);
 } finally {
     if (is_resource($gate["lock"])) { fclose($gate["lock"]); }
     unset($GLOBALS["fnlla_update_read_lease"]);

@@ -9,3 +9,4 @@
 /branding/.brand-update-lock/
 __pycache__/
 *.py[cod]
+/node_modules/

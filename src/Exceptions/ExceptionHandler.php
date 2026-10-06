@@ -58,6 +58,10 @@ final class ExceptionHandler
 
     public function render(Throwable $exception, Request $request): Response
     {
+        if (\Fnlla\Php\Resilience\DependencyFailure::classify($exception) !== null) {
+            return $this->renderHttpException(new HttpException(503, 'A required service is temporarily unavailable.'), $request)
+                ->withHeader('Retry-After', '30')->withHeader('Cache-Control', 'no-store')->withHeader('X-FNLLA-Status', 'unavailable');
+        }
         if ($exception instanceof HttpException) {
             return $this->renderHttpException($exception, $request);
         }
@@ -85,8 +89,21 @@ final class ExceptionHandler
     private function renderHttpException(HttpException $exception, Request $request): Response
     {
         $status = $exception->statusCode();
-        $message = $exception->getMessage();
+        $message = app_debug() ? $exception->getMessage() : match ($status) {
+            403 => 'Access to this resource is forbidden.',
+            404 => 'The requested resource was not found.',
+            413 => 'The request body is too large.',
+            429 => 'Too many requests. Please try again later.',
+            502, 503, 504 => 'The service is temporarily unavailable. Please try again shortly.',
+            default => 'The request could not be completed.',
+        };
         $headline = match ($status) {
+            403 => 'Forbidden',
+            404 => 'Not Found',
+            500 => 'Server Error',
+            502 => 'Bad Gateway',
+            503 => 'Service Unavailable',
+            504 => 'Gateway Timeout',
             413 => "Request too large",
             429 => "Too many requests",
             default => "Request could not be completed",
@@ -114,7 +131,7 @@ final class ExceptionHandler
             return Response::html(View::render("pages/error", $data), $status);
         } catch (Throwable $renderError) {
             $this->report($renderError, $request);
-            return Response::text("The application could not render this request.", 500)
+            return Response::text("The application could not render this request.", $status)
                 ->withHeader("Cache-Control", "no-store");
         }
     }

@@ -40,6 +40,7 @@ $GLOBALS["fnlla_php_container"] = $container;
 
 $container->instance(\Fnlla\Php\Container\Container::class, $container);
 $container->singleton(\Fnlla\Php\Console\Application::class);
+(new \Fnlla\Php\Providers\CoreServiceProvider($container))->register();
 
 $console = $container->make(\Fnlla\Php\Console\Application::class);
 $commands = [
@@ -47,6 +48,7 @@ $commands = [
     "MigrateStatus", "Seed", "QueueWork", "RuntimeInspect", "RuntimeDoctor", "FnllaUpgrade", "MakeController", "MakeMiddleware",
     "MakeCommand", "MakeFactory", "MakeSeeder", "MakeMigration", "ProductValidate", "OpenApiExport",
     "OutboxWork", "OutboxStatus", "OutboxRetry",
+    "Health", "FallbackGenerate", "Down", "Up",
     "ProductModuleValidate", "ProductModuleList", "ProductModuleInspect", "ProductModuleEnable", "ProductModuleDisable",
 ];
 

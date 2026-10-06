@@ -97,6 +97,20 @@ final class Container
         }
     }
 
+    /** Roll back registrations from an optional provider; not external side effects. */
+    public function transactionalBindings(callable $callback): mixed
+    {
+        $bindings = $this->bindings;
+        $instances = $this->instances;
+        $scopes = $this->scopes;
+        try { return $callback($this); } catch (\Throwable $exception) {
+            $this->bindings = $bindings;
+            $this->instances = $instances;
+            $this->scopes = $scopes;
+            throw $exception;
+        }
+    }
+
     public function hasActiveScope(): bool
     {
         return $this->scopes !== [];

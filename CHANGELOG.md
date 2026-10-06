@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 2.6.0 — 2026-10-06
+
+- Add opt-in resilience: typed dependency failures, public last-known-good opt-in, isolated optional providers, disposable cache failover, bounded read retries/circuits, safe health and emergency/maintenance artifacts. Preserve immutable installed Core dependencies; see docs/resilience.md for activation and compatibility limits.
+
+- Complete FNLLA Navigation Step 4: keyboard skip/focus, polite route/Region announcements, reduced-motion utilities, menu/search cleanup, script/style nonce preservation and desktop/mobile regression probes. Keep document animations disabled and native SSR/forms authoritative.
+
+- Add FNLLA Navigation Step 3: keyed page/Region lifecycle, read-only Region GET navigation with history and native error fallback, and scoped cleanup. Preserve native POST/CSRF/PRG; Full adds real repository browsing and commit pagination Regions.
+
+- Add FNLLA Navigation Step 2: compatible SSR shell persistence, fresh active/account state, visit-scoped resource cleanup, stable local assets and subtle delayed loading feedback. Keep Regions and form enhancement deferred.
+
+- Add the optional FNLLA Navigation Step 1 layer to starter applications: ordinary HTML links, full-reload opt-out and a small page lifecycle boundary. Preserve complete PHP SSR responses and native form submissions.
+
 - Reorganize the documentation around application setup, architectural ownership,
   a complete capability example and operational recovery. Clarify Core versus
   Full transport responsibilities and immutable-release documentation boundaries.

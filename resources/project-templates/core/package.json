@@ -1,0 +1,11 @@
+{
+  "name": "fnlla-navigation-assets",
+  "private": true,
+  "scripts": {
+    "build:navigation": "node scripts/build-navigation.mjs",
+    "build": "npm run build:navigation"
+  },
+  "dependencies": {
+    "@hotwired/turbo": "8.0.23"
+  }
+}

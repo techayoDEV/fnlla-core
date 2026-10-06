@@ -7,12 +7,17 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-This is the maintained documentation for **Core 2.5.0**. Guides describe the
+This is the maintained documentation for **Core 2.6.0**. Guides describe the
 implemented contracts and their limits. The documentation on the development
 branch may be newer than the files in an immutable release ZIP; updating a guide
 does not replace that release or upgrade an installed dependency.
 
+- [Resilience: safe defaults and operations](resilience.md)
+
 ## Choose your path
+
+The 2.6.0 starter also includes [FNLLA Navigation Steps 1–4](framework/NAVIGATION.md).
+These optional starter enhancements preserve PHP SSR and native forms. Earlier immutable releases remain unchanged.
 
 | Goal | Read first | Continue with |
 | --- | --- | --- |

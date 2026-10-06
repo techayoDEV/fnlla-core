@@ -76,6 +76,9 @@ final class Application
     public function handle(Request $request): Response
     {
         $startedAt = microtime(true);
+        $health = $this->container->bound(\Fnlla\Php\Resilience\DependencyHealth::class)
+            ? $this->container->make(\Fnlla\Php\Resilience\DependencyHealth::class) : null;
+        $health?->reset();
         unset($_SERVER["FNLLA_ROUTE_NAME"]);
         $observer = null;
         try {
@@ -102,6 +105,7 @@ final class Application
             }
             return $this->finalizeResponse($request, $response, $startedAt, $observer);
         } finally {
+            $health?->reset();
             unset($_SERVER["FNLLA_ROUTE_NAME"]);
             try {
                 $observer?->reset();
@@ -154,6 +158,22 @@ final class Application
         responses expose the same correlation handle that was used in logs.
         */
         $final = $response->withHeader("X-Request-Id", $request->requestId());
+        if (config('resilience.enabled', false) === true) {
+            $headers = array_change_key_case($final->headers(), CASE_LOWER);
+            if (!isset($headers['x-fnlla-status'])) {
+                $state = $this->container->bound(\Fnlla\Php\Resilience\DependencyHealth::class)
+                    ? $this->container->make(\Fnlla\Php\Resilience\DependencyHealth::class)->status() : 'healthy';
+                $final = $final->withHeader('X-FNLLA-Status', $final->status() >= 500 ? 'unavailable' : $state);
+            }
+        }
+        if (config('resilience.enabled', false) === true && $this->container->bound(\Fnlla\Php\Resilience\ResilienceEvents::class)) {
+            $events = $this->container->make(\Fnlla\Php\Resilience\ResilienceEvents::class);
+            $events->emit('request_count', ['status' => (string) $response->status()], false);
+            if ($response->status() >= 500) { $events->emit('response_5xx_count', [], false); }
+            if ((array_change_key_case($final->headers(), CASE_LOWER)['x-fnlla-status'] ?? '') === 'degraded') {
+                $events->emit('degraded_response_count', [], false);
+            }
+        }
 
         if ($startedAt !== null) {
             $durationMs = (microtime(true) - $startedAt) * 1000;

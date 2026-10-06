@@ -141,18 +141,14 @@ register_shutdown_function(static function (): void {
 $container = new Container();
 $GLOBALS["fnlla_container"] = $container;
 $GLOBALS["fnlla_php_container"] = $container;
-$providers = [];
-
-/* Service providers register first, then boot in a second pass once the container is ready. */
-foreach ((array) config("app.providers", []) as $providerClass) {
-    /** @var ServiceProvider $provider */
-    $provider = new $providerClass($container);
-    $provider->register();
-    $providers[] = $provider;
-}
-
-foreach ($providers as $provider) {
-    $provider->boot();
+$resilienceEvents = new \Fnlla\Php\Resilience\ResilienceEvents();
+$dependencyHealth = new \Fnlla\Php\Resilience\DependencyHealth($resilienceEvents, (array) config('resilience.dependencies', []));
+$container->instance(\Fnlla\Php\Resilience\DependencyHealth::class, $dependencyHealth);
+(new \Fnlla\Php\Resilience\ProviderBooter($container, $dependencyHealth))->boot(
+    (array) config('app.providers', []), (array) config('resilience.providers', [])
+);
+if ($container->bound(\Fnlla\Php\Resilience\ResilienceEvents::class)) {
+    $dependencyHealth->observeWith($container->make(\Fnlla\Php\Resilience\ResilienceEvents::class));
 }
 
 // Optional trusted capability extensions use identical registration in CLI and HTTP.

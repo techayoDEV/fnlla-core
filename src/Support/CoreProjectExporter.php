@@ -23,6 +23,7 @@ final class CoreProjectExporter
         // Customize only application-owned template files. The bundled package is
         // copied last so project tokens can never rewrite verified Core content.
         $this->copyDirectory($templateRoot, $targetRoot);
+        $this->write($targetRoot . '/docs/resilience.md', (string) file_get_contents($packageRoot . '/docs/resilience.md'));
         $this->writeProjectComposer($targetRoot, $appName, $packageSlug);
         $this->replaceTokens($targetRoot, [
             "{{APP_NAME}}" => $this->cleanAppName($appName),
@@ -43,7 +44,7 @@ final class CoreProjectExporter
             }
         }
 
-        foreach (["README.md", "LICENSE.md", "SECURITY.md", "VERSION"] as $file) {
+        foreach (["README.md", "LICENSE.md", "SECURITY.md", "VERSION", "docs/resilience.md"] as $file) {
             $source = $sourceRoot . "/" . $file;
 
             if (is_file($source)) {

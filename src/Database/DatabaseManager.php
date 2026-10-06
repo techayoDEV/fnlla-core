@@ -130,7 +130,7 @@ final class DatabaseManager
                 $options
             );
         } catch (PDOException $exception) {
-            throw new RuntimeException("Database connection failed: " . $exception->getMessage(), 0, $exception);
+            throw new \Fnlla\Php\Resilience\DependencyUnavailable('database', $exception);
         }
 
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

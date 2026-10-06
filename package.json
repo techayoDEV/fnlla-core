@@ -1,0 +1,10 @@
+{
+  "name": "fnlla-navigation-assets",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-navigation.mjs --output=resources/project-templates/core/public/assets/fnlla"
+  },
+  "dependencies": {
+    "@hotwired/turbo": "8.0.23"
+  }
+}

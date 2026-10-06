@@ -111,6 +111,14 @@ try {
         $composerExit === 0,
         "Packaged composer.json failed strict validation: " . $composerOutput
     );
+    // Local-review traversal must also prune ignored build dependencies. Keeping
+    // @scoped packages breaks immutable manifests and bloats shipped artifacts.
+    mkdir($releaseArtifactRoot . '/node_modules/@synthetic/library', 0700, true);
+    file_put_contents($releaseArtifactRoot . '/node_modules/@synthetic/library/package.json', '{}');
+    $localOutput = $releaseArtifactRoot . '/dist/local-review';
+    [$localExit, $localText] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . '/scripts/build-local-artifact.php',
+        '9.8.8-alpha.1', $localOutput, '--local-review'], $releaseArtifactRoot);
+    release_artifact_assert($localExit === 0 && !is_dir($localOutput . '/node_modules'), 'Local artifact shipped build dependencies: ' . $localText);
 
     fwrite(STDOUT, "FNLLA Core release artifact builder tests passed." . PHP_EOL);
 } finally {
