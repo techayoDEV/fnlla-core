@@ -1,7 +1,6 @@
 # Runtime reliability and upgrade contracts
 
-These contracts target Core 2.7.0. Availability requires its immutable release
-and passing exact-commit CI. Core 2.6.0 artefacts remain unchanged; upgrade the
+These contracts are available in released Core 2.7.0, verified by exact-commit CI. Core 2.6.0 artefacts remain unchanged; upgrade the
 installed package before relying on these contracts in an application.
 
 ## Commit and delivery

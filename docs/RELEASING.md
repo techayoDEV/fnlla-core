@@ -57,3 +57,12 @@ has a bounded timeout. Composer's download cache uses OS and exact lock digest;
 installs, strict validation and analysis still run. Vendor/build outputs are not
 cached. Deterministic package artifacts retain a 14-day review window. Expired
 evidence requires fresh validation, never replacement of a released artifact.
+
+## GitHub titles and protected integration
+
+Release tags and artifacts are immutable. The display title is always
+`FNLLA-CORE X.X.X`, including prerelease suffixes when applicable. Never use a
+title edit to imply different artifact contents. Main requires a PR, strict
+PHP 8.3 and PHP 8.4 checks and conversation resolution, with administrator
+enforcement and force-push/deletion disabled. The owner-approved solo policy
+requires zero approving GitHub reviews; CI and PR requirements remain mandatory.

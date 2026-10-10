@@ -190,3 +190,23 @@ local prerelease with `scripts/build-local-artifact.php --local-review` and test
 it in isolated consumers. Keep the source version, stable consumer locks and
 bundled package unchanged until a reviewed dependency upgrade. A candidate test
 does not authorize publication or make its contracts available in stable Core.
+
+## Delivery from scope to release
+
+Start with one user outcome, its owner, excluded scope and observable acceptance.
+Use the existing Product Specification, App Map and Product Graph; do not create
+a duplicate backlog. Implement one complete vertical slice through the owning
+policies, Actions, HTTP and UI, including denial, missing-data and stale/conflict
+cases. Keep synthetic fixtures separate from customers and production providers.
+
+For each change, bind context, plan, tests and review to the exact source and
+installed dependencies. Source drift requires renewed evidence. Automated tests
+do not replace human usability or product acceptance. Update the maintained
+contract and upgrade instructions in the same PR. Merge only after required CI
+and the applicable owner/review policy; remove the completed branch afterwards.
+
+Release acceptance includes clean install, protected application updates,
+rollback/recovery, operational ownership and an immutable verified artifact.
+Technical review, client acceptance, release authorization and deployment are
+separate decisions. Record actual lead time, rework, defects and billed CI/AI
+usage when measuring delivery; do not infer savings from commit timestamps.

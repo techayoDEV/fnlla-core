@@ -1,6 +1,8 @@
 # Queue, Cache And Request Concurrency
 
-These changes ship in Core 2.4.0; older immutable packages remain unchanged.
+Current contract: Core 2.7.0. Atomic admission was introduced in 2.4.0;
+older immutable packages remain unchanged. The lock-stripe migration below
+applies when upgrading from 2.6.0.
 
 ## Long-running jobs
 

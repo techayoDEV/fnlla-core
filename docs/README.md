@@ -20,7 +20,7 @@ does not replace that release or upgrade an installed dependency.
 
 ## Choose your path
 
-The 2.6.0 starter also includes [FNLLA Navigation Steps 1–4](framework/NAVIGATION.md).
+The current 2.7.0 starter includes [FNLLA Navigation Steps 1–4](framework/NAVIGATION.md).
 These optional starter enhancements preserve PHP SSR and native forms. Earlier immutable releases remain unchanged.
 
 | Goal | Read first | Continue with |
