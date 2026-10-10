@@ -8,7 +8,7 @@ adds delivery claims, ownership checks, acknowledgement, retry and status.
 
 ## Upgrade and enable
 
-Unreleased starters default to reliable asynchronous delivery; maintained older
+Core 2.7.0 starters default to reliable asynchronous delivery; maintained older
 application configurations are not silently switched. Review
 [runtime reliability](RUNTIME-RELIABILITY.md). Set
 `ACTION_PUBLISH_AFTER_COMMIT=false` for supervised delivery rather than relay

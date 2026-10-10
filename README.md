@@ -5,7 +5,7 @@
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
 [![Release](https://img.shields.io/badge/release-2.7.0-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.0)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE.md)
-[![PHP 8.3+](https://img.shields.io/badge/runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
+[![PHP 8.3+](https://img.shields.io/badge/web%20runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
 [![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
 
 **Built for developers working with AI.**
@@ -16,7 +16,7 @@
 [Documentation](docs/README.md) ·
 [Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.0)
 
-**Build with AI. Stay in control.** FNLLA Core is a PHP application foundation
+**Build with AI. Stay in control.** FNLLA Core is a Web application foundation
 with explicit contracts that developers and coding agents can inspect. You
 direct the work, review changes and maintain the result. No runtime AI required.
 
@@ -28,7 +28,7 @@ developers and coding agents.
 
 | Build | Inspect | Stay in control |
 | --- | --- | --- |
-| PHP runtime, application Actions and module contracts | Routes, capabilities and machine-readable application metadata | Explicit permissions, validation, tests and reviewable changes |
+| web runtime, application Actions and module contracts | Routes, capabilities and machine-readable application metadata | Explicit permissions, validation, tests and reviewable changes |
 
 [![FNLLA Core architecture: explicit framework primitives beneath an application-owned product layer](branding/assets/readme/core-architecture.svg)](docs/README.md)
 
@@ -46,12 +46,19 @@ Give coding agents context, review their changes and maintain the result. The
 [developer workflow](docs/framework/DEVELOPER-WORKFLOW.md) documents source-based
 inspection, readiness, explicit OpenAPI and repeatable coding tasks available
 since Core 2.4.0 and included in 2.5.0.
-Core and generated PHP applications work without runtime AI.
+Core and generated web applications work without runtime AI.
 
 Core 2.5.0 adds [application capabilities](docs/framework/CAPABILITIES.md): one
 action registry, executor and permission-filtered schema for downstream
 interfaces. Business rules remain in application actions; transports belong to
 consumers such as FNLLA Full.
+
+## Web runtime and UI runtime
+
+The **web runtime** is the server-side application engine, implemented in PHP.
+PHP versions and extensions remain installation requirements. The **UI runtime**
+provides browser components, styles and interactions as a separate layer.
+These names identify different responsibilities; neither runtime requires AI.
 
 ## About FNLLA Core
 

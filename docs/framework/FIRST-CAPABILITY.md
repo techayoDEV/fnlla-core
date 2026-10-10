@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md) · [Capability reference](CAPABILITIES.md)
 
-This Core 2.5.0 example registers an authenticated pricing preview and executes
+This Core 2.7.0 example registers an authenticated pricing preview and executes
 it through the shared executor. It needs no database query and creates no HTTP
 endpoint. Prices supplied to this preview are illustrative inputs; real checkout
 commands must load authoritative prices and authorize the relevant resources.

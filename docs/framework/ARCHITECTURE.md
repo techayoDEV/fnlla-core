@@ -1,8 +1,8 @@
 # Architecture and responsibility boundaries
 
-[Documentation index](../README.md) · Applies to Core 2.5.0
+[Documentation index](../README.md) · Applies to Core 2.7.0
 
-FNLLA Core supplies the PHP runtime and reusable application contracts.
+FNLLA Core supplies the web runtime and reusable application contracts.
 Applications define business behavior. FNLLA Full consumes Core and provides
 additional developer tooling and capability adapters. Core has no dependency
 on Full, an AI provider or a hosted FNLLA service.

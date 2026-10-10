@@ -1,8 +1,8 @@
 # FNLLA Core Documentation
 
-- [Runtime reliability and migration contracts (unreleased)](framework/RUNTIME-RELIABILITY.md)
+- [Runtime reliability and migration contracts (Core 2.7.0)](framework/RUNTIME-RELIABILITY.md)
 
-- [Application snapshot primitives (unreleased)](framework/APPLICATION-SNAPSHOTS.md)
+- [Application snapshot primitives (Core 2.7.0)](framework/APPLICATION-SNAPSHOTS.md)
 
 FNLLA Core is the standalone public core package for the FNLLA framework family,
 built for developers working with AI. Its contribution is architectural:
@@ -25,7 +25,7 @@ These optional starter enhancements preserve PHP SSR and native forms. Earlier i
 
 | Goal | Read first | Continue with |
 | --- | --- | --- |
-| Create a PHP application | [Getting started](framework/GETTING-STARTED.md) | [Runtime contracts](framework/RUNTIME-CONTRACTS.md) |
+| Create a web application | [Getting started](framework/GETTING-STARTED.md) | [Runtime contracts](framework/RUNTIME-CONTRACTS.md) |
 | Understand Core and Full | [Architecture](framework/ARCHITECTURE.md) | [Capability reference](framework/CAPABILITIES.md) |
 | Write a reusable application operation | [First capability](framework/FIRST-CAPABILITY.md) | [Actions and events](framework/ACTIONS-AND-DOMAIN-EVENTS.md) |
 | Configure permissions and tenancy | [Security primitives](framework/SECURITY-PRIMITIVES.md) | [Runtime hardening](framework/AUDIT-HARDENING.md) |

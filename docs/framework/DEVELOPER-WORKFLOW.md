@@ -1,12 +1,12 @@
 # Build with AI. Stay in control.
 
-Core supplies a PHP application foundation, a project starter and developer tools.
+Core supplies a Web application foundation, a project starter and developer tools.
 Humans define the task, inspect the proposed changes and maintain the application.
 Coding agents can use the same local contracts and checks. No runtime AI, model
 account, provider SDK or commercial FNLLA package is required.
 
 The developer tools below were introduced in Core 2.4.0 and remain available in
-2.5.0. Core 2.5.0 additionally supplies the [capability schema](CAPABILITIES.md)
+2.7.0. Core 2.5.0 introduced the [capability schema](CAPABILITIES.md)
 in local inspection. Use the [getting-started guide](GETTING-STARTED.md) for a
 new application and upgrade older immutable dependencies before adopting contracts.
 

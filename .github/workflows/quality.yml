@@ -48,7 +48,7 @@ jobs:
       - name: Test fail-closed exact-commit release checks
         if: runner.os == 'Linux'
         run: python -B -m unittest discover -s tests -p test_release_ci.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: stable-package-${{ matrix.os }}
           path: dist/release/*.zip*
