@@ -46,7 +46,7 @@ final class ActionTransaction
             if ($stored !== null) {
                 $replay = ActionResult::replay($stored);
                 if ($validateOutput !== null) { $validateOutput($replay->value); }
-                $database->afterCommit(fn (): int => $this->outbox->publishPending());
+                if ((bool) config('actions.publish_after_commit', true)) { $database->afterCommit(fn () => $this->outbox->publishAfterCommit()); }
                 return $replay;
             }
 
@@ -100,7 +100,7 @@ final class ActionTransaction
             $this->store->append($auditId, "audit", $definition->id, $audit->toArray());
             $result = new ActionResult($definition->id, $mutation->subjectId, $mutation->result, $eventIds);
             $this->store->complete($idempotencyKey, $result->toArray());
-            $database->afterCommit(fn (): int => $this->outbox->publishPending());
+            if ((bool) config('actions.publish_after_commit', true)) { $database->afterCommit(fn () => $this->outbox->publishAfterCommit()); }
             return $result;
         });
     }

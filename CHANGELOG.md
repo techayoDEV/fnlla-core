@@ -1,6 +1,24 @@
 # FNLLA Core Changelog
 
-## Unreleased
+## 2.7.0 — 2026-10-10
+
+- Core-to-Full upgrade preserves existing application delivery configuration,
+  preventing implicit outbox mode changes during profile promotion.
+
+- Run all independent after-commit callbacks and retain aggregate private failure
+  evidence. Keep committed Action results separate from durable outbox delivery;
+  isolate legacy poison rows and default fresh starters to supervised reliable
+  delivery. Existing installations require an explicit migration and worker cutover.
+- Add neutral exception reporting, safe uncaught/fatal diagnostics and allowlisted
+  queue error codes. Full tracking is now registered upstream. Native PHP error
+  text requires restricted opt-in; historical failed-job records remain unchanged.
+- Add generator export baselines and text-only EOL comparisons, preserving real
+  application edits. Bound file-cache locks to 256 stripes with an explicit legacy
+  rollout option and expiry-only cache maintenance. Drain workers before changing
+  lock protocols. See docs/framework/RUNTIME-RELIABILITY.md for compatibility.
+
+
+- Add optional durable application-file snapshots, streamed MySQL whole-database backup/restore and bounded recovery processes for upstream update orchestration. Existing file-only transactions remain compatible. See docs/framework/APPLICATION-SNAPSHOTS.md.
 
 ## 2.6.0 — 2026-10-06
 

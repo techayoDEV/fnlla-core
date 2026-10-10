@@ -25,7 +25,9 @@ final class OutboxProcessor
             return (new OutboxWorker($this->store, $this->audit, $this->events))->work($limit)["published"];
         }
         $published = 0;
+        $failures = 0;
         foreach ($this->store->pending($limit) as $message) {
+            try {
             if ($message["kind"] === "audit") {
                 $this->audit->record($this->auditEvent($message["payload"]));
             } elseif ($message["kind"] === "domain_event") {
@@ -35,8 +37,20 @@ final class OutboxProcessor
             }
             $this->store->markPublished($message["id"]);
             $published++;
+            } catch (\Throwable $error) {
+                $failures++;
+                \Fnlla\Php\Exceptions\ExceptionReporting::report($error, ['outbox_message_id' => $message['id'] ?? 'unknown']);
+            }
         }
+        if ($failures > 0) { throw new RuntimeException('Legacy outbox delivery failed for ' . $failures . ' message(s); migrate to reliable delivery for quarantine and retry.'); }
         return $published;
+    }
+
+    /** Durable records remain pending; delivery failure cannot undo a committed Action. */
+    public function publishAfterCommit(): void
+    {
+        try { $this->publishPending(); }
+        catch (\Throwable $error) { \Fnlla\Php\Exceptions\ExceptionReporting::report($error, ['phase' => 'outbox_after_commit']); }
     }
 
     /** @param array<string, mixed> $payload */

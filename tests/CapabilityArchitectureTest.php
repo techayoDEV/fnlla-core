@@ -188,6 +188,21 @@ try {
     } catch (RuntimeException) {}
     cap_assert(count($observed) === $eventsBefore, 'Rolled-back outer transaction emitted success hook.');
 
+    $reported = [];
+    $container->instance(\Fnlla\Php\Exceptions\ExceptionReporterInterface::class, new class($reported) implements \Fnlla\Php\Exceptions\ExceptionReporterInterface {
+        public function __construct(private array &$reported) {}
+        public function report(Throwable $error, array $context = [], ?\Fnlla\Php\Http\Request $request = null): void { $this->reported[] = [$error, $context]; }
+    });
+    $original = new RuntimeException('SYNTHETIC_PRIVATE_CAPABILITY_FAILURE');
+    $registry->register(cap_definition('fixture.reporting', handler: static function () use ($original): never { throw $original; }));
+    cap_error('execution_failed', fn () => $executor->execute('fixture.reporting', ['value' => 'one'], $context));
+    cap_assert(count($reported) === 1 && $reported[0][0] === $original, 'Original capability failure was not reported once.');
+    cap_assert($reported[0][1]['correlation_id'] === $context->tenant->correlationId(), 'Failure correlation was lost.');
+    $container->instance(\Fnlla\Php\Exceptions\ExceptionReporterInterface::class, new class implements \Fnlla\Php\Exceptions\ExceptionReporterInterface {
+        public function report(Throwable $error, array $context = [], ?\Fnlla\Php\Http\Request $request = null): void { throw new RuntimeException('Reporter unavailable.'); }
+    });
+    cap_error('execution_failed', fn () => $executor->execute('fixture.reporting', ['value' => 'one'], $context));
+
     $moduleFixture = pm_write_fixture($capTemp);
     $moduleContainer = new Container();
     $moduleContainer->singleton(ActionRegistry::class);

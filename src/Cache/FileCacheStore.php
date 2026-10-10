@@ -22,8 +22,9 @@ namespace Fnlla\Php\Cache;
 
 use RuntimeException;
 
-final class FileCacheStore implements CacheStoreInterface, RateLimitStoreInterface
+final class FileCacheStore implements CacheStoreInterface, RateLimitStoreInterface, PrunableCacheStoreInterface
 {
+    private string $lockProtocol;
     public function __construct(
         private string $directory,
         private ?CacheSerializerInterface $serializer = null,
@@ -34,6 +35,8 @@ final class FileCacheStore implements CacheStoreInterface, RateLimitStoreInterfa
             throw new RuntimeException("Cannot create cache directory.");
         }
         $this->directory = (string) realpath($this->directory);
+        $this->lockProtocol = (string) config('cache.file_lock_protocol', 'striped');
+        if (!in_array($this->lockProtocol, ['striped', 'legacy'], true)) { throw new RuntimeException('Unsupported file-cache lock protocol.'); }
 
         $this->serializer ??= new JsonCacheSerializer();
         $this->legacySerializer ??= new PhpCacheSerializer();
@@ -91,6 +94,21 @@ final class FileCacheStore implements CacheStoreInterface, RateLimitStoreInterfa
         return true;
     }
 
+    public function pruneExpired(): int
+    {
+        $removed = 0;
+        foreach (new \DirectoryIterator($this->directory) as $entry) {
+            if (preg_match('/^([a-f0-9]{40})\.cache$/D', $entry->getFilename(), $match) !== 1) { continue; }
+            $path = $entry->getPathname();
+            $removed += $this->lockedHash($match[1], function () use ($path): int {
+                $existed = is_file($path);
+                $this->readPath($path);
+                return $existed && !is_file($path) ? 1 : 0;
+            });
+        }
+        return $removed;
+    }
+
     public function increment(string $key, int $value = 1, int $ttlSeconds = 3600): int
     {
         return $this->locked($key, function () use ($key, $value, $ttlSeconds): int {
@@ -128,7 +146,11 @@ final class FileCacheStore implements CacheStoreInterface, RateLimitStoreInterfa
 
     private function read(string $key, bool $strict = false): ?array
     {
-        $path = $this->path($key);
+        return $this->readPath($this->path($key), $strict);
+    }
+
+    private function readPath(string $path, bool $strict = false): ?array
+    {
         if (is_link($path)) {
             throw new RuntimeException("Cache entries cannot be symbolic links.");
         }
@@ -213,7 +235,9 @@ final class FileCacheStore implements CacheStoreInterface, RateLimitStoreInterfa
 
     private function lockedHash(string $hash, callable $callback): mixed
     {
-        $lockPath = $this->directory . DIRECTORY_SEPARATOR . $hash . ".lock";
+        // A fixed pool bounds lock cardinality, including cache misses. Never unlink
+        // live locks: clear() removes data only. Drain old workers before upgrading.
+        $lockPath = $this->directory . DIRECTORY_SEPARATOR . ($this->lockProtocol === 'legacy' ? $hash : 'lock-v2-' . substr($hash, 0, 2)) . '.lock';
         clearstatcache();
         if (is_link($lockPath)) {
             throw new RuntimeException("Cache locks cannot be symbolic links.");

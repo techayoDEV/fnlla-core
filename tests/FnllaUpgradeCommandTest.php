@@ -47,11 +47,12 @@ fnlla_upgrade_write_fixture($upgradeSource, $cleanProject, false, $upgradeRoot);
 fnlla_upgrade_assert_same(0, $planExit, "Clean generated Core should produce an upgrade-ready plan: " . $planOutput);
 $plan = json_decode($planOutput, true, 512, JSON_THROW_ON_ERROR);
 fnlla_upgrade_assert_same("upgrade-ready", $plan["status"] ?? null, "Clean generated Core was not classified as upgrade-ready.");
-fnlla_upgrade_assert_true(isset($plan["updates"]["config/actions.php"]), "Clean Core-owned configuration was not classified as an update.");
-fnlla_upgrade_assert_true(!isset($plan["conflicts"]["config/actions.php"]), "Clean Core-owned configuration was classified as a conflict.");
+fnlla_upgrade_assert_true(isset($plan["updates"]["config/cache.php"]), "Clean Core-owned configuration was not classified as an update.");
+fnlla_upgrade_assert_true(isset($plan["skips"]["config/actions.php"]), "Application delivery policy must be retained even when pristine.");
 fnlla_upgrade_assert_true(isset($plan["updates"]["fnlla.cmd"]), "Pristine installed Core launcher was not recognized across distinct Framework template bytes.");
 
 $projectRoute = (string) file_get_contents($cleanProject . DIRECTORY_SEPARATOR . "routes" . DIRECTORY_SEPARATOR . "web.php");
+$deliveryPolicy = (string) file_get_contents($cleanProject . '/config/actions.php');
 [$applyExit, $applyOutput] = fnlla_upgrade_run_process([
     PHP_BINARY,
     "fnlla",
@@ -65,10 +66,11 @@ fnlla_upgrade_assert_same(0, $applyExit, "Clean generated Core upgrade failed: "
 $applied = json_decode($applyOutput, true, 512, JSON_THROW_ON_ERROR);
 fnlla_upgrade_assert_same("applied", $applied["status"] ?? null, "Clean generated Core upgrade was not applied.");
 fnlla_upgrade_assert_same(
-    hash_file("sha256", $upgradeSource . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "actions.php"),
-    hash_file("sha256", $cleanProject . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "actions.php"),
+    hash_file("sha256", $upgradeSource . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "cache.php"),
+    hash_file("sha256", $cleanProject . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "cache.php"),
     "Core-owned configuration did not update to the Framework source."
 );
+fnlla_upgrade_assert_same($deliveryPolicy, (string) file_get_contents($cleanProject . '/config/actions.php'), "Upgrade changed the existing delivery mode or migration policy.");
 fnlla_upgrade_assert_same(
     $projectRoute,
     (string) file_get_contents($cleanProject . DIRECTORY_SEPARATOR . "routes" . DIRECTORY_SEPARATOR . "web.php"),
@@ -89,7 +91,7 @@ fnlla_upgrade_write_fixture($upgradeSource, $modifiedProject, true, $upgradeRoot
 fnlla_upgrade_assert_same(1, $conflictExit, "Modified Core-owned configuration should block automatic upgrade.");
 $conflictPlan = json_decode($conflictOutput, true, 512, JSON_THROW_ON_ERROR);
 fnlla_upgrade_assert_same("conflicts", $conflictPlan["status"] ?? null, "Modified Core-owned configuration did not produce a conflict plan.");
-fnlla_upgrade_assert_true(isset($conflictPlan["updates"]["config/actions.php"]), "Mixed plan lost the clean Core-owned update.");
+fnlla_upgrade_assert_true(isset($conflictPlan["updates"]["config/cache.php"]), "Mixed plan lost the clean Core-owned update.");
 fnlla_upgrade_assert_true(isset($conflictPlan["conflicts"]["config/auth.php"]), "Mixed plan did not protect modified Core-owned content.");
 fnlla_upgrade_assert_true(isset($conflictPlan["conflicts"]["fnlla.cmd"]), "Modified launcher must not be overwritten during upgrade.");
 fnlla_upgrade_assert_same("<?php return ['owner' => 'application'];\n", (string) file_get_contents($modifiedProject . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "auth.php"), "Conflict planning changed application content.");
@@ -121,9 +123,10 @@ function fnlla_upgrade_write_fixture(string $source, string $project, bool $modi
     fnlla_upgrade_write($source . DIRECTORY_SEPARATOR . "public" . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "fnlla-runtime" . DIRECTORY_SEPARATOR . "VERSION", "3.0.0\n");
     fnlla_upgrade_write($source . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "project-templates" . DIRECTORY_SEPARATOR . "v1" . DIRECTORY_SEPARATOR . "export-files.json", json_encode([
         "schema" => "fnlla.project_export.v1",
-        "files" => ["config/actions.php", "config/auth.php", "config/framework.php", "routes/web.php"],
+        "files" => ["config/actions.php", "config/cache.php", "config/auth.php", "config/framework.php", "routes/web.php"],
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
     fnlla_upgrade_write($source . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "actions.php", "<?php return ['mode' => 'framework'];\n");
+    fnlla_upgrade_write($source . '/config/cache.php', "<?php return ['mode' => 'framework'];\n");
     fnlla_upgrade_write($source . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "auth.php", "<?php return ['guard' => 'framework'];\n");
     fnlla_upgrade_write($source . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "framework.php", "<?php return ['enabled' => true];\n");
     fnlla_upgrade_write($source . DIRECTORY_SEPARATOR . "routes" . DIRECTORY_SEPARATOR . "web.php", "<?php // framework route\n");
@@ -141,6 +144,7 @@ function fnlla_upgrade_write_fixture(string $source, string $project, bool $modi
         (string) file_get_contents($root . "/resources/project-templates/core/fnlla.cmd")
         . ($modified ? "REM application-owned edit\r\n" : ""));
     fnlla_upgrade_write($project . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "actions.php", (string) file_get_contents($root . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "project-templates" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "actions.php"));
+    fnlla_upgrade_write($project . '/config/cache.php', (string) file_get_contents($root . '/resources/project-templates/core/config/cache.php'));
     fnlla_upgrade_write(
         $project . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "auth.php",
         $modified

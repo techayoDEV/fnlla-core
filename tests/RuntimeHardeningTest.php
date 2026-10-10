@@ -402,6 +402,21 @@ runtime_expect_exception(PostCommitCallbackException::class, static function () 
 }, "Post-commit callback failure was not distinguished from rollback.");
 runtime_assert_same("COMMIT", end($transactionPdo->calls), "Post-commit failure rewrote the committed transaction.");
 
+$independentEffects = [];
+try {
+    $database->transaction(static function (DatabaseManager $db) use (&$independentEffects): void {
+        $db->afterCommit(static function () use (&$independentEffects): never { $independentEffects[] = 'first'; throw new RuntimeException('SYNTHETIC_PRIVATE_FIRST'); });
+        $db->afterCommit(static function () use (&$independentEffects): void { $independentEffects[] = 'second'; });
+        $db->afterCommit(static function () use (&$independentEffects): never { $independentEffects[] = 'third'; throw new RuntimeException('SYNTHETIC_PRIVATE_THIRD'); });
+    });
+    throw new LogicException('Expected aggregated post-commit failure.');
+} catch (PostCommitCallbackException $error) {
+    runtime_assert_same([1, 3], array_keys($error->failures()), 'Post-commit failures did not retain callback positions.');
+    runtime_assert_same(false, str_contains($error->getMessage(), 'SYNTHETIC_PRIVATE'), 'Post-commit summary exposed callback text.');
+}
+runtime_assert_same(['first', 'second', 'third'], $independentEffects, 'One callback skipped independent committed effects.');
+runtime_assert_same('COMMIT', end($transactionPdo->calls), 'Independent effects changed commit outcome.');
+
 $transactionQueueDirectory = $queueDirectory . DIRECTORY_SEPARATOR . "transaction-queue";
 $transactionQueueStore = new FileQueueStore($transactionQueueDirectory);
 $transactionQueue = new QueueManager($scopeContainer, $transactionQueueStore, $database);

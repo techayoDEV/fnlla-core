@@ -43,8 +43,18 @@ try {
 
     file_put_contents($concurrencyRoot . "/cache/" . sha1("rate-limit:corrupt") . ".cache", "{broken");
     concurrency_rejects(fn () => $limiter->acquire("corrupt", 1), "Corrupt rate counter failed open.");
-    mkdir($concurrencyRoot . "/cache/" . sha1("rate-limit:locked") . ".lock");
-    concurrency_rejects(fn () => $limiter->acquire("locked", 1), "Unavailable cache lock failed open.");
+    $unavailable = new FileCacheStore($concurrencyRoot . '/broken-lock');
+    mkdir($concurrencyRoot . '/broken-lock/lock-v2-' . substr(sha1('rate-limit:locked'), 0, 2) . '.lock');
+    concurrency_rejects(fn () => (new RateLimiter($unavailable))->acquire("locked", 1), "Unavailable cache lock failed open.");
+    $bounded = new FileCacheStore($concurrencyRoot . '/bounded-locks');
+    for ($key = 0; $key < 1000; $key++) { $bounded->get('missing-' . $key); }
+    $locks = glob($concurrencyRoot . '/bounded-locks/*.lock') ?: [];
+    concurrency_check(count($locks) > 0 && count($locks) <= 256, 'Cache miss lock cardinality is unbounded.');
+    $bounded->put('live', 'preserved', 3600);
+    file_put_contents($concurrencyRoot . '/bounded-locks/' . sha1('expired') . '.cache', json_encode(['expires_at' => time() - 1, 'value' => 'old'], JSON_THROW_ON_ERROR));
+    concurrency_check($bounded->pruneExpired() === 1 && $bounded->get('live') === 'preserved', 'Pruning removed live data or retained expired data.');
+    $bounded->clear();
+    concurrency_check(count(glob($concurrencyRoot . '/bounded-locks/*.lock') ?: []) <= 256, 'Clear created extra locks or removed live synchronization.');
     mkdir($concurrencyRoot . "/cache/" . sha1("rate-limit:unwritable") . ".cache");
     concurrency_rejects(fn () => $limiter->acquire("unwritable", 1), "Failed cache write granted a slot.");
     concurrency_rejects(fn () => $cache->increment("rate-limit:unwritable"), "Failed increment returned success.");

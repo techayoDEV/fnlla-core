@@ -10,3 +10,6 @@
 __pycache__/
 *.py[cod]
 /node_modules/
+
+/.fnlla/application-update/
+/.fnlla/update-transaction/

@@ -23,6 +23,7 @@ $capServiceDb = DatabaseManager::using($capServicePdo);
 $capServiceQueuePath = sys_get_temp_dir() . '/' . $capServicePrefix;
 try {
     $GLOBALS['fnlla_config'] = ['actions' => ['receipts_table' => $capServicePrefix . '_receipts', 'outbox_table' => $capServicePrefix . '_outbox'],
+        'app' => ['log_path' => $capServiceQueuePath . '/diagnostics.log'],
         'security' => ['authorization' => ['roles' => ['writer' => ['permissions' => ['fixture.write']]]]]];
     $store = new DatabaseActionStore($capServiceDb);
     $store->installSchema();
@@ -67,18 +68,23 @@ try {
     serviceCheck((int) $capServicePdo->query("SELECT COUNT(*) FROM `{$capServicePrefix}_receipts`")->fetchColumn() === 1, 'Rollback left a receipt.');
     serviceCheck((int) $capServicePdo->query("SELECT COUNT(*) FROM `{$capServicePrefix}_outbox`")->fetchColumn() === 1, 'Rollback left an audit message.');
     $audit->fail = true;
-    try { $executor->execute('fixture.postcommit', ['value' => 3], $context); throw new RuntimeException('Expected callback failure.'); }
-    catch (ActionException $error) { serviceCheck($error->reason === 'post_commit_failed', 'Committed failure was misclassified.'); }
+    $committed = $executor->execute('fixture.postcommit', ['value' => 3], $context);
+    serviceCheck(!$committed->replayed && $committed->value === ['value' => 3], 'Relay failure replaced the committed result.');
     serviceCheck((int) $capServicePdo->query("SELECT COUNT(*) FROM `{$capServicePrefix}`")->fetchColumn() === 2, 'Post-commit failure lost the mutation.');
+    serviceCheck(count($store->pending()) === 1, 'Failed audit was acknowledged or lost.');
+    $diagnostics = (string) file_get_contents($capServiceQueuePath . '/diagnostics.log');
+    serviceCheck(str_contains($diagnostics, 'RuntimeException') && !str_contains($diagnostics, 'private-driver-error'), 'Relay failure diagnostics were missing or unsafe.');
     $audit->fail = false;
     serviceCheck($executor->execute('fixture.postcommit', ['value' => 3], $context)->replayed, 'Post-commit recovery repeated mutation.');
     serviceCheck(count($store->pending()) === 0, 'Recovered audit remains pending.');
+    serviceCheck((int) $capServicePdo->query("SELECT COUNT(*) FROM `{$capServicePrefix}`")->fetchColumn() === 2, 'Relay recovery duplicated the mutation.');
     echo "Capability real-MySQL commit, replay, output rollback and post-commit recovery passed.\n";
 } finally {
     foreach ([$capServicePrefix, $capServicePrefix . '_outbox', $capServicePrefix . '_receipts'] as $table) {
         $capServicePdo->exec("DROP TABLE IF EXISTS `{$table}`");
     }
     $GLOBALS['fnlla_config'] = $capServiceConfig;
+    if (is_file($capServiceQueuePath . '/diagnostics.log')) { unlink($capServiceQueuePath . '/diagnostics.log'); }
     // No jobs are dispatched by this fixture; remove only its empty directories.
     foreach ([$capServiceQueuePath . '/pending', $capServiceQueuePath . '/failed', $capServiceQueuePath . '/reserved', $capServiceQueuePath] as $directory) {
         if (is_dir($directory) && count(scandir($directory)) === 2) { rmdir($directory); }

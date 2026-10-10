@@ -166,7 +166,7 @@ final class QueueManager
                 $failedPath = "lease-lost";
                 try {
                     if ($store->owns($queuedJob)) {
-                        $failedPath = $store->reject($queuedJob, $exception->getMessage());
+                        $failedPath = $store->reject($queuedJob, 'invalid_payload');
                     }
                 } catch (Throwable $settlement) {
                     Logger::exception($settlement, ["queue_job_id" => $queuedJob["id"]]);
@@ -185,7 +185,7 @@ final class QueueManager
                 $failedPath = "lease-lost";
                 try {
                     if ($store->owns($queuedJob)) {
-                        $queuedJob["last_error"] = $exception->getMessage();
+                        $queuedJob["last_error"] = 'job_failed';
                         $failedPath = $store->fail($queuedJob);
                     }
                 } catch (Throwable $settlement) {
@@ -255,7 +255,7 @@ final class QueueManager
                     $scope->call([$job, "handle"]);
                 });
             } catch (Throwable $exception) {
-                $queuedJob["last_error"] = $exception->getMessage();
+                $queuedJob["last_error"] = 'legacy_job_failed';
                 $failedPath = $this->store->fail($queuedJob);
                 Logger::exception($exception, [
                     "queue_job_id" => $queuedJob["id"] ?? "unknown",

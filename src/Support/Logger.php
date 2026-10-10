@@ -27,10 +27,8 @@ final class Logger
     public static function configuredPath(): string
     {
         $configured = trim((string) config("app.log_path", ""));
-        $fallback = storage_path("logs/app.log");
-
         if ($configured === "") {
-            return $fallback;
+            return storage_path("logs/app.log");
         }
 
         if (is_dir($configured) || preg_match('/[\\\\\\/]$/', $configured) === 1) {
@@ -48,7 +46,7 @@ final class Logger
         $directory = dirname($logPath);
 
         if (!is_dir($directory)) {
-            mkdir($directory, 0777, true);
+            mkdir($directory, 0700, true);
         }
 
         self::rotateIfNeeded($logPath);

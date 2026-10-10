@@ -19,6 +19,7 @@ Purpose:
 */
 
 return [
+    "file_lock_protocol" => env("FILE_CACHE_LOCK_PROTOCOL", "striped"),
     "default" => (string) env("CACHE_STORE", "file"),
     "serializer" => (string) env("CACHE_SERIALIZER", "json"),
     "stores" => [

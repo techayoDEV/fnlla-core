@@ -38,6 +38,14 @@ final class CacheClearCommand extends Command
 
     public function handle(array $arguments): int
     {
+        if (in_array('--expired', $arguments, true)) {
+            $store = $this->container->make(CacheStoreInterface::class);
+            if (!$store instanceof \Fnlla\Php\Cache\PrunableCacheStoreInterface) {
+                throw new \RuntimeException('The configured cache does not support expiry pruning.');
+            }
+            $this->line('Expired cache entries removed: ' . $store->pruneExpired());
+            return 0;
+        }
         if (!$this->container->make(CacheStoreInterface::class)->clear()) {
             throw new \RuntimeException("The cache store could not be cleared.");
         }

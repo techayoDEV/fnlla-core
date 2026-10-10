@@ -231,6 +231,7 @@ fwrite(STDOUT, json_encode([
 
 function is_sensitive_path(string $relative): bool
 {
+    if (preg_match('~^\.fnlla/(?:application-update|update-transaction)(?:/|$)~i', $relative) === 1) { return true; }
     $name = strtolower(basename($relative));
     if (str_starts_with($name, ".env") && !in_array($name, [".env.example", ".env.platform.example"], true)) {
         return true;

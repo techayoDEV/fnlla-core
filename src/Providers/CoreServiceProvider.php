@@ -74,6 +74,7 @@ class CoreServiceProvider extends ServiceProvider
         \Fnlla\Php\Resilience\ResilienceServices::register($this->container);
         $this->container->instance(Container::class, $this->container);
         $this->container->singleton(ExceptionHandler::class);
+        $this->container->singleton(\Fnlla\Php\Exceptions\ExceptionReporterInterface::class, \Fnlla\Php\Exceptions\LogExceptionReporter::class);
         $this->container->singleton(DatabaseManager::class);
         $this->container->singleton(SessionStore::class);
         $this->container->singleton(CacheStoreInterface::class, static function (): CacheStoreInterface {

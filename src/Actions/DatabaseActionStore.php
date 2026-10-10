@@ -113,10 +113,9 @@ final class DatabaseActionStore implements ReliableOutboxStoreInterface
         );
         $rows = [];
         foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $payload = json_decode((string) ($row["payload_json"] ?? ""), true, 512, JSON_THROW_ON_ERROR);
-            if (!is_array($payload)) {
-                throw new RuntimeException("Stored outbox payload is invalid.");
-            }
+            // Keep poison records in the batch so one corrupt envelope cannot hide later rows.
+            try { $payload = json_decode((string) ($row["payload_json"] ?? ""), true, 512, JSON_THROW_ON_ERROR); }
+            catch (\JsonException) { $payload = null; }
             $rows[] = [
                 "id" => (string) $row["message_id"],
                 "kind" => (string) $row["kind"],

@@ -20,8 +20,6 @@ Purpose:
 
 use Fnlla\Php\Container\Container;
 use Fnlla\Php\Support\Env;
-use Fnlla\Php\Support\FnllaRuntimeGuard;
-use Fnlla\Php\Support\Logger;
 use Fnlla\Php\Support\ServiceProvider;
 
 if (!defined("APP_ROOT")) {
@@ -90,27 +88,15 @@ Env::load(env_file_path());
 $GLOBALS["fnlla_config"] = load_config_directory(base_path("config"));
 $GLOBALS["fnlla_php_config"] = $GLOBALS["fnlla_config"];
 
-/*
-Development guard note:
-- FNLLA uses this shared bootstrap point to enforce the official integrated UI
-  surface boundary
-- the guard is skipped only for specific maintainer repair flows that need to
-  fix a broken UI contract from the CLI itself
-*/
-if (!defined("FNLLA_RUNTIME_SKIP_AUTO_GUARD") && class_exists(FnllaRuntimeGuard::class)) {
-    FnllaRuntimeGuard::enforce();
-}
-
 date_default_timezone_set((string) config("app.timezone", "UTC"));
 error_reporting(E_ALL);
 ini_set("display_errors", app_debug() ? "1" : "0");
 ini_set("display_startup_errors", app_debug() ? "1" : "0");
-ini_set("log_errors", "1");
-ini_set("error_log", \Fnlla\Php\Support\Logger::configuredPath());
+\Fnlla\Php\Exceptions\RuntimeErrorHandling::install();
 
 $logPath = dirname(\Fnlla\Php\Support\Logger::configuredPath());
 if (!is_dir($logPath)) {
-    mkdir($logPath, 0777, true);
+    mkdir($logPath, 0700, true);
 }
 
 set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
@@ -119,23 +105,6 @@ set_error_handler(static function (int $severity, string $message, string $file,
     }
 
     throw new \ErrorException($message, 0, $severity, $file, $line);
-});
-
-register_shutdown_function(static function (): void {
-    $error = error_get_last();
-    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
-
-    if (!is_array($error) || !in_array($error["type"] ?? 0, $fatalTypes, true)) {
-        return;
-    }
-
-    Logger::write("critical", "Fatal error", [
-        "request_id" => request_id(),
-        "type" => $error["type"] ?? null,
-        "message" => $error["message"] ?? "Unknown fatal error",
-        "file" => $error["file"] ?? null,
-        "line" => $error["line"] ?? null,
-    ]);
 });
 
 $container = new Container();

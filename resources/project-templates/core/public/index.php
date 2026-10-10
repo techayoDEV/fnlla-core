@@ -21,10 +21,8 @@ Purpose:
 $root = dirname(__DIR__);
 ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
-$emergency = require $root . '/bootstrap/emergency.php';
-if ($emergency($root)) { exit; }
 $gatePath = $root . "/bootstrap/update-gate.php";
-$gate = is_file($gatePath) ? (require $gatePath)($root) : ["ready" => true, "lock" => null];
+$gate = is_file($root . '/.fnlla/application-update/active.json') ? ['ready' => false, 'lock' => null] : (is_file($gatePath) ? (require $gatePath)($root) : ["ready" => true, "lock" => null]);
 if (!$gate["ready"]) {
     http_response_code(503);
     header("Content-Type: text/plain; charset=UTF-8");
@@ -34,6 +32,11 @@ if (!$gate["ready"]) {
     if (($_SERVER["REQUEST_METHOD"] ?? "GET") !== "HEAD") {
         echo "Service temporarily unavailable. Please try again shortly.";
     }
+    exit;
+}
+$emergency = require $root . '/bootstrap/emergency.php';
+if ($emergency($root)) {
+    if (is_resource($gate['lock'])) { fclose($gate['lock']); }
     exit;
 }
 try {

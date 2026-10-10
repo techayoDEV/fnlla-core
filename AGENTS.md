@@ -8,7 +8,13 @@ license: MIT
 depends_on: []
 must_not_depend_on: [techayodev/fnlla, fnlla.com, ai-provider-sdk, search-provider-sdk]
 product_positioning:
+  category: Web Framework
   primary: Built for developers working with AI.
+  specialization: AI-assisted engineering
+  flagship_experience: Developer Operations Panel (owned by FNLLA, not Core)
+  complementary_capability: business administration (owned upstream)
+  internal_quality_ambition: The best AI-assisted web framework
+  quality_ambition_is_public_claim: false
   architecture: provider-neutral AI-engineering foundation
   human_authority: humans direct, decide, review and control changes
   runtime_ai_required: false
@@ -192,3 +198,8 @@ in their maintained references. Tool loading is documented by
 [Codex](https://developers.openai.com/codex/guides/agents-md),
 [Claude Code](https://code.claude.com/docs/en/memory) and
 [Copilot](https://docs.github.com/en/copilot/reference/custom-instructions-support).
+
+Product naming: describe FNLLA only as a **Web Framework**. PHP remains a
+technical implementation language and runtime requirement, not the product
+category. Apply this naming to current copy, metadata, documentation and brand
+exports; preserve technical identifiers and immutable historical artifacts.

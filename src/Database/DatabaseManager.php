@@ -227,16 +227,17 @@ final class DatabaseManager
             return $result;
         }
 
+        $failures = [];
         foreach ($callbacks as $index => $afterCommit) {
             try {
                 $afterCommit();
             } catch (\Throwable $exception) {
-                throw new PostCommitCallbackException(
-                    "Database commit succeeded, but after-commit callback " . ($index + 1) . " failed: " . $exception->getMessage(),
-                    0,
-                    $exception
-                );
+                $failures[$index + 1] = $exception;
             }
+        }
+        if ($failures !== []) {
+            throw new PostCommitCallbackException('Database commit succeeded; ' . count($failures) . ' after-commit callback(s) failed.',
+                0, reset($failures), $failures);
         }
 
         return $result;

@@ -24,6 +24,7 @@ final class CoreProjectExporter
         // copied last so project tokens can never rewrite verified Core content.
         $this->copyDirectory($templateRoot, $targetRoot);
         $this->write($targetRoot . '/docs/resilience.md', (string) file_get_contents($packageRoot . '/docs/resilience.md'));
+        $this->write($targetRoot . '/docs/framework/APPLICATION-SNAPSHOTS.md', (string) file_get_contents($packageRoot . '/docs/framework/APPLICATION-SNAPSHOTS.md'));
         $this->writeProjectComposer($targetRoot, $appName, $packageSlug);
         $this->replaceTokens($targetRoot, [
             "{{APP_NAME}}" => $this->cleanAppName($appName),
@@ -31,6 +32,15 @@ final class CoreProjectExporter
             "{{FNLLA_CORE_VERSION}}" => $this->version(),
         ]);
         $this->writeRuntimePlaceholders($targetRoot);
+        $paths = [];
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($templateRoot, FilesystemIterator::SKIP_DOTS));
+        foreach ($iterator as $item) {
+            if ($item->isFile() && !$item->isLink()) {
+                $relative = ltrim(substr(str_replace('\\', '/', $item->getPathname()), strlen(str_replace('\\', '/', $templateRoot))), '/');
+                if (!str_starts_with($relative, '.fnlla/') && !str_starts_with($relative, 'storage/')) { $paths[] = $relative; }
+            }
+        }
+        ProjectExportBaseline::record($targetRoot, $paths);
         $this->copyCorePackage($packageRoot, $targetRoot . "/packages/fnlla-core");
     }
 

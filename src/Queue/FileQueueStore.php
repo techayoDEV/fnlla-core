@@ -57,7 +57,7 @@ final class FileQueueStore implements ReliableQueueStoreInterface
                 $maximum = max(1, (int) ($payload["max_attempts"] ?? config("queue.max_attempts", 1)));
                 if ($attempts >= $maximum) {
                     $payload["state"] = "failed";
-                    $payload["last_error"] = "Reservation expired after the final attempt.";
+                    $payload["last_error"] = 'attempts_exhausted';
                     $this->write($file, $payload);
                     $this->quarantine($file);
                     continue;
@@ -87,7 +87,7 @@ final class FileQueueStore implements ReliableQueueStoreInterface
     {
         return $this->locked(function () use ($job): string {
             [$file, $payload] = $this->owned($job);
-            $payload["last_error"] = substr((string) ($job["last_error"] ?? "Job failed."), 0, 4000);
+            $payload["last_error"] = QueueFailure::code((string) ($job["last_error"] ?? 'job_failed'));
             unset($payload["reservation"], $payload["reserved_until"]);
             $payload["state"] = $payload["attempts"] < $payload["max_attempts"] ? "pending" : "failed";
             $payload["available_at"] = time() + max(1, (int) config("queue.retry_backoff_seconds", 30));
@@ -100,7 +100,7 @@ final class FileQueueStore implements ReliableQueueStoreInterface
     {
         return $this->locked(function () use ($job, $reason): string {
             [$file, $payload] = $this->owned($job);
-            $payload["last_error"] = substr($reason, 0, 4000);
+            $payload["last_error"] = QueueFailure::code($reason);
             $payload["state"] = "failed";
             unset($payload["reservation"], $payload["reserved_until"]);
             $this->write($file, $payload);

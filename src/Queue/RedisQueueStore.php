@@ -85,7 +85,7 @@ for _, id in ipairs(expired) do
             job.reservation = nil
             job.reserved_until = nil
             if tonumber(job.attempts) >= tonumber(job.max_attempts) then
-                job.last_error = 'Reservation expired after the final attempt.'
+                job.last_error = 'attempts_exhausted'
                 redis.call('RPUSH', KEYS[2], cjson.encode(job))
             else
                 redis.call('RPUSH', KEYS[1], cjson.encode(job))
@@ -322,7 +322,7 @@ redis.call('ZREM', KEYS[4], ARGV[1])
 return 1
 LUA, [$this->pendingKey, $this->failedKey, $this->reservedKey, $this->leasesKey, $this->delayedKey,
             (string) ($job["id"] ?? ""), (string) ($job["reservation"] ?? ""), $mode,
-            substr((string) ($job["last_error"] ?? "Job failed."), 0, 4000),
+            QueueFailure::code((string) ($job["last_error"] ?? 'job_failed')),
             max(1, (int) config("queue.retry_backoff_seconds", 30))], 5);
         if ($result !== 1) {
             throw new RuntimeException("Queue reservation is missing, expired or owned by another worker.");

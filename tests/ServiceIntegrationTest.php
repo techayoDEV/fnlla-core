@@ -137,10 +137,11 @@ try {
     $retryId = $first->push("CoreIntegrationJob", []);
     $retry = $first->pop();
     serviceCheck($retry !== null, "Cannot reserve retry test job.");
-    $first->fail($retry);
+    $first->fail($retry, 'Bearer SYNTHETIC_PRIVATE_QUEUE_ERROR');
     serviceCheck($redis->lLen($prefix . "pending") === 0 && $redis->zCard($prefix . "delayed") === 1, "Retry entered the ready queue early.");
     $rawDelayed = $redis->zRange($prefix . "delayed", 0, 0)[0];
     $due = json_decode($rawDelayed, true, 512, JSON_THROW_ON_ERROR);
+    serviceCheck($due['last_error'] === 'job_failed' && !str_contains($rawDelayed, 'SYNTHETIC_PRIVATE_QUEUE_ERROR'), 'Redis retry persisted raw exception text.');
     $due["available_at"] = time() - 1;
     $redis->zRem($prefix . "delayed", $rawDelayed);
     $redis->zAdd($prefix . "delayed", time() - 1, json_encode($due, JSON_THROW_ON_ERROR));

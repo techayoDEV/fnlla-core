@@ -32,6 +32,13 @@ ready-made SaaS or billing engine.
 
 ## Versioning
 
+Core release versions come from the repository `VERSION`. Product contract,
+module and schema versions describe their own compatibility and do not need to
+match that release number. For example, a `1.0.0` specification or module remains
+valid with a newer Core release when its contract is unchanged. Historical
+Framework `2.1.3` upgrade baselines and the frozen `3.0.0` business blueprint
+identify older inputs; they are not declarations of the current Core version.
+
 - `schema` is the compatibility discriminator. Consumers must reject an
   unknown schema instead of guessing.
 - `specification_version` versions the document shape within

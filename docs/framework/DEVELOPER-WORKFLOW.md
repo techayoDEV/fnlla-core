@@ -176,3 +176,17 @@ untrusted implementations in a disposable OS/container environment with no
 credentials or network access and keep the grader outside the agent's writable
 paths. Time/output limits bound normal checks, not hostile child processes.
 No measured speed, quality or cost improvement follows from harness verification.
+
+## Checking downstream integrations
+
+Core remains independent of the commercial Framework and fnlla.com. Project
+administration, local Git hosting, project files, team chat and analytics views
+belong to Framework; commerce accounts and public documentation belong to the
+application. Synchronizing those modules does not require adding them to Core.
+
+Check downstream locks against the immutable Core artifact and its manifest.
+When the Core working tree contains unreleased runtime changes, build a distinct
+local prerelease with `scripts/build-local-artifact.php --local-review` and test
+it in isolated consumers. Keep the source version, stable consumer locks and
+bundled package unchanged until a reviewed dependency upgrade. A candidate test
+does not authorize publication or make its contracts available in stable Core.

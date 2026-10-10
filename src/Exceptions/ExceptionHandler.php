@@ -23,7 +23,6 @@ namespace Fnlla\Php\Exceptions;
 use Fnlla\Php\Http\HttpException;
 use Fnlla\Php\Http\Request;
 use Fnlla\Php\Http\Response;
-use Fnlla\Php\Support\Logger;
 use Fnlla\Php\View\View;
 use Throwable;
 
@@ -31,29 +30,7 @@ final class ExceptionHandler
 {
     public function report(Throwable $exception, Request $request): void
     {
-        // Full FNLLA may install a first-party issue tracker. Core logging must
-        // remain available when that optional extension is absent or fails.
-        $trackerClass = "Fnlla\\Php\\Observability\\RuntimeIssueTracker";
-        if (class_exists($trackerClass)) {
-            try {
-                $tracker = new $trackerClass();
-                if (is_callable([$tracker, "record"])) {
-                    call_user_func([$tracker, "record"], $exception, $request);
-                }
-            } catch (Throwable) {
-                @error_log("FNLLA issue tracking failed; continuing with Core exception logging.");
-            }
-        }
-        try {
-            Logger::exception($exception, [
-                "request_id" => $request->requestId(),
-                "method" => $request->method(),
-                "path" => $request->path(),
-                "ip" => $request->ip(),
-            ]);
-        } catch (Throwable) {
-            @error_log("FNLLA exception reporting failed; check log storage permissions.");
-        }
+        ExceptionReporting::report($exception, request: $request);
     }
 
     public function render(Throwable $exception, Request $request): Response

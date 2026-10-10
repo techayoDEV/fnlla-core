@@ -86,6 +86,12 @@ final class ActionExecutor
             return new ActionResult($result->actionId, $result->subjectId,
                 ActionShape::project($metadata->output, $result->value), $result->eventIds, $result->replayed);
         } catch (Throwable $error) {
+            if (!$error instanceof ActionException && !$error instanceof AuthorizationException && !$error instanceof ValidationException) {
+                \Fnlla\Php\Exceptions\ExceptionReporting::report($error, [
+                    'capability' => isset($definition) ? $definition->id : 'unresolved',
+                    'correlation_id' => $context->tenant->correlationId(),
+                ], container: $this->container);
+            }
             $failure = match (true) {
                 $error instanceof ActionException => $error,
                 $error instanceof AuthorizationException => new ActionException('unauthorized'),

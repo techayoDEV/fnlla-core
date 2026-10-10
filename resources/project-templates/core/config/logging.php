@@ -19,6 +19,8 @@ Purpose:
 */
 
 return [
+    "native_errors_enabled" => (bool) env("LOG_NATIVE_ERRORS_ENABLED", false),
+    "native_error_path" => env("LOG_NATIVE_ERROR_PATH", storage_path("logs/native-errors.log")),
     "redact_keys" => array_values(array_filter(array_map(
         static fn (string $key): string => strtolower(trim($key)),
         explode(",", (string) env("LOG_REDACT_KEYS", "password,pass,secret,token,authorization,cookie,set-cookie,csrf,_token,api_key"))

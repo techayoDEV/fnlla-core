@@ -1,5 +1,9 @@
 # FNLLA Core Documentation
 
+- [Runtime reliability and migration contracts (unreleased)](framework/RUNTIME-RELIABILITY.md)
+
+- [Application snapshot primitives (unreleased)](framework/APPLICATION-SNAPSHOTS.md)
+
 FNLLA Core is the standalone public core package for the FNLLA framework family,
 built for developers working with AI. Its contribution is architectural:
 readable PHP, explicit contracts and verifiable behavior that developers and
@@ -7,7 +11,7 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-This is the maintained documentation for **Core 2.6.0**. Guides describe the
+This is the maintained documentation for **Core 2.7.0**. Guides describe the
 implemented contracts and their limits. The documentation on the development
 branch may be newer than the files in an immutable release ZIP; updating a guide
 does not replace that release or upgrade an installed dependency.

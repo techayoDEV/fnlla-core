@@ -9,6 +9,7 @@ return [
     "outbox_table" => env("ACTION_OUTBOX_TABLE", "fnlla_action_outbox"),
     "delivery_table" => env("ACTION_OUTBOX_DELIVERY_TABLE", "fnlla_outbox_deliveries"),
     // Enable after the application migration installs the delivery side table.
-    "reliable_outbox" => (bool) env("ACTION_RELIABLE_OUTBOX", false),
+    "reliable_outbox" => (bool) env("ACTION_RELIABLE_OUTBOX", true),
+    "publish_after_commit" => (bool) env("ACTION_PUBLISH_AFTER_COMMIT", false),
     "outbox" => ["max_attempts" => 5, "lease_seconds" => 60, "retry_seconds" => 5],
 ];

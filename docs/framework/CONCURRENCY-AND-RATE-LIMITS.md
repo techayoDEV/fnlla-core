@@ -50,8 +50,11 @@ limits if preserving the previous window is required.
 
 ## File-cache persistence
 
-Reads, writes, increments, expiry deletion and explicit deletion share stable
-per-key locks. Writes stage a complete entry in the cache directory and rename
+Released Core uses stable per-key locks. The unreleased runtime uses a fixed
+256-lock pool by default; drain all old workers before switching protocols.
+See [runtime reliability](RUNTIME-RELIABILITY.md) for legacy rollout and pruning.
+Reads, writes, increments, expiry deletion and explicit deletion share locks.
+Writes stage a complete entry in the cache directory and rename
 it over the old entry. Readers cannot observe a partially written value. Missing
 locks, failed writes and unreadable entries raise exceptions. Corrupt numeric or
 admission counters fail closed; ordinary cache reads retain cache-miss handling

@@ -197,14 +197,22 @@ final class FnllaUpgradeCommand extends Command
             $sourceHash = hash_file("sha256", $sourcePath);
             $targetHash = is_file($targetPath) ? hash_file("sha256", $targetPath) : null;
 
-            if ($targetHash === $sourceHash) {
+            if ($relative === 'config/actions.php' && $targetHash !== null) {
+                $skips[$relative] = 'application-owned delivery configuration; retain mode and migration policy';
+                continue;
+            }
+
+            if ($targetHash === $sourceHash || ($targetHash !== null && \Fnlla\Php\Support\ProjectExportBaseline::equivalentFiles(
+                $relative, $targetPath, $sourcePath))) {
                 $skips[$relative] = "already matches FNLLA source";
                 continue;
             }
 
             if ($targetHash !== null) {
                 $coreSource = $this->coreTemplateSource($relative);
-                if ($coreSource !== null && $targetHash === hash_file("sha256", $coreSource)) {
+                if (\Fnlla\Php\Support\ProjectExportBaseline::matches($projectRoot, $relative)
+                    || ($coreSource !== null && \Fnlla\Php\Support\ProjectExportBaseline::equivalentFiles(
+                        $relative, $targetPath, $coreSource))) {
                     $updates[$relative] = ["source_hash" => $sourceHash, "current_hash" => $targetHash];
                     continue;
                 }
