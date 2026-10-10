@@ -12,6 +12,11 @@ on:
 permissions:
   contents: read
 
+# Only superseded PR validation is cancellable. Main, tags and manual runs are unique.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   package:
     name: Package on ${{ matrix.os }}
@@ -40,13 +45,18 @@ jobs:
           archive = 'dist/release/fnlla-core-' + version + '.zip'
           assert pathlib.Path(archive).read_bytes() == pathlib.Path('dist/repeat/fnlla-core-' + version + '.zip').read_bytes()
           subprocess.run(['python', 'scripts/verify-release.py', archive, commit], check=True)
+      - name: Test fail-closed exact-commit release checks
+        if: runner.os == 'Linux'
+        run: python -B -m unittest discover -s tests -p test_release_ci.py
       - uses: actions/upload-artifact@v4
         with:
           name: stable-package-${{ matrix.os }}
           path: dist/release/*.zip*
           if-no-files-found: error
+          retention-days: 14
 
   quality:
+    timeout-minutes: 10
     name: PHP ${{ matrix.php }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -74,6 +84,14 @@ jobs:
       - name: Validate Composer metadata
         run: composer validate --strict
 
+      - name: Locate Composer download cache
+        id: composer-cache
+        shell: bash
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
       - name: Install analysis dependencies
         run: composer install --no-interaction --prefer-dist
 
@@ -95,6 +113,7 @@ jobs:
         run: composer analyse
 
   services:
+    timeout-minutes: 15
     name: MySQL and Redis PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
@@ -130,6 +149,14 @@ jobs:
           extensions: pdo_mysql, redis, fileinfo, mbstring
           coverage: none
           tools: composer:v2
+      - name: Locate Composer download cache
+        id: composer-cache
+        shell: bash
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
       - run: composer install --no-interaction --prefer-dist
       - run: php tests/ServiceIntegrationTest.php
       - run: sudo apt-get update && sudo apt-get install -y mysql-client
@@ -147,3 +174,19 @@ jobs:
           sudo apt-get install -y apache2 libapache2-mod-php
       - name: Verify upload guards over HTTP
         run: python3 scripts/test-upload-http.py resources/project-templates/core/public
+
+  required:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    if: always()
+    needs: [quality, services, package, upload-http]
+    strategy:
+      matrix:
+        php: ['8.3', '8.4']
+    steps:
+      - name: Require every runtime, platform, service and package check
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 -c 'import json, os; results=json.loads(os.environ["RESULTS"]); assert results and all(job["result"] == "success" for job in results.values()), "Required CI failed, was cancelled or was skipped"'

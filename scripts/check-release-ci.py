@@ -8,7 +8,7 @@ REPO = "techayoDEV/fnlla-core"
 REQUIRED = {"PHP 8.3 on ubuntu-latest", "PHP 8.4 on ubuntu-latest",
             "PHP 8.3 on windows-latest", "PHP 8.4 on windows-latest",
             "MySQL and Redis PHP 8.3", "MySQL and Redis PHP 8.4", "upload-http",
-            "Package on ubuntu-latest", "Package on windows-latest"}
+            "Package on ubuntu-latest", "Package on windows-latest", "PHP 8.3", "PHP 8.4"}
 
 
 def api(path):
