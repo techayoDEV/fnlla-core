@@ -1,6 +1,6 @@
 # Reliable outbox operations
 
-This is an optional Core 2.4.0 capability. `ActionStoreInterface` and the
+This optional capability is supported in Core 2.7.0 and was introduced in 2.4.0. `ActionStoreInterface` and the
 legacy receipt/outbox tables stay compatible. `ReliableOutboxStoreInterface`
 adds delivery claims, ownership checks, acknowledgement, retry and status.
 `DatabaseActionStore` implements it for MySQL 8+ using transactions and

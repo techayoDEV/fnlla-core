@@ -1,6 +1,6 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the public runtime surface targeting FNLLA Core 2.7.0.
+These contracts describe the public runtime surface in released FNLLA Core 2.7.0.
 Reliability changes and their migration requirements are distinguished
 in [runtime reliability](RUNTIME-RELIABILITY.md); they are absent from Core 2.6.0.
 See [2.5.0 upgrade notes](../releases/2.5.0.md) for capability and security changes.

@@ -2,8 +2,8 @@
 
 ## Status and ownership
 
-This capability is included in the Core 2.6.0 source. Public availability is
-established by its matching immutable release, not this guide or a local build.
+These contracts are available in released Core 2.7.0. Resilience was introduced
+in 2.6.0; install the matching immutable dependency before using newer contracts.
 Core owns the provider-neutral runtime. Full owns compatibility/bootstrap
 adapters; applications own approved public content and deployment rules.
 Installed immutable dependencies must be upgraded through a reviewed versioned

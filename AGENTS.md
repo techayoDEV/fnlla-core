@@ -212,3 +212,11 @@ layers. Preserve PHP version/extension requirements and technical identifiers.
 Keep maintained contracts, legal notices, reusable tests and agent instructions.
 Keep one-off coding-session reports, private evidence, temporary consumers and
 local source overrides outside the product tree.
+
+## Version and delivery maintenance
+
+Preserve immutable historical artifacts, dependency pins and upgrade fixtures.
+Update current-version labels and introduced-version explanations separately.
+Brand edition is independent of product, web runtime and UI runtime versions.
+Keep scope, implementation, evidence and human decisions in the existing
+delivery contracts; a coding-session report is not a second source of truth.

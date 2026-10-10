@@ -1,4 +1,6 @@
-# Upload validation hardening (Core 2.4.0)
+# Upload validation hardening
+
+Current contract: Core 2.7.0. Introduced in Core 2.4.0.
 
 `UploadedFile::validate()` checks the actual temporary file size as well as reported
 metadata and rejects symlinked temporary files. Previously understated metadata could
@@ -31,5 +33,5 @@ assets as managed. SEO, newsletter and support configuration stays project-owned
 The plain Core starter removes link underlines on hover while preserving focus cues.
 Chat UI, AI routing, business roles, newsletter and SEO workflows remain outside Core.
 
-These changes ship in Core 2.4.0. Existing Core 2.3.1 packages are immutable;
+These changes were introduced in Core 2.4.0 and remain supported in 2.7.0. Existing Core 2.3.1 packages are immutable;
 consumers must explicitly update their dependency and lock file.
