@@ -203,3 +203,12 @@ Product naming: describe FNLLA only as a **Web Framework**. PHP remains a
 technical implementation language and runtime requirement, not the product
 category. Apply this naming to current copy, metadata, documentation and brand
 exports; preserve technical identifiers and immutable historical artifacts.
+
+## Runtime terminology and repository hygiene
+
+Use **web runtime** for the server-side application engine, implemented in PHP,
+and **UI runtime** for browser components and interactions. They are separate
+layers. Preserve PHP version/extension requirements and technical identifiers.
+Keep maintained contracts, legal notices, reusable tests and agent instructions.
+Keep one-off coding-session reports, private evidence, temporary consumers and
+local source overrides outside the product tree.

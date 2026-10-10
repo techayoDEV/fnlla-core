@@ -50,7 +50,7 @@ limits if preserving the previous window is required.
 
 ## File-cache persistence
 
-Released Core uses stable per-key locks. The unreleased runtime uses a fixed
+Core 2.6.0 uses stable per-key locks. Core 2.7.0 uses a fixed
 256-lock pool by default; drain all old workers before switching protocols.
 See [runtime reliability](RUNTIME-RELIABILITY.md) for legacy rollout and pruning.
 Reads, writes, increments, expiry deletion and explicit deletion share locks.

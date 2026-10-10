@@ -144,7 +144,7 @@ disables smooth document scrolling and progress-width transitions.
 
 The provider-neutral adapter and accessibility CSS are maintained in the Core
 starter under `resources/project-templates/core/public/assets/fnlla/`. Full/site
-mirror them under `public/assets/fnlla/`. The PHP runtime kernel and installed
+mirror them under `public/assets/fnlla/`. The web runtime kernel and installed
 packages are untouched. Local Turbo 8.0.23 (MIT) is the engine; no new dependency
 is introduced in Step 4. It stays isolated behind FNLLA conventions and lifecycle.
 

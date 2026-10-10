@@ -1,9 +1,9 @@
 {
   "name": "fnlla-brand",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "schema": "fnlla.brand-package.v1",
   "profile": "core",
-  "manifest_sha256": "15d98e8a7d540e4db59ab978daf057c28c2637e07fdedcc422abe51658bdce85",
+  "manifest_sha256": "f2ba825c556fdbdd538b68df66b1347f43ddf4c4564a4e16af617d9613e4f600",
   "files": {
     "branding/tokens.json": "bdc409b970d4906d91875578841af5a3b81b0db5742ab4266bb57596bd1332bc",
     "branding/assets/logo/favicon.svg": "e922010fe5c96f0ab1416ac757cd1bbdf64982ccc45697fe028c8371e332565f",
@@ -25,6 +25,7 @@
     "branding/assets/logo/fnlla-core-lockup.svg": "6cf16b2599075ad05e13d823af80d17b1d9847ee68e14ca8fcec56d133021e42",
     "branding/assets/readme/core-architecture.svg": "d369b5fb021febd9d34f3842e60ae89fde3cfdccc4bb1a6219049a17caf37741",
     "branding/assets/readme/core-workflow.svg": "342f5905f3e8cdc046e205a298c948601ab0162ba646fa582ab2d9152735d30a",
+    "branding/assets/readme/github-cover.svg": "9b584c65c76fa9e9c277a2f8e7277154043b0cac633530f35a78c84fca9d44bc",
     "scripts/brand-consumer.py": "7e9abbc6b6c5445cb01110cf2d70ee78e4deb71576f07245cf6e2e8050b5defe"
   }
 }

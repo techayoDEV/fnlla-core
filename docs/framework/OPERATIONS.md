@@ -1,6 +1,6 @@
 # Operating and upgrading Core applications
 
-[Documentation index](../README.md) · Applies to Core 2.5.0
+[Documentation index](../README.md) · Applies to Core 2.7.0
 
 This guide describes application operations. Maintainers publishing the Core
 package use the separate [release procedure](../RELEASING.md).

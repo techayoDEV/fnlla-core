@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md) · [Architecture](ARCHITECTURE.md) · [First capability](FIRST-CAPABILITY.md)
 
-This guide targets Core 2.5.0. It creates a minimal PHP application with an
+This guide targets Core 2.7.0. It creates a minimal web application with an
 explicit route table, application configuration and local verification tools.
 No AI account, provider SDK or FNLLA Full installation is required.
 
@@ -25,7 +25,7 @@ Database-backed authentication and transactional commands need their own setup.
 Run from the directory where you keep projects. Use a new destination:
 
 ```console
-git clone --branch v2.5.0 --depth 1 https://github.com/techayoDEV/fnlla-core.git fnlla-core
+git clone --branch v2.7.0 --depth 1 https://github.com/techayoDEV/fnlla-core.git fnlla-core
 cd fnlla-core
 composer install
 php fnlla make:project ../my-core-app "My Core App"
@@ -77,7 +77,7 @@ A service that has not been configured need not report ready.
 
 The generated project includes `php scripts/static-analysis.php` (also exposed
 as `composer analyse`). It delegates to PHPStan/Psalm when installed and otherwise
-runs a lightweight source check. In the 2.5.0 starter, that fallback also scans
+runs a lightweight source check. In the 2.7.0 starter, that fallback also scans
 bundled Core view templates and reports four missing `strict_types` declarations.
 This is a known limitation of the generated fallback check, distinct from PHP
 lint or a failing application request. Do not report it as a passing analysis
@@ -107,7 +107,7 @@ For an existing Composer application, configure the public VCS repository:
 
 ```console
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.5.0
+composer require techayodev/fnlla-core:^2.7.0
 ```
 
 This installs a library; it does not generate an application or configure its
@@ -125,7 +125,7 @@ archive and the verified release ZIP are distinct distribution forms.
 | A capability is unauthorized | Verify application authentication, trusted tenant context and the declared permission |
 | A capability is unavailable | Confirm registration, metadata, enabled module and audience |
 | `runtime:doctor` fails | Inspect its safe status code; configure the required driver and service |
-| Starter analysis reports four bundled views without `strict_types` | See the 2.5.0 fallback-analysis limitation above; do not edit installed dependencies to hide it |
+| Starter analysis reports four bundled views without `strict_types` | See the starter fallback-analysis limitation above; do not edit installed dependencies to hide it |
 | `/.fnlla` does not exist | Core does not install Full's capability discovery HTTP adapter |
 
 Next: [architecture](ARCHITECTURE.md), [capabilities](CAPABILITIES.md),
