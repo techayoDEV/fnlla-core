@@ -3,7 +3,7 @@
 [![FNLLA Core — the open Web Framework foundation](branding/assets/readme/github-cover.svg)](https://fnlla.com/core)
 
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
-[![Release](https://img.shields.io/badge/release-2.7.1-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.1)
+[![Release](https://img.shields.io/badge/release-2.7.2-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.2)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE.md)
 [![PHP 8.3+](https://img.shields.io/badge/web%20runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
 [![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
@@ -14,7 +14,7 @@
 [First capability](docs/framework/FIRST-CAPABILITY.md) ·
 [Architecture](docs/framework/ARCHITECTURE.md) ·
 [Documentation](docs/README.md) ·
-[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.1)
+[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.2)
 
 **Build with AI. Stay in control.** FNLLA Core is a Web application foundation
 with explicit contracts that developers and coding agents can inspect. You
@@ -37,8 +37,8 @@ framework primitives and safe defaults; the wider FNLLA product, documentation
 and licensed access live at [fnlla.com](https://fnlla.com).
 
 Package: `techayodev/fnlla-core`<br>
-Release target: `2.7.1`. Availability is established by the matching immutable
-release. Read the [upgrade notes](docs/releases/2.7.1.md) before deploying.
+Release target: `2.7.2`. Availability is established by the matching immutable
+release. Read the [upgrade notes](docs/releases/2.7.2.md) before deploying.
 
 ### Build with AI. Stay in control.
 
@@ -117,7 +117,7 @@ Install from the public GitHub VCS repository:
 
 ```powershell
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.7.1
+composer require techayodev/fnlla-core:^2.7.2
 ```
 
 The package autoloads `Fnlla\Php\` from `src/` and includes the shared helper
@@ -271,6 +271,29 @@ commands and namespaces literal, especially `techayodev/fnlla-core` and
 `Fnlla\Php\`.
 
 ## Maintenance
+
+### Repository map
+
+| Location | Responsibility |
+| --- | --- |
+| `src/`, `bootstrap/`, `fnlla` | Provider-neutral web runtime, bootstrap and CLI |
+| `resources/project-templates/core/` | Application-owned starter files; edit these templates before exporting |
+| `resources/product-specification/`, `resources/security/`, `resources/events/` | Versioned declarative contracts |
+| `docs/framework/`, `docs/releases/` | Maintained contract guides and historical release notes |
+| `scripts/`, `scripts/lib/`, `tests/` | Build, validation and reusable test tooling |
+| `branding/` | Pinned identity consumer, distinct from runtime versions |
+
+`vendor/` and `node_modules/` are installed dependencies. `dist/` contains
+regenerable package builds; `storage/` holds local runtime and test state.
+Neither is a second source tree. Preserve release evidence outside the product
+tree before removing an old build, and inspect runtime state before cleanup.
+
+Commit source, tests, dependency locks, explicit environment templates and
+maintained documentation. Actual environment files, credentials, private keys,
+customer uploads, database dumps, backups, test output and local editor/agent
+state must stay outside Git. Keep audit evidence outside the product tree.
+`.gitignore` also protects nested environment files; it does not remove files
+already tracked or erase secrets from history. Review staged changes before push.
 
 Changes must remain aligned with the public Core boundary and preserve the
 standalone package contract. See [CONTRIBUTING.md](CONTRIBUTING.md),
