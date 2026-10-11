@@ -229,7 +229,13 @@ final class QueryBuilder
 
     public function exists(): bool
     {
-        return $this->count() > 0;
+        // Presence does not need an aggregate over every matching row. Like the
+        // previous count-based contract, selection, ordering and pagination do
+        // not narrow the predicate; keep the builder reusable after this probe.
+        $sql = sprintf("SELECT 1 FROM %s%s LIMIT 1", $this->table, $this->compileWhereClause());
+        $statement = $this->pdo->prepare($sql);
+        QueryTelemetry::execute($statement, $this->bindings);
+        return $statement->fetchColumn() !== false;
     }
 
     private function compileSelect(): array

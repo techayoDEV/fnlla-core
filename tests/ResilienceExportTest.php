@@ -9,7 +9,9 @@ $resilienceTarget = sys_get_temp_dir() . '/fnlla-resilience-export-' . bin2hex(r
 try {
     (new \Fnlla\Php\Support\CoreProjectExporter())->export($resilienceTarget, 'Synthetic resilience export', 'synthetic-resilience');
     foreach (['config/resilience.php', 'bootstrap/emergency.php', 'public/emergency/503.html', 'docs/resilience.md',
-        'packages/fnlla-core/src/Resilience/PublicPageCache.php', 'packages/fnlla-core/docs/resilience.md'] as $file) {
+        'packages/fnlla-core/src/Resilience/PublicPageCache.php', 'packages/fnlla-core/docs/resilience.md',
+        'packages/fnlla-core/docs/assets/action-execution.svg', 'packages/fnlla-core/docs/assets/runtime-boundaries.svg',
+        'package-lock.json'] as $file) {
         assert_true(is_file($resilienceTarget . '/' . $file), 'Export omitted resilience file: ' . $file);
     }
     foreach ([['health'], ['fallback:generate'], ['down', '--message=<script>private</script>']] as $arguments) {

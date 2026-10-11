@@ -279,7 +279,7 @@ final class Container
                     continue;
                 }
                 if ($parameter->isDefaultValueAvailable()
-                    && !array_key_exists($dependency, $this->bindings) && !array_key_exists($dependency, $this->instances)) {
+                    && !$this->bound($dependency)) {
                     $resolved[] = $parameter->getDefaultValue();
                     continue;
                 }

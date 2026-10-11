@@ -85,7 +85,10 @@ final class Response
     public function withHeaders(array $headers): self
     {
         $clone = clone $this;
-        $clone->headers = array_merge($clone->headers, self::normalizeHeaders($headers));
+        foreach (self::normalizeHeaders($headers) as $name => $value) {
+            $clone = $clone->withoutHeader($name);
+            $clone->headers[$name] = $value;
+        }
 
         return $clone;
     }
@@ -93,7 +96,11 @@ final class Response
     public function withCookie(Cookie $cookie): self
     {
         $clone = clone $this;
-        $existing = $clone->headers["Set-Cookie"] ?? [];
+        $existing = [];
+        foreach ($clone->headers as $name => $value) {
+            if (strcasecmp($name, "Set-Cookie") === 0) { $existing = $value; break; }
+        }
+        $clone = $clone->withoutHeader("Set-Cookie");
 
         if (!is_array($existing)) {
             $existing = [$existing];
@@ -188,13 +195,13 @@ final class Response
             $defaultHeaders = [];
         }
 
-        $headers = array_merge(
+        $headers = self::normalizeHeaders(array_merge(
             array_filter(
                 self::normalizeHeaders($defaultHeaders),
                 static fn (string|array $value): bool => is_array($value) || trim($value) !== ""
             ),
             $this->headers
-        );
+        ));
 
         foreach ($headers as $name => $value) {
             if (is_string($value) && str_contains($value, "{nonce}")) {
@@ -215,6 +222,9 @@ final class Response
             }
 
             self::assertHeaderName($name);
+            foreach (array_keys($normalized) as $existingName) {
+                if (strcasecmp($existingName, $name) === 0) { unset($normalized[$existingName]); }
+            }
 
             if (is_array($value)) {
                 $normalized[$name] = array_map(static function (mixed $headerValue) use ($name): string {

@@ -6,5 +6,8 @@
   },
   "dependencies": {
     "@hotwired/turbo": "8.0.23"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
   }
 }

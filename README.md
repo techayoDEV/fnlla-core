@@ -3,7 +3,7 @@
 [![FNLLA Core — the open Web Framework foundation](branding/assets/readme/github-cover.svg)](https://fnlla.com/core)
 
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
-[![Release](https://img.shields.io/badge/release-2.7.0-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.0)
+[![Release](https://img.shields.io/badge/release-2.7.1-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.1)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE.md)
 [![PHP 8.3+](https://img.shields.io/badge/web%20runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
 [![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
@@ -14,7 +14,7 @@
 [First capability](docs/framework/FIRST-CAPABILITY.md) ·
 [Architecture](docs/framework/ARCHITECTURE.md) ·
 [Documentation](docs/README.md) ·
-[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.0)
+[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.7.1)
 
 **Build with AI. Stay in control.** FNLLA Core is a Web application foundation
 with explicit contracts that developers and coding agents can inspect. You
@@ -37,8 +37,8 @@ framework primitives and safe defaults; the wider FNLLA product, documentation
 and licensed access live at [fnlla.com](https://fnlla.com).
 
 Package: `techayodev/fnlla-core`<br>
-Release target: `2.7.0`. Availability is established by the matching immutable
-release. Read the [upgrade notes](docs/releases/2.7.0.md) before deploying.
+Release target: `2.7.1`. Availability is established by the matching immutable
+release. Read the [upgrade notes](docs/releases/2.7.1.md) before deploying.
 
 ### Build with AI. Stay in control.
 
@@ -54,6 +54,8 @@ interfaces. Business rules remain in application actions; transports belong to
 consumers such as FNLLA Full.
 
 ## Web runtime and UI runtime
+
+![Core web runtime, UI runtime and application ownership](docs/assets/runtime-boundaries.svg)
 
 The **web runtime** is the server-side application engine, implemented in PHP.
 PHP versions and extensions remain installation requirements. The **UI runtime**
@@ -115,7 +117,7 @@ Install from the public GitHub VCS repository:
 
 ```powershell
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.7.0
+composer require techayodev/fnlla-core:^2.7.1
 ```
 
 The package autoloads `Fnlla\Php\` from `src/` and includes the shared helper
@@ -272,5 +274,5 @@ commands and namespaces literal, especially `techayodev/fnlla-core` and
 
 Changes must remain aligned with the public Core boundary and preserve the
 standalone package contract. See [CONTRIBUTING.md](CONTRIBUTING.md),
-[SECURITY.md](SECURITY.md) and the [Code of Conduct](.github/CODE_OF_CONDUCT.md)
+[SECURITY.md](SECURITY.md) and the [Code of Conduct](https://github.com/techayoDEV/fnlla-core/blob/main/.github/CODE_OF_CONDUCT.md)
 before opening an issue or pull request.

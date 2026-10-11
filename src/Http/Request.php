@@ -150,7 +150,10 @@ final class Request
 
     public function input(string $key, mixed $default = null): mixed
     {
-        return $this->request[$key] ?? $this->query[$key] ?? $this->routeParams[$key] ?? $default;
+        foreach ([$this->request, $this->query, $this->routeParams] as $source) {
+            if (array_key_exists($key, $source)) { return $source[$key]; }
+        }
+        return $default;
     }
 
     public function only(array $keys): array
@@ -166,7 +169,7 @@ final class Request
 
     public function all(): array
     {
-        return array_merge($this->query, $this->request, $this->routeParams);
+        return array_merge($this->routeParams, $this->query, $this->request);
     }
 
     public function query(string $key, mixed $default = null): mixed
@@ -341,7 +344,7 @@ final class Request
         try {
             return json_decode($rawBody, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            return null;
+            throw new HttpException(400, "The request body contains malformed JSON.");
         }
     }
 

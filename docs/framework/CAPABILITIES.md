@@ -1,5 +1,7 @@
 # Application Capabilities
 
+![Trusted Action execution, authorization, transaction and after-commit delivery](../assets/action-execution.svg)
+
 Status: introduced in Core 2.5.0; not part of the immutable 2.4.0 package. This foundation introduces no REST, MCP or SDK adapter.
 
 [Documentation index](../README.md) · [Tutorial](FIRST-CAPABILITY.md) ·

@@ -1,5 +1,37 @@
 # FNLLA Core Changelog
 
+## 2.7.1 — 2026-10-11
+
+This source targets the following patch release contracts. Availability requires
+the matching immutable release and exact-commit CI. Existing 2.7.0 packages are
+immutable and do not acquire these changes automatically.
+
+- Partial MySQL TLS configuration verifies the server certificate by default;
+  explicit `verify_server_cert=false` remains a deliberate opt-out.
+- Filtered `QueryBuilder::exists()` uses a parameter-bound `SELECT 1 LIMIT 1`
+  probe instead of counting matching rows. Selection, ordering, limit and offset
+  remain irrelevant to existence; the builder is reusable after the probe.
+- Unknown cache/queue drivers fail configuration instead of silently using files.
+- Tenant jobs require an active resolved actor whose ID matches the persisted job.
+- Optional typed DI resolves scoped instances. HTTP input uses body, query, then
+  route precedence, including explicit null. Malformed JSON produces HTTP 400.
+- Nested route prefixes retain outer-to-inner order. JSON clients receive JSON
+  routing errors; response header replacement ignores casing and preserves cookies.
+- Update recovery validates every entry's checksum and permission metadata before
+  restoring any file; payloads cannot replace the transaction journal or lock.
+  Permission failures retain recovery evidence. Existing valid journals remain compatible.
+  Portable path validation also rejects case aliases of private environment,
+  storage, uploads and Git paths, trailing dots and Windows device filenames.
+- Cookie directive attributes reject control characters, semicolons and invalid
+  SameSite policies. Explicit response headers override defaults irrespective of casing.
+- Optional provider failures retain degraded boot and private source diagnostics.
+- `queue:work --prune-completed` explicitly expires completed file idempotency
+  receipts. It preserves processing/live receipts, uses the queue lock and a
+  bounded rotating batch (default 100, maximum 1000). File enumeration remains a
+  directory scan; large stores require measurement before claiming bounded I/O.
+  Schedule housekeeping locally; it does not create a worker or contact a service.
+
+
 ## 2.7.0 — 2026-10-10
 
 - Core-to-Full upgrade preserves existing application delivery configuration,

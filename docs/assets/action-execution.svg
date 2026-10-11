@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="440" viewBox="0 0 1600 440" role="img" aria-labelledby="title desc">
+  <title id="title">One Action contract, across entry points.</title>
+  <desc id="desc">Transport adapters supply a trusted principal; application handlers own domain behavior. Trusted context: Resolve identity, tenant and permissions. Client input cannot establish authority. Authorize + validate: Use the registered Action definition. Reject denied or invalid requests. Execute the handler: Query: read-only by application design. Command: mutation in a managed transaction. Commit + deliver: Persist command receipt, audit and outbox. External effects run after commit. Discovery is permission-filtered context, not execution authorization or proof of behavior.</desc>
+  <rect width="1600" height="440" fill="#f5f8ff"/>
+  <text x="64" y="70" fill="#0c1635" font-family="Arial,sans-serif" font-size="36" font-weight="700">One Action contract, across entry points.</text>
+  <text x="64" y="106" fill="#536d96" font-family="Arial,sans-serif" font-size="20">Transport adapters supply a trusted principal; application handlers own domain behavior.</text>
+  <g font-family="Arial,sans-serif">
+    <g transform="translate(64 148)">
+      <rect width="338" height="196" rx="14" fill="#ffffff" stroke="#dce7fb" stroke-width="2"/>
+      <text x="24" y="36" fill="#1754ff" font-family="monospace" font-size="17" font-weight="700">01</text>
+      <text x="24" y="76" fill="#0c1635" font-size="24" font-weight="700">Trusted context</text>
+      <text x="24" y="112" fill="#536d96" font-size="16">Resolve identity, tenant and</text>
+      <text x="24" y="134" fill="#536d96" font-size="16">permissions</text>
+      <text x="24" y="156" fill="#536d96" font-size="16">Client input cannot establish</text>
+      <text x="24" y="178" fill="#536d96" font-size="16">authority</text>
+    </g>
+    <path d="M414 246h16m-6-6 6 6-6 6" fill="none" stroke="#1754ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(442 148)">
+      <rect width="338" height="196" rx="14" fill="#ffffff" stroke="#dce7fb" stroke-width="2"/>
+      <text x="24" y="36" fill="#1754ff" font-family="monospace" font-size="17" font-weight="700">02</text>
+      <text x="24" y="76" fill="#0c1635" font-size="24" font-weight="700">Authorize + validate</text>
+      <text x="24" y="112" fill="#536d96" font-size="16">Use the registered Action definition</text>
+      <text x="24" y="134" fill="#536d96" font-size="16">Reject denied or invalid requests</text>
+    </g>
+    <path d="M792 246h16m-6-6 6 6-6 6" fill="none" stroke="#1754ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(820 148)">
+      <rect width="338" height="196" rx="14" fill="#ffffff" stroke="#dce7fb" stroke-width="2"/>
+      <text x="24" y="36" fill="#1754ff" font-family="monospace" font-size="17" font-weight="700">03</text>
+      <text x="24" y="76" fill="#0c1635" font-size="24" font-weight="700">Execute the handler</text>
+      <text x="24" y="112" fill="#536d96" font-size="16">Query: read-only by application design</text>
+      <text x="24" y="134" fill="#536d96" font-size="16">Command: mutation in a managed</text>
+      <text x="24" y="156" fill="#536d96" font-size="16">transaction</text>
+    </g>
+    <path d="M1170 246h16m-6-6 6 6-6 6" fill="none" stroke="#1754ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(1198 148)">
+      <rect width="338" height="196" rx="14" fill="#ffffff" stroke="#dce7fb" stroke-width="2"/>
+      <text x="24" y="36" fill="#1754ff" font-family="monospace" font-size="17" font-weight="700">04</text>
+      <text x="24" y="76" fill="#0c1635" font-size="24" font-weight="700">Commit + deliver</text>
+      <text x="24" y="112" fill="#536d96" font-size="16">Persist command receipt, audit and</text>
+      <text x="24" y="134" fill="#536d96" font-size="16">outbox</text>
+      <text x="24" y="156" fill="#536d96" font-size="16">External effects run after commit</text>
+    </g>
+  </g>
+  <text x="64" y="394" fill="#536d96" font-family="Arial,sans-serif" font-size="18">Discovery is permission-filtered context, not execution authorization or proof of behavior.</text>
+</svg>

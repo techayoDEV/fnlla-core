@@ -1,6 +1,6 @@
 # Upload validation hardening
 
-Current contract: Core 2.7.0. Introduced in Core 2.4.0.
+Current contract: Core 2.7.1. Introduced in Core 2.4.0.
 
 `UploadedFile::validate()` checks the actual temporary file size as well as reported
 metadata and rejects symlinked temporary files. Previously understated metadata could

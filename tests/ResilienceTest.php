@@ -239,8 +239,15 @@ try {
     });
     $scenario('optional provider boot rolls back bindings; critical failure propagates', function () use ($events, $check, $throws): void {
         $container = new Container(); $health = new DependencyHealth($events);
+        $reports = new class implements \Fnlla\Php\Exceptions\ExceptionReporterInterface {
+            public array $contexts = [];
+            public function report(Throwable $exception, array $context = [], ?Request $request = null): void { $this->contexts[] = $context; }
+        };
+        $container->instance(\Fnlla\Php\Exceptions\ExceptionReporterInterface::class, $reports);
         $booter = new ProviderBooter($container, $health);
         $booter->boot([ResilienceBrokenProvider::class], [ResilienceBrokenProvider::class => 'optional']);
+        $check(count($reports->contexts) === 1 && ($reports->contexts[0]['provider'] ?? '') === ResilienceBrokenProvider::class
+            && ($reports->contexts[0]['operation'] ?? '') === 'optional_provider_boot', 'Optional failure lost its reporting source.');
         $check(!$container->bound('partial-binding') && $health->status() === 'degraded', 'Optional provider contaminated bootstrap.');
         $throws(static fn () => $booter->boot([ResilienceBrokenProvider::class]), RuntimeException::class);
         $health->reset(); $check($health->status() === 'degraded', 'Bootstrap degradation lost across requests.');

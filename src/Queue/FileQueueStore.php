@@ -318,6 +318,38 @@ final class FileQueueStore implements ReliableQueueStoreInterface
         ]));
     }
 
+    /** Delete only expired completion receipts, under the same lock as workers. */
+    public function pruneCompletedIdempotency(int $limit = 100, ?int $now = null): int
+    {
+        $limit = max(1, min(1000, $limit));
+        $now ??= time();
+        return $this->locked(function () use ($limit, $now): int {
+            $directory = $this->directory . DIRECTORY_SEPARATOR . "idempotency";
+            if (!is_dir($directory)) { return 0; }
+            if (is_link($directory)) { throw new RuntimeException("Unsafe idempotency directory."); }
+            $files = glob($directory . "/*.json") ?: [];
+            sort($files);
+            $cursorPath = $this->directory . DIRECTORY_SEPARATOR . ".idempotency-prune-cursor";
+            if (is_link($cursorPath)) { throw new RuntimeException("Unsafe housekeeping cursor."); }
+            $cursor = is_file($cursorPath) ? trim((string) file_get_contents($cursorPath)) : "";
+            $remaining = array_values(array_filter($files, static fn (string $file): bool => basename($file) > $cursor));
+            $batch = array_slice($remaining === [] ? $files : $remaining, 0, $limit);
+            $removed = 0;
+            foreach ($batch as $file) {
+                if (is_link($file) || preg_match('/^[a-f0-9]{64}\.json$/D', basename($file)) !== 1) { continue; }
+                $record = $this->readIdempotency($file);
+                // Never delete processing reservations, unknown formats or locks.
+                if (($record["state"] ?? null) === "completed" && is_int($record["expires_at"] ?? null)
+                    && $record["expires_at"] <= $now && unlink($file)) { ++$removed; }
+            }
+            $cursor = $batch === [] ? "" : basename($batch[array_key_last($batch)]);
+            if (file_put_contents($cursorPath, $cursor, LOCK_EX) !== strlen($cursor)) {
+                throw new RuntimeException("Cannot persist housekeeping cursor.");
+            }
+            return $removed;
+        });
+    }
+
     private function assertIdempotencyOwned(array $job, array $record): void
     {
         if (($record["state"] ?? null) !== "processing"

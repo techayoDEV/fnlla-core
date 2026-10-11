@@ -76,7 +76,8 @@ final class TenantContextManager
             throw new AuthorizationException("Multi-tenant jobs require an actor and tenant context.");
         }
         $actor = $this->identities->findActor($actorId);
-        if ($actor === null || $this->identities->resolveTenant($actor, $mode, $tenantId) !== $tenantId) {
+        if (!\Fnlla\Php\Auth\ActorStatus::active($actor) || $this->actorId($actor) !== $actorId
+            || $this->identities->resolveTenant($actor, $mode, $tenantId) !== $tenantId) {
             throw new AuthorizationException("Queued tenant context is no longer authorized.");
         }
         return $this->within(new TenantContext($mode, $tenantId, $actorId, $job->correlationId()), $callback);

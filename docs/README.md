@@ -11,7 +11,7 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-This is the maintained documentation for **Core 2.7.0**. Guides describe the
+This is the maintained documentation for **Core 2.7.1**. Guides describe the
 implemented contracts and their limits. The documentation on the development
 branch may be newer than the files in an immutable release ZIP; updating a guide
 does not replace that release or upgrade an installed dependency.
@@ -20,7 +20,7 @@ does not replace that release or upgrade an installed dependency.
 
 ## Choose your path
 
-The current 2.7.0 starter includes [FNLLA Navigation Steps 1–4](framework/NAVIGATION.md).
+The current 2.7.1 starter includes [FNLLA Navigation Steps 1–4](framework/NAVIGATION.md).
 These optional starter enhancements preserve PHP SSR and native forms. Earlier immutable releases remain unchanged.
 
 | Goal | Read first | Continue with |
@@ -30,7 +30,7 @@ These optional starter enhancements preserve PHP SSR and native forms. Earlier i
 | Write a reusable application operation | [First capability](framework/FIRST-CAPABILITY.md) | [Actions and events](framework/ACTIONS-AND-DOMAIN-EVENTS.md) |
 | Configure permissions and tenancy | [Security primitives](framework/SECURITY-PRIMITIVES.md) | [Runtime hardening](framework/AUDIT-HARDENING.md) |
 | Operate or upgrade an application | [Operations](framework/OPERATIONS.md) | [2.5.0 upgrade notes](releases/2.5.0.md), [outbox](framework/OUTBOX-OPERATIONS.md) |
-| Work with coding agents | [Developer workflow](framework/DEVELOPER-WORKFLOW.md) | Repository [AGENTS.md](../AGENTS.md) |
+| Work with coding agents | [Developer workflow](framework/DEVELOPER-WORKFLOW.md) | Your application's own AGENTS.md and reviewed task context |
 | Build a trusted extension | [Product Specification](framework/PRODUCT-SPECIFICATION.md) | [Capability lifecycle](framework/CAPABILITIES.md#plugins-and-lifecycle) |
 
 ## Core and the API platform
@@ -46,8 +46,8 @@ explicit route OpenAPI exporter remains available independently. See the
 
 ## Reference library
 
-- [Core 2.5.0 upgrade notes](releases/2.5.0.md) and the
-  [maintainer release procedure](RELEASING.md).
+- [Core 2.5.0 upgrade notes](releases/2.5.0.md) and
+  [application operations](framework/OPERATIONS.md).
 - [Developer workflow](framework/DEVELOPER-WORKFLOW.md): source-derived context,
   bounded readiness, explicit OpenAPI and reproducible coding-agent tasks.
 - [Outbox operations](framework/OUTBOX-OPERATIONS.md): leases, quarantine, retries

@@ -32,7 +32,10 @@ final class ProviderBooter
                     $provider->register();
                     $provider->boot();
                 });
-            } catch (Throwable) { $this->health->bootFailed('optional_provider'); }
+            } catch (Throwable $error) {
+                $this->health->bootFailed('optional_provider');
+                \Fnlla\Php\Exceptions\ExceptionReporting::report($error, ['provider' => $class, 'operation' => 'optional_provider_boot'], container: $this->container);
+            }
         }
     }
 }
