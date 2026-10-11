@@ -90,6 +90,10 @@ class CoreServiceProvider extends ServiceProvider
                 return new RedisCacheStore((array) config("cache.stores.redis", []));
             }
 
+            if ($defaultStore !== "file") {
+                throw new RuntimeException("Unsupported cache driver: " . $defaultStore);
+            }
+
             return new FileCacheStore(
                 (string) ($storeConfig["path"] ?? storage_path("framework/cache")),
                 $serializer === "php" ? new PhpCacheSerializer() : new JsonCacheSerializer(),
@@ -119,6 +123,10 @@ class CoreServiceProvider extends ServiceProvider
 
             if ($default === "redis") {
                 return new RedisQueueStore((array) config("queue.connections.redis", []));
+            }
+
+            if ($default !== "file") {
+                throw new RuntimeException("Unsupported queue driver: " . $default);
             }
 
             return new FileQueueStore(storage_path((string) config("queue.connections.file.path", "framework/queue")));

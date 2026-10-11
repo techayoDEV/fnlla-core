@@ -1,6 +1,7 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the public runtime surface in released FNLLA Core 2.7.0.
+These contracts describe the public runtime surface targeted by FNLLA Core 2.7.1.
+Availability requires its matching immutable release and exact-commit CI.
 Reliability changes and their migration requirements are distinguished
 in [runtime reliability](RUNTIME-RELIABILITY.md); they are absent from Core 2.6.0.
 See [2.5.0 upgrade notes](../releases/2.5.0.md) for capability and security changes.
@@ -200,3 +201,36 @@ and must not be replaced by a Framework update. This classification adds no
 panel UI, account roles or commercial capabilities to Core. It changes no
 public method signatures and applies when the consuming application adopts
 the Core build containing it; existing released packages are not rewritten.
+
+## Core 2.7.1 patch contracts
+
+Core 2.7.1 changes the following contracts. Existing 2.7.0
+packages are immutable and do not acquire these changes automatically.
+
+- Partial MySQL TLS configuration verifies the server certificate by default;
+  explicit `verify_server_cert=false` remains a deliberate opt-out.
+- Unknown cache/queue drivers fail configuration instead of silently using files.
+- Tenant jobs require an active resolved actor whose ID matches the persisted job.
+- Optional typed DI resolves scoped instances. HTTP input uses body, query, then
+  route precedence, including explicit null. Malformed JSON produces HTTP 400.
+- Nested route prefixes retain outer-to-inner order. JSON clients receive JSON
+  routing errors; response header replacement ignores casing and preserves cookies.
+- Update recovery preflights all checksum/permission metadata before restoring
+  files. Invalid metadata retains the journal and changes no targets; only a
+  corrected, fully checked journal may resume recovery. Transaction metadata is
+  never an update payload. Failed permission restoration keeps the journal.
+  Protected paths are checked without case sensitivity; trailing-dot aliases
+  and Windows device filenames are rejected before any journal is written.
+- Cookie path/domain directives reject control characters and semicolons;
+  SameSite accepts Lax, Strict or None. Cookie values remain URL-encoded.
+  Explicit response headers override configured defaults without case duplicates.
+- Optional provider failures retain degraded boot and private source diagnostics.
+- `queue:work --prune-completed` explicitly expires completed file idempotency
+  receipts. It preserves processing/live receipts, uses the queue lock and a
+  bounded rotating batch (default 100, maximum 1000). File enumeration remains a
+  directory scan; large stores require measurement before claiming bounded I/O.
+  Schedule housekeeping locally; it does not create a worker or contact a service.
+- `QueryBuilder::exists()` uses a parameter-bound `SELECT 1 ... LIMIT 1` presence
+  probe instead of counting every match. As before, selected columns, ordering,
+  limit and offset do not narrow `exists()`; its filters remain unchanged and
+  the builder can be reused. No index or database schema change is required.

@@ -36,6 +36,11 @@ final class Cookie
 
     public function toHeaderValue(): string
     {
+        // Values are encoded; directive attributes must never introduce another directive.
+        if ($this->name === '' || preg_match('/[;\x00-\x1f\x7f]/', $this->path . $this->domain) === 1
+            || !in_array(strtolower($this->sameSite), ['lax', 'strict', 'none'], true)) {
+            throw new \InvalidArgumentException('Invalid cookie name or directive attribute.');
+        }
         $parts = [
             rawurlencode($this->name) . "=" . rawurlencode($this->value),
             "Path=" . $this->path,

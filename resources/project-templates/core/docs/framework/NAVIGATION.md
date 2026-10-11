@@ -180,3 +180,13 @@ in production. They complement backend authorization/session tests, not a real
 account/provider acceptance. Playwright and local Edge are QA tools, not runtime
 dependencies. Automated semantics do not replace manual screen-reader and
 additional browser verification.
+
+## Reproducible navigation assets
+
+`npm ci --ignore-scripts` installs the locked build inputs; `npm run build`
+rebuilds the shipped assets. Turbo remains pinned to **8.0.23**. The builder
+compacts whitespace with esbuild without renaming symbols or rewriting syntax,
+and keeps `TURBO-LICENSE` beside the local ESM. The public asset URL and browser
+API stay unchanged. Node and esbuild are build tools; serving an exported
+application requires neither. Preserve both the source build script and its
+lockfile when maintaining an application.

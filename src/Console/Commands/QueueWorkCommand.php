@@ -37,6 +37,15 @@ final class QueueWorkCommand extends Command
 
     public function handle(array $arguments): int
     {
+        if (in_array("--prune-completed", $arguments, true)) {
+            $store = $this->container->make(\Fnlla\Php\Queue\QueueStoreInterface::class);
+            if (!$store instanceof \Fnlla\Php\Queue\FileQueueStore) {
+                $this->error("Completed receipt housekeeping is only available for the file queue.");
+                return 1;
+            }
+            $this->line("Removed expired completion receipts: " . $store->pruneCompletedIdempotency());
+            return 0;
+        }
         $maxJobs = isset($arguments[0]) ? max(1, (int) $arguments[0]) : 50;
         $maxSeconds = isset($arguments[1]) ? max(1, (int) $arguments[1]) : null;
         $worker = $this->container->make(QueueManager::class);

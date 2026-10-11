@@ -59,6 +59,12 @@ try {
     });
     serviceCheck($effects === ["committed"], "After-commit effect did not run after commit.");
     serviceCheck((int) $pdo->query("SELECT COUNT(*) FROM `{$table}`")->fetchColumn() === 1, "Nested rollback changed committed rows.");
+    $query = new \Fnlla\Php\Database\QueryBuilder($pdo, $table);
+    $query->select('value')->where('value', 'committed')->orderBy('id', 'desc')->limit(0)->offset(99);
+    serviceCheck($query->exists(), "Exists must preserve filtered presence independently of select/pagination.");
+    serviceCheck($query->count() === 1, "Exists mutated the reusable builder.");
+    serviceCheck(!(new \Fnlla\Php\Database\QueryBuilder($pdo, $table))->where('id', 2)->exists(), "Absent row reported present.");
+    serviceCheck(!(new \Fnlla\Php\Database\QueryBuilder($pdo, $table))->where('value', "committed' OR 1=1 --")->exists(), "Exists bypassed parameter binding.");
 } finally {
     $pdo->exec("DROP TABLE `{$table}`");
 }

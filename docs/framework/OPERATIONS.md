@@ -1,9 +1,9 @@
 # Operating and upgrading Core applications
 
-[Documentation index](../README.md) · Applies to Core 2.7.0
+[Documentation index](../README.md) · Applies to Core 2.7.1
 
-This guide describes application operations. Maintainers publishing the Core
-package use the separate [release procedure](../RELEASING.md).
+This guide describes application operations, reviewed dependency updates and
+recovery. Core package publication is maintained separately from your application.
 
 ## Before deployment
 

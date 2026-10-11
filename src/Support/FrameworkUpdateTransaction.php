@@ -60,11 +60,17 @@ final class FrameworkUpdateTransaction
         $this->assertReady();
         $entries = [];
         foreach (array_unique($paths) as $relative) {
+            $this->assertPayloadPath($relative);
             $path = $this->path($relative);
+            if (file_exists($path) && !is_file($path)) {
+                throw new RuntimeException("Update target is not a regular file.");
+            }
             $exists = is_file($path);
             $backup = hash("sha256", $relative) . ".backup";
             if ($exists) {
-                self::replace($this->path(".fnlla/update-transaction/" . $backup), (string) file_get_contents($path));
+                $contents = file_get_contents($path);
+                if ($contents === false) { throw new RuntimeException("Cannot read update target for backup."); }
+                self::replace($this->path(".fnlla/update-transaction/" . $backup), $contents);
             }
             $entries[$relative] = ["exists" => $exists, "backup" => $backup,
                 "hash" => $exists ? hash_file("sha256", $path) : null,
@@ -103,9 +109,19 @@ final class FrameworkUpdateTransaction
         }
         // Validate every backup before restoring anything. A damaged journal must fail closed.
         foreach ($journal["entries"] as $relative => $entry) {
+            $this->assertPayloadPath($relative);
             $this->path($relative);
-            if (!is_bool($entry["exists"] ?? null) || ($entry["backup"] ?? null) !== hash("sha256", $relative) . ".backup") {
+            if (!is_array($entry) || !is_bool($entry["exists"] ?? null)
+                || ($entry["backup"] ?? null) !== hash("sha256", $relative) . ".backup"
+                || ($entry["exists"] && (!is_string($entry["hash"] ?? null)
+                    || preg_match('/^[a-f0-9]{64}$/D', $entry["hash"]) !== 1
+                    || !is_int($entry["mode"] ?? null) || $entry["mode"] < 0 || $entry["mode"] > 0777))
+                || (!$entry["exists"] && (($entry["hash"] ?? null) !== null || ($entry["mode"] ?? null) !== null))) {
                 throw new RuntimeException("Invalid backup entry.");
+            }
+            $target = $this->path($relative);
+            if (file_exists($target) && !is_file($target)) {
+                throw new RuntimeException("Recovery target is not a regular file.");
             }
             $backup = $this->path(".fnlla/update-transaction/" . $entry["backup"]);
             if ($entry["exists"] && (!is_file($backup) || hash_file("sha256", $backup) !== $entry["hash"])) {
@@ -116,8 +132,8 @@ final class FrameworkUpdateTransaction
             $path = $this->path($relative);
             if ($entry["exists"]) {
                 self::replace($path, (string) file_get_contents($this->directory . "/" . $entry["backup"]));
-                if (PHP_OS_FAMILY !== "Windows") {
-                    chmod($path, $entry["mode"]);
+                if (PHP_OS_FAMILY !== "Windows" && !chmod($path, $entry["mode"])) {
+                    throw new RuntimeException("Cannot restore update file permissions.");
                 }
             } elseif (is_file($path) && !unlink($path)) {
                 throw new RuntimeException("Cannot remove newly installed file: " . $relative);
@@ -152,7 +168,9 @@ final class FrameworkUpdateTransaction
                 fclose($stream);
             }
             if (PHP_OS_FAMILY !== "Windows") {
-                chmod($temporary, is_file($path) ? fileperms($path) & 0777 : 0666 & ~umask());
+                if (!chmod($temporary, is_file($path) ? fileperms($path) & 0777 : 0666 & ~umask())) {
+                    throw new RuntimeException("Cannot preserve update file permissions.");
+                }
             }
             if (!rename($temporary, $path)) {
                 throw new RuntimeException("Cannot replace update file.");
@@ -166,14 +184,22 @@ final class FrameworkUpdateTransaction
 
     private function path(string $relative): string
     {
+        // Apply a portable policy before resolving: Windows aliases case and trailing dots.
+        $portable = strtolower($relative);
         if (preg_match('~^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$~D', $relative) !== 1
             || array_intersect([".", ".."], explode("/", $relative)) !== []
-            || $this->isPrivateEnvironmentPath($relative) || str_starts_with($relative, "storage/")
-            || str_starts_with($relative, "public/uploads/") || str_starts_with($relative, ".git/")) {
+            || $this->isPrivateEnvironmentPath($portable) || $portable === 'storage'
+            || str_starts_with($portable, "storage/") || $portable === 'public/uploads'
+            || str_starts_with($portable, "public/uploads/") || $portable === '.git'
+            || str_starts_with($portable, ".git/")) {
             throw new RuntimeException("Unsafe update transaction path.");
         }
         $path = $this->root;
         foreach (explode("/", $relative) as $part) {
+            if (str_ends_with($part, '.')
+                || preg_match('/^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/iD', $part) === 1) {
+                throw new RuntimeException('Non-portable update transaction path.');
+            }
             $path .= DIRECTORY_SEPARATOR . $part;
             if (is_link($path)) {
                 throw new RuntimeException("Symlinks are not allowed in update paths.");
@@ -198,6 +224,15 @@ final class FrameworkUpdateTransaction
             if (is_file($path)) {
                 @unlink($path);
             }
+        }
+    }
+
+    /** Recovery metadata is never a framework payload, even in a damaged journal. */
+    private function assertPayloadPath(mixed $relative): void
+    {
+        if (!is_string($relative) || strtolower($relative) === '.fnlla/update-transaction'
+            || str_starts_with(strtolower($relative), '.fnlla/update-transaction/')) {
+            throw new RuntimeException("Update payload cannot modify transaction metadata.");
         }
     }
 

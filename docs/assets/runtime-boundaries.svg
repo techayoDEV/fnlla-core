@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="440" viewBox="0 0 1600 440" role="img" aria-labelledby="title desc">
+  <title id="title">Two runtimes. Clear application ownership.</title>
+  <desc id="desc">Core supplies server contracts. The application owns its interface and business rules. Application: Routes, business Actions and policies. Your data and chosen infrastructure. Web runtime: PHP HTTP, DI, validation and storage. Core authorization and transaction contracts. UI runtime: Browser HTML, CSS and JavaScript. Optional navigation; ordinary SSR still works. Human control: Explicit configuration and review. AI is optional in development and runtime. Web runtime and UI runtime are separate layers; neither grants application permissions.</desc>
+  <rect width="1600" height="440" fill="#f5f8ff"/>
+  <text x="64" y="70" fill="#0c1635" font-family="Arial,sans-serif" font-size="36" font-weight="700">Two runtimes. Clear application ownership.</text>
+  <text x="64" y="106" fill="#536d96" font-family="Arial,sans-serif" font-size="20">Core supplies server contracts. The application owns its interface and business rules.</text>
+  <g font-family="Arial,sans-serif">
+    <g transform="translate(64 148)">
+      <rect width="338" height="196" rx="14" fill="#ffffff" stroke="#dce7fb" stroke-width="2"/>
+      <text x="24" y="36" fill="#1754ff" font-family="monospace" font-size="17" font-weight="700">01</text>
+      <text x="24" y="76" fill="#0c1635" font-size="24" font-weight="700">Application</text>
+      <text x="24" y="112" fill="#536d96" font-size="16">Routes, business Actions and policies</text>
+      <text x="24" y="134" fill="#536d96" font-size="16">Your data and chosen infrastructure</text>
+    </g>
+    <g transform="translate(442 148)">
+      <rect width="338" height="196" rx="14" fill="#ffffff" stroke="#dce7fb" stroke-width="2"/>
+      <text x="24" y="36" fill="#1754ff" font-family="monospace" font-size="17" font-weight="700">02</text>
+      <text x="24" y="76" fill="#0c1635" font-size="24" font-weight="700">Web runtime</text>
+      <text x="24" y="112" fill="#536d96" font-size="16">PHP HTTP, DI, validation and storage</text>
+      <text x="24" y="134" fill="#536d96" font-size="16">Core authorization and transaction</text>
+      <text x="24" y="156" fill="#536d96" font-size="16">contracts</text>
+    </g>
+    <g transform="translate(820 148)">
+      <rect width="338" height="196" rx="14" fill="#ffffff" stroke="#dce7fb" stroke-width="2"/>
+      <text x="24" y="36" fill="#1754ff" font-family="monospace" font-size="17" font-weight="700">03</text>
+      <text x="24" y="76" fill="#0c1635" font-size="24" font-weight="700">UI runtime</text>
+      <text x="24" y="112" fill="#536d96" font-size="16">Browser HTML, CSS and JavaScript</text>
+      <text x="24" y="134" fill="#536d96" font-size="16">Optional navigation; ordinary SSR</text>
+      <text x="24" y="156" fill="#536d96" font-size="16">still works</text>
+    </g>
+    <g transform="translate(1198 148)">
+      <rect width="338" height="196" rx="14" fill="#ffffff" stroke="#dce7fb" stroke-width="2"/>
+      <text x="24" y="36" fill="#1754ff" font-family="monospace" font-size="17" font-weight="700">04</text>
+      <text x="24" y="76" fill="#0c1635" font-size="24" font-weight="700">Human control</text>
+      <text x="24" y="112" fill="#536d96" font-size="16">Explicit configuration and review</text>
+      <text x="24" y="134" fill="#536d96" font-size="16">AI is optional in development and</text>
+      <text x="24" y="156" fill="#536d96" font-size="16">runtime</text>
+    </g>
+  </g>
+  <text x="64" y="394" fill="#536d96" font-family="Arial,sans-serif" font-size="18">Web runtime and UI runtime are separate layers; neither grants application permissions.</text>
+</svg>

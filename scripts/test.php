@@ -18,6 +18,8 @@ require __DIR__ . "/../tests/LegacyOutboxIsolationTest.php";
 require __DIR__ . "/../tests/RuntimeDiagnosticsTest.php";
 require __DIR__ . "/../tests/CapabilityArchitectureTest.php";
 require __DIR__ . "/../tests/AuditHardeningTest.php";
+require __DIR__ . "/../tests/AuditRemediationTest.php";
+require __DIR__ . "/../tests/EnterpriseBoundaryTest.php";
 require __DIR__ . "/../tests/ResilienceTest.php";
 require __DIR__ . "/../tests/ResilienceExportTest.php";
 require __DIR__ . "/../tests/ApplicationSnapshotTest.php";

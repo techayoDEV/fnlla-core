@@ -232,6 +232,12 @@ final class Router
         }
 
         if ($route === null) {
+            if ($request->expectsJson() || str_starts_with($request->path(), "/api/")) {
+                $status = $this->pathExists($path) ? 405 : 404;
+                $response = $this->container->make(\Fnlla\Php\Exceptions\ExceptionHandler::class)
+                    ->render(new \Fnlla\Php\Http\HttpException($status, $status === 405 ? "Method Not Allowed" : "Not Found"), $request);
+                return $status === 405 ? $response->withHeader("Allow", $this->allowedMethodsForPath($path)) : $response;
+            }
             if ($this->pathExists($path)) {
                 return Response::html(View::render("pages/error", [
                     "pageTitle" => "Method Not Allowed",
@@ -279,14 +285,15 @@ final class Router
         $normalizedPath = $this->normalizePath($path);
         $middleware = [];
         $namePrefix = "";
+        $prefix = "";
 
         foreach ($this->groupStack as $group) {
-            $normalizedPath = $this->mergePaths($group->prefix, $normalizedPath);
+            $prefix = $this->mergePaths($prefix, $group->prefix);
             $middleware = array_merge($middleware, $group->middleware);
             $namePrefix .= $group->namePrefix;
         }
 
-        return [$normalizedPath, array_values(array_unique($middleware)), $namePrefix];
+        return [$this->mergePaths($prefix, $normalizedPath), array_values(array_unique($middleware)), $namePrefix];
     }
 
     private function resolveMiddleware(array $stack): array

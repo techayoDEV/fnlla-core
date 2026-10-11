@@ -305,7 +305,9 @@ final class DatabaseManager
             $value = $ssl[$key] ?? null;
 
             if ($key === "verify_server_cert") {
-                $options[constant($constant)] = (bool) $value;
+                // TLS verification is opt-out: a partial configuration must
+                // not silently trust an unverified database server.
+                $options[constant($constant)] = (bool) ($ssl[$key] ?? true);
                 continue;
             }
 
