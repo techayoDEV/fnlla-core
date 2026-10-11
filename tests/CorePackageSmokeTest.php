@@ -163,6 +163,19 @@ $console->register(MakeProjectCommand::class);
 $exitCode = $console->run(["fnlla", "make:project", $target, "Core Smoke"]);
 assert_same(0, $exitCode, "make:project should export a Core project.");
 assert_true(is_file($target . "/composer.json"), "Core project composer.json missing.");
+
+[$gitInitExit, $gitInitOutput] = run_process(["git", "init", "--quiet"], $target);
+assert_same(0, $gitInitExit, "Cannot verify exported Git ignore rules: " . $gitInitOutput);
+foreach ([".env", "nested/.env.production", "nested/auth.json", "nested/client.key",
+    "storage/customer.json", "database/local.sqlite-wal", "public/uploads/customer.txt"] as $privatePath) {
+    [$ignoreExit] = run_process(["git", "check-ignore", "--no-index", $privatePath], $target);
+    assert_same(0, $ignoreExit, "Exported starter would track private/local data: " . $privatePath);
+}
+foreach ([".env.example", "nested/.env.example", "config/app.php", "composer.lock"] as $sourcePath) {
+    [$ignoreExit] = run_process(["git", "check-ignore", "--no-index", $sourcePath], $target);
+    assert_same(1, $ignoreExit, "Exported starter hides maintained source: " . $sourcePath);
+}
+
 assert_true(is_file($target . "/public/.htaccess"), "Core project Apache upload boundary missing.");
 assert_true(str_contains((string) file_get_contents($target . "/public/.htaccess"), "^uploads/"),
     "Core project Apache upload boundary was not exported.");

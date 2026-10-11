@@ -1,6 +1,6 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the public runtime surface targeted by FNLLA Core 2.7.1.
+These contracts describe the public runtime surface targeted by FNLLA Core 2.7.2.
 Availability requires its matching immutable release and exact-commit CI.
 Reliability changes and their migration requirements are distinguished
 in [runtime reliability](RUNTIME-RELIABILITY.md); they are absent from Core 2.6.0.

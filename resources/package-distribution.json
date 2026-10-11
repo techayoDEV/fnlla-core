@@ -2,11 +2,11 @@
   "schema": "fnlla.core_distribution.v1",
   "package": "techayodev/fnlla-core",
   "canonical_source": "https://github.com/techayoDEV/fnlla-core",
-  "published_baseline": "2.7.0",
-  "candidate": "2.7.1",
+  "published_baseline": "2.7.1",
+  "candidate": "2.7.2",
   "channel": "stable",
   "release_approved": true,
-  "framework_compatibility": ">=3.0.0-alpha.1 <4.0.0",
+  "framework_compatibility": ">=3.0.0-alpha.1 <5.0.0",
   "requirements": {
     "php": "^8.3",
     "required_extensions": [

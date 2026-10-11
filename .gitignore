@@ -1,15 +1,75 @@
-/vendor/
-/storage/
-/dist/
-/.env
-/.env.*
-!.env.example
+# Local files are not product sources. Keep runtime data and immutable artifacts.
 
-/storage/brand-adoption/
-/branding/.brand-update-lock/
-__pycache__/
-*.py[cod]
+# Local environment
+.env
+.env.*
+!.env.example
+!.env.platform.example
+!.env.full.example
+
+# Installed dependencies
+/vendor/
 /node_modules/
 
+# Generated builds and platform artifacts
+/dist/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+
+# Runtime state and recovery
+/storage/
+/storage/brand-adoption/
 /.fnlla/application-update/
 /.fnlla/update-transaction/
+
+# Identity generation
+/branding/.brand-update-lock/
+
+# Private credentials and signing material (examples belong in explicit templates)
+auth.json
+.npmrc
+.pypirc
+id_rsa
+id_ed25519
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Local editor, test output and backups
+/.idea/
+/.vscode/
+/coverage/
+/test-results/
+/playwright-report/
+/.phpunit.cache/
+/.phpunit.result.cache
+.pytest_cache/
+/backups/
+/tmp/
+/temp/
+/*.sql
+/*.zip
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+/.claude/settings.local.json
+/.codex/config.local.toml
+/.codex/sessions/
+/.codex/log/
+
+# Uploaded customer files are runtime data, not public source assets
+/public/uploads/*
+!/public/uploads/.gitignore

@@ -1,5 +1,14 @@
 # FNLLA Core Changelog
 
+## 2.7.2
+
+- Harden generated starter ignore rules for nested environments, credentials,
+  private keys, runtime data, local editor state and test/build artifacts.
+- Clarify maintained repository ownership and application/source hygiene.
+- Retain runtime interfaces and data formats; extend the declared adapter range
+  to FNLLA 4 with the same Core contracts. No migration is required from 2.7.1.
+- Preserve immutable packages, historical notes and the independent brand edition.
+
 ## 2.7.1 — 2026-10-11
 
 This source targets the following patch release contracts. Availability requires
