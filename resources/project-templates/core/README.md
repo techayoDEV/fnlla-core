@@ -27,6 +27,10 @@ uploads with script extensions should be reviewed before deployment.
 
 Application code belongs in `app/` (`App\`), routes in `routes/`, templates in `views/`.
 The core (`Fnlla\Php\`) is a separate Composer library. Do not modify `vendor/`.
+
+The bundled Core repository is the FNLLA dependency source; a public registry
+entry for another FNLLA package is not an alternative. Composer can use its
+default Packagist repository for third-party packages you deliberately add.
 Database access is lazy: the homepage and `/api/health` do not require a database.
 The health endpoint is liveness only, not database or deployment readiness.
 Use `php fnlla runtime:inspect` for the installed source context and

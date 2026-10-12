@@ -2,9 +2,19 @@
 
 [Documentation index](../README.md) · [Architecture](ARCHITECTURE.md) · [First capability](FIRST-CAPABILITY.md)
 
-This guide targets Core 2.7.2. It creates a minimal web application with an
+This guide covers the Core 2.8.0 release target. The commands below use the
+published 2.7.2 baseline until a verified immutable 2.8.0 release is available;
+see [2.8.0 upgrade notes](../releases/2.8.0.md) before choosing that version.
+It creates a minimal web application with an
 explicit route table, application configuration and local verification tools.
 No AI account, provider SDK or FNLLA Full installation is required.
+
+Core source is obtained from its versioned GitHub repository or verified release
+artifact. Generated applications resolve `techayodev/fnlla-core` from their bundled
+path repository. Composer's default Packagist repository can resolve third-party
+development/application dependencies; it does not establish the FNLLA release
+identity. Preserve the explicit source and lock rather than substituting a
+similarly named registry package.
 
 ## Requirements
 

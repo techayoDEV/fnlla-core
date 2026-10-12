@@ -253,6 +253,22 @@ function config_set(string $key, mixed $value): void
 
 function load_config_directory(string $directory): array
 {
+    $defaults = defined('FNLLA_CONFIG_DEFAULTS_ROOT') ? FNLLA_CONFIG_DEFAULTS_ROOT : null;
+    if ($defaults !== null && (!is_string($defaults) || !is_dir($defaults))) {
+        throw new RuntimeException('Invalid trusted configuration defaults root.');
+    }
+    // Lists, including a whole configuration namespace, replace rather than merge.
+    $merge = static function (array $base, array $overrides) use (&$merge): array {
+        if (array_is_list($base) || array_is_list($overrides)) {
+            return $overrides;
+        }
+        foreach ($overrides as $key => $value) {
+            $base[$key] = is_array($value) && isset($base[$key]) && is_array($base[$key])
+                ? $merge($base[$key], $value) : $value;
+        }
+        return $base;
+    };
+    $directories = $defaults === null ? [$directory] : [$defaults, $directory];
     $cachedConfig = framework_config_cache_path();
 
     if (is_file($cachedConfig)) {
@@ -261,10 +277,18 @@ function load_config_directory(string $directory): array
         if (is_array($config)) {
             $GLOBALS["fnlla_config_source"] = "bootstrap_cache";
             // Credentials must not outlive a password rotation in the bootstrap cache.
-            $accessConfigPath = rtrim($directory, "\\/") . DIRECTORY_SEPARATOR . "developer_access.php";
-            if (isset($config["developer_access"]) && is_file($accessConfigPath)) {
-                $accessConfig = require $accessConfigPath;
-                $config["developer_access"]["users"] = is_array($accessConfig) ? (string) ($accessConfig["users"] ?? "") : "";
+            if (isset($config["developer_access"])) {
+                $accessConfig = [];
+                foreach ($directories as $sourceDirectory) {
+                    $accessConfigPath = rtrim($sourceDirectory, "\\/") . DIRECTORY_SEPARATOR . 'developer_access.php';
+                    if (!is_file($accessConfigPath)) { continue; }
+                    $loaded = require $accessConfigPath;
+                    if (!is_array($loaded)) {
+                        throw new RuntimeException("Config file must return an array: " . $accessConfigPath);
+                    }
+                    $accessConfig = $merge($accessConfig, $loaded);
+                }
+                $config["developer_access"]["users"] = (string) ($accessConfig["users"] ?? "");
             }
             return $config;
         }
@@ -272,23 +296,20 @@ function load_config_directory(string $directory): array
 
     $config = [];
     $GLOBALS["fnlla_config_source"] = "config_files";
-    $files = glob(rtrim($directory, "\\/") . DIRECTORY_SEPARATOR . "*.php");
+    // Package defaults are evaluated after Env::load; application keys always win.
+    foreach ($directories as $sourceDirectory) {
+        $files = glob(rtrim($sourceDirectory, "\\/") . DIRECTORY_SEPARATOR . "*.php") ?: [];
+        sort($files);
+        foreach ($files as $file) {
+            $key = pathinfo($file, PATHINFO_FILENAME);
+            $loaded = require $file;
 
-    if ($files === false) {
-        return $config;
-    }
+            if (!is_array($loaded)) {
+                throw new RuntimeException("Config file must return an array: " . $file);
+            }
 
-    sort($files);
-
-    foreach ($files as $file) {
-        $key = pathinfo($file, PATHINFO_FILENAME);
-        $loaded = require $file;
-
-        if (!is_array($loaded)) {
-            throw new RuntimeException("Config file must return an array: " . $file);
+            $config[$key] = $merge($config[$key] ?? [], $loaded);
         }
-
-        $config[$key] = $loaded;
     }
 
     return $config;

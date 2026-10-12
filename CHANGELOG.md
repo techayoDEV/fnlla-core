@@ -1,5 +1,29 @@
 # FNLLA Core Changelog
 
+## 2.8.0 — release target
+
+This source prepares the next stable minor release. Publication and exact-commit
+CI remain separate release gates; the published baseline is 2.7.2.
+
+- Add optional trusted package configuration defaults through
+  `FNLLA_CONFIG_DEFAULTS_ROOT`. Application associative maps override recursively;
+  lists and empty arrays replace defaults, including an entire namespace.
+- Add public `View::path()` and optional `view.paths` fallback roots. Application
+  views retain priority; invalid names, traversal and symlink escapes fail closed.
+- Add opt-in `FrameworkUpdateTransaction($root, 'package-publication')` for a
+  restricted set of published config, routes, views and assets. Package installs
+  still reject legacy in-place framework updates. Recovery journals bind their
+  operation and retain compatibility with older file-only journals.
+- Persist a hashed standalone transaction component before mutation so a trusted
+  recovery entrypoint can recover without application bootstrap or autoloading.
+- Refresh cached developer credentials from effective defaults and overrides;
+  removing their configuration clears stale cached credentials. Invalid defaults
+  roots fail even when a bootstrap cache exists.
+- Preserve existing signatures, queue/database formats and generated Core
+  applications. No database migration is required. Clear disposable bootstrap
+  configuration caches after changing packages or configuration roots. See
+  [2.8.0 upgrade notes](docs/releases/2.8.0.md).
+
 ## 2.7.2
 
 - Harden generated starter ignore rules for nested environments, credentials,

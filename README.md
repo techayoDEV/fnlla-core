@@ -37,8 +37,9 @@ framework primitives and safe defaults; the wider FNLLA product, documentation
 and licensed access live at [fnlla.com](https://fnlla.com).
 
 Package: `techayodev/fnlla-core`<br>
-Release target: `2.7.2`. Availability is established by the matching immutable
-release. Read the [upgrade notes](docs/releases/2.7.2.md) before deploying.
+Release target: `2.8.0`; published baseline: `2.7.2`. Availability is established
+by the matching immutable release. Read the [2.8.0 upgrade notes](docs/releases/2.8.0.md)
+for the optional contracts and maintenance freeze before deploying that version.
 
 ### Build with AI. Stay in control.
 

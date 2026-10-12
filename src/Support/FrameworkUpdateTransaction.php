@@ -13,13 +13,16 @@ final class FrameworkUpdateTransaction
     private string $directory;
     private $lock;
 
-    public function __construct(private string $root)
+    public function __construct(private string $root, private string $operation = 'framework')
     {
         $this->root = realpath($root) ?: throw new RuntimeException("Update root does not exist.");
         if (is_file($this->root . "/.fnlla-release.json")) {
             throw new RuntimeException("Immutable deployment: stage and activate a new release instead of updating in place.");
         }
-        if (is_file($this->root . "/.fnlla/package-distribution")) {
+        if (!in_array($this->operation, ['framework', 'package-publication'], true)) {
+            throw new RuntimeException('Unknown file transaction operation.');
+        }
+        if (is_file($this->root . "/.fnlla/package-distribution") && $this->operation !== 'package-publication') {
             throw new RuntimeException("Composer distribution: update the reviewed packages and composer.lock, not the legacy file tree.");
         }
         $this->directory = $this->path(".fnlla/update-transaction");
@@ -58,6 +61,11 @@ final class FrameworkUpdateTransaction
     public function run(array $paths, callable $install): mixed
     {
         $this->assertReady();
+        // Standalone recovery must survive a broken application bootstrap/autoloader.
+        $component = file_get_contents(__FILE__);
+        if ($component === false) { throw new RuntimeException('Cannot retain the recovery component.'); }
+        self::replace($this->directory . '/recovery.php', $component);
+        self::replace($this->directory . '/recovery.json', json_encode(['sha256' => hash('sha256', $component)], JSON_THROW_ON_ERROR));
         $entries = [];
         foreach (array_unique($paths) as $relative) {
             $this->assertPayloadPath($relative);
@@ -77,7 +85,7 @@ final class FrameworkUpdateTransaction
                 "mode" => $exists ? fileperms($path) & 0777 : null];
         }
         self::replace($this->directory . "/journal.json", json_encode([
-            "schema" => "fnlla.update_transaction.v1", "entries" => $entries,
+            "schema" => "fnlla.update_transaction.v1", 'operation' => $this->operation, "entries" => $entries,
         ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
         try {
             $result = $install();
@@ -104,7 +112,8 @@ final class FrameworkUpdateTransaction
             throw new RuntimeException("No interrupted update to recover.");
         }
         $journal = json_decode((string) file_get_contents($journalPath), true, 512, JSON_THROW_ON_ERROR);
-        if (($journal["schema"] ?? null) !== "fnlla.update_transaction.v1" || !is_array($journal["entries"] ?? null)) {
+        if (($journal["schema"] ?? null) !== "fnlla.update_transaction.v1" || !is_array($journal["entries"] ?? null)
+            || (array_key_exists('operation', $journal) ? $journal['operation'] : 'framework') !== $this->operation) {
             throw new RuntimeException("Invalid update journal.");
         }
         // Validate every backup before restoring anything. A damaged journal must fail closed.
@@ -233,6 +242,13 @@ final class FrameworkUpdateTransaction
         if (!is_string($relative) || strtolower($relative) === '.fnlla/update-transaction'
             || str_starts_with(strtolower($relative), '.fnlla/update-transaction/')) {
             throw new RuntimeException("Update payload cannot modify transaction metadata.");
+        }
+        if ($this->operation === 'package-publication'
+            && $relative !== '.fnlla/package-publication.json'
+            && !str_starts_with($relative, 'config/') && !str_starts_with($relative, 'routes/')
+            && !str_starts_with($relative, 'views/') && !str_starts_with($relative, 'public/assets/')
+            && !str_starts_with($relative, 'public/vendor/fnlla-runtime/')) {
+            throw new RuntimeException('Package publication cannot change application code, dependencies or private data.');
         }
     }
 

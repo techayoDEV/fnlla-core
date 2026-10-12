@@ -28,4 +28,7 @@ assert_same(0, $atomicExit, "Product Module state atomicity failed: " . $atomicO
 echo $atomicOutput;
 require __DIR__ . "/../tests/FnllaUpgradeCommandTest.php";
 require __DIR__ . "/../tests/ProjectExportBaselineTest.php";
+[$packageExit, $packageOutput] = run_process([PHP_BINARY, 'tests/PackageRuntimeTest.php'], dirname(__DIR__));
+assert_same(0, $packageExit, 'Package runtime failed: ' . $packageOutput);
+echo $packageOutput;
 require __DIR__ . "/../tests/ReleaseArtifactBuilderTest.php";
