@@ -38,9 +38,11 @@ Use `php fnlla runtime:inspect` for the installed source context and
 be exported with `php fnlla openapi:export`. Read the bundled Core documents
 `docs/framework/DEVELOPER-WORKFLOW.md` and `OUTBOX-OPERATIONS.md` for capabilities,
 required outbox migration and delivery limits.
-Composer metadata, `.env.example`, `phpunit.xml`, `phpstan.neon`, `README.md`,
-`LICENSE.md` and the `fnlla` launcher remain at root because common PHP tooling
-discovers them there by default.
+Composer metadata, `.env.example`, `phpunit.xml`, `phpstan.neon`, `README.md`
+and the `fnlla` launcher remain at root for application tooling. Core's MIT
+notice is retained at `packages/fnlla-core/LICENSE.md`; preserve it and any
+component-specific notices when distributing your application. The application's
+own licence and terms are its owner's responsibility.
 
 After installation, `php scripts/test.php` runs the bundled smoke harness.
 `composer analyse` runs the dependency-light baseline unless the project adds

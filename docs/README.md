@@ -11,10 +11,10 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-This is the maintained documentation for **Core 2.8.0**. Install its matching
+This is the maintained documentation for **Core 2.8.1**. Install its matching
 immutable release; development-branch documentation is not release availability.
-Read [2.8.0 upgrade notes](releases/2.8.0.md) for the new optional contracts and
-the frozen maintenance baseline. Guides describe the
+Read [2.8.1 upgrade notes](releases/2.8.1.md) for the maintenance corrections and
+[2.8.0 contracts](releases/2.8.0.md) for the frozen feature baseline. Guides describe the
 implemented contracts and their limits. The documentation on the development
 branch may be newer than the files in an immutable release ZIP; updating a guide
 does not replace that release or upgrade an installed dependency.
@@ -71,7 +71,9 @@ explicit route OpenAPI exporter remains available independently. See the
   marks may be referenced.
 - [Support policy](framework/SUPPORT.md) defines the public, best-effort support
   boundary.
-- [Security policy](../SECURITY.md) explains private vulnerability reporting.
+- [Security policy](SECURITY.md) explains private vulnerability reporting.
+- [Contribution guide](CONTRIBUTING.md) covers repository checks and build tools.
+- [Changelog](CHANGELOG.md) records released changes and pending maintenance.
 
 ## Core Project Template
 

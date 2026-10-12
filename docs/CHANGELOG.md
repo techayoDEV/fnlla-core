@@ -1,5 +1,23 @@
 # FNLLA Core Changelog
 
+## 2.8.1 — 2026-10-12
+
+- Keep maintenance history, contribution guidance and the security policy in
+  `docs/`; retain the policy in generated bundled Core packages at
+  `docs/SECURITY.md`.
+- Move repository browser build inputs to `tools/assets/`, PHPStan configuration
+  to `tools/quality/` and the Windows convenience launcher to
+  `scripts/windows/fnlla.cmd`. Use `npm --prefix tools/assets ci` and
+  `npm --prefix tools/assets run build`; `composer analyse` and `php fnlla`
+  retain their existing invocation.
+- Preserve runtime APIs, dependency pins and generated application tooling.
+  Existing applications are not rearranged. These source changes do not alter
+  the immutable published Core 2.8.0 release.
+- Include the public documentation index, upgrade notes and linked security
+  guides in generated bundled packages, and verify their relative links.
+- Correct generated application licence guidance to the actual retained
+  `packages/fnlla-core/LICENSE.md` notice. Application licence terms are unchanged.
+
 ## 2.8.0 — 2026-10-12
 
 Stable minor version following 2.7.2. Install the matching immutable release;
@@ -22,7 +40,7 @@ a development checkout does not establish release availability.
 - Preserve existing signatures, queue/database formats and generated Core
   applications. No database migration is required. Clear disposable bootstrap
   configuration caches after changing packages or configuration roots. See
-  [2.8.0 upgrade notes](docs/releases/2.8.0.md).
+  [2.8.0 upgrade notes](releases/2.8.0.md).
 
 ## 2.7.2
 

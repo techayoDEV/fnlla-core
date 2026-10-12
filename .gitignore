@@ -9,7 +9,7 @@
 
 # Installed dependencies
 /vendor/
-/node_modules/
+**/node_modules/
 
 # Generated builds and platform artifacts
 /dist/

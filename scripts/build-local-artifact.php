@@ -74,7 +74,7 @@ $iterator = new RecursiveIteratorIterator(
         static function (SplFileInfo $item) use ($root): bool {
             $relative = ltrim(str_replace("\\", "/", substr($item->getPathname(), strlen($root))), "/");
             // Prune excluded trees before traversal, especially large consumer snapshots.
-            return preg_match('~^(?:\\.git|vendor|node_modules|dist|storage)(?:/|$)~i', $relative) !== 1;
+            return !is_excluded_tree($relative);
         }
     ),
     RecursiveIteratorIterator::LEAVES_ONLY
@@ -88,7 +88,7 @@ foreach ($iterator as $item) {
         throw new RuntimeException("Distribution does not follow symbolic links: " . $item->getPathname());
     }
     $relative = ltrim(str_replace("\\", "/", substr($item->getPathname(), strlen($root))), "/");
-    if ($relative === "" || preg_match('~^(?:\.git|vendor|node_modules|dist|storage)(?:/|$)~i', $relative) === 1) {
+    if ($relative === "" || is_excluded_tree($relative)) {
         continue;
     }
     if (is_sensitive_path($relative)) {
@@ -111,7 +111,7 @@ if ($releaseApproved) {
             throw new RuntimeException("Stable source cannot contain symlinks or submodules.");
         }
         $relative = $match[3];
-        if (preg_match('~^(?:vendor|node_modules|dist|storage)(?:/|$)~i', $relative) === 1 || is_sensitive_path($relative)) { continue; }
+        if (is_excluded_tree($relative) || is_sensitive_path($relative)) { continue; }
         if (preg_match('~^[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$~D', $relative) !== 1) {
             throw new RuntimeException("Unsafe committed artifact path.");
         }
@@ -228,6 +228,12 @@ fwrite(STDOUT, json_encode([
     "archive_sha256" => $archiveHash,
     "release_approved" => $releaseApproved,
 ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL);
+
+function is_excluded_tree(string $relative): bool
+{
+    return preg_match('~^(?:\.git|vendor|dist|storage)(?:/|$)~i', $relative) === 1
+        || preg_match('~(?:^|/)node_modules(?:/|$)~i', $relative) === 1;
+}
 
 function is_sensitive_path(string $relative): bool
 {

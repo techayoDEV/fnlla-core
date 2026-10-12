@@ -19,6 +19,27 @@ php scripts/lint.php
 php scripts/static-analysis.php
 ```
 
+Run these commands from the repository root. `composer analyse` uses the
+configuration in `tools/quality/phpstan.neon.dist`; a direct PHPStan invocation
+needs that explicit configuration path.
+
+Browser build inputs and their unchanged dependency lock live in `tools/assets/`:
+
+```bash
+npm --prefix tools/assets ci
+npm --prefix tools/assets run build
+```
+
+Prebuilt assets remain available without Node. Repository build scripts resolve
+their inputs from `tools/assets/` and write the Core template's local assets.
+Generated standalone applications retain their own documented build layout.
+
+Use `php fnlla` for the CLI. The repository's Windows convenience launcher is
+`scripts/windows/fnlla.cmd`; Composer's generated vendor launcher is unaffected.
+
+Maintenance history is in [CHANGELOG.md](CHANGELOG.md). A development checkout
+does not replace an immutable release or upgrade an installed consumer.
+
 ## Security
 
 Do not report exploitable vulnerabilities in public issues or pull requests. Use

@@ -109,4 +109,4 @@ OAuth/API-token issuer or Developer Panel. Tenant isolation is explicit at data
 boundaries. Arbitrary long-lived HTTP workers need separate lifecycle validation.
 Service availability, recovery objectives and legal retention policies are
 application responsibilities. See [support](SUPPORT.md) and
-[security reporting](../../SECURITY.md).
+[security reporting](../SECURITY.md).
