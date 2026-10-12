@@ -24,6 +24,21 @@ try {
     file_put_contents($releaseArtifactRoot . "/resources/package-distribution.json",
         json_encode($fixturePolicy, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
     file_put_contents($releaseArtifactRoot . "/.gitignore", "/dist/\n/ignored.tmp\n");
+    // Commit synthetic dependencies too: stable Git-blob packaging must exclude
+    // them before scoped paths or dependency contents reach manifest validation.
+    foreach ([
+        "node_modules/@synthetic/library",
+        "tools/assets/node_modules/@synthetic/library",
+        "tools/assets/node_modules/synthetic-parent/node_modules/synthetic-library",
+        "tools/quality/fixtures/node_modules/synthetic-library",
+    ] as $dependency) {
+        mkdir($releaseArtifactRoot . "/" . $dependency, 0700, true);
+        file_put_contents($releaseArtifactRoot . "/" . $dependency . "/package.json", "{}");
+        file_put_contents($releaseArtifactRoot . "/" . $dependency . "/fixture.js",
+            "-----BEGIN " . "PRIVATE KEY-----\nsynthetic dependency contents; never a credential\n");
+    }
+    mkdir($releaseArtifactRoot . "/tools/assets/node_modules-cache", 0700, true);
+    file_put_contents($releaseArtifactRoot . "/tools/assets/node_modules-cache/package.json", "{\"synthetic\":true}\n");
     foreach ([["git", "init", "-q"], ["git", "config", "user.name", "Synthetic release test"],
         ["git", "config", "user.email", "release-test@example.invalid"], ["git", "config", "core.autocrlf", "false"],
         ["git", "add", "."], ["git", "-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "Synthetic stable fixture"]] as $command) {
@@ -44,6 +59,7 @@ try {
         $releaseArtifactExit === 0,
         "Release artifact build failed: " . $releaseArtifactBuildOutput
     );
+    release_artifact_assert_dependencies_pruned($releaseArtifactOutput);
 
     $sourceComposer = (string) file_get_contents($releaseArtifactRoot . "/composer.json");
     $artifactComposerPath = $releaseArtifactOutput . "/composer.json";
@@ -111,14 +127,13 @@ try {
         $composerExit === 0,
         "Packaged composer.json failed strict validation: " . $composerOutput
     );
-    // Local-review traversal must also prune ignored build dependencies. Keeping
-    // @scoped packages breaks immutable manifests and bloats shipped artifacts.
-    mkdir($releaseArtifactRoot . '/node_modules/@synthetic/library', 0700, true);
-    file_put_contents($releaseArtifactRoot . '/node_modules/@synthetic/library/package.json', '{}');
+    // Local-review traversal must prune the same dependencies at every depth.
+    // Their synthetic unsafe contents must never enter secret/manifest checks.
     $localOutput = $releaseArtifactRoot . '/dist/local-review';
     [$localExit, $localText] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . '/scripts/build-local-artifact.php',
         '9.8.8-alpha.1', $localOutput, '--local-review'], $releaseArtifactRoot);
-    release_artifact_assert($localExit === 0 && !is_dir($localOutput . '/node_modules'), 'Local artifact shipped build dependencies: ' . $localText);
+    release_artifact_assert($localExit === 0, 'Local artifact dependency pruning failed: ' . $localText);
+    release_artifact_assert_dependencies_pruned($localOutput);
 
     fwrite(STDOUT, "FNLLA Core release artifact builder tests passed." . PHP_EOL);
 } finally {
@@ -161,6 +176,18 @@ function release_artifact_assert(bool $condition, string $message): void
     if (!$condition) {
         throw new RuntimeException($message);
     }
+}
+
+function release_artifact_assert_dependencies_pruned(string $output): void
+{
+    foreach (["node_modules", "tools/assets/node_modules", "tools/quality/fixtures/node_modules"] as $relative) {
+        release_artifact_assert(!file_exists($output . "/" . $relative), "Artifact shipped build dependencies: " . $relative);
+    }
+    $manifest = (string) file_get_contents($output . "/FNLLA-MANIFEST.sha256");
+    release_artifact_assert(preg_match('~(?:  |/)node_modules/~i', $manifest) !== 1,
+        "Artifact manifest contains build dependencies.");
+    release_artifact_assert((string) file_get_contents($output . "/tools/assets/node_modules-cache/package.json") === "{\"synthetic\":true}\n",
+        "Dependency pruning removed a similarly named source directory.");
 }
 
 function release_artifact_remove_tree(string $path): void

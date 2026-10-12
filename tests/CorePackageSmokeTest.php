@@ -181,6 +181,41 @@ assert_true(str_contains((string) file_get_contents($target . "/public/.htaccess
     "Core project Apache upload boundary was not exported.");
 assert_true(is_file($target . "/fnlla"), "Core project CLI launcher missing.");
 assert_true(is_file($target . "/packages/fnlla-core/src/Application.php"), "Bundled Core package missing.");
+$bundledCoreRoot = $target . "/packages/fnlla-core";
+assert_true(is_file($bundledCoreRoot . "/docs/README.md"), "Bundled Core public documentation index missing.");
+assert_true(is_file($bundledCoreRoot . "/docs/releases/" . trim((string) file_get_contents($root . "/VERSION")) . ".md"), "Bundled Core current upgrade notes missing.");
+assert_true(!is_file($bundledCoreRoot . "/docs/RELEASING.md"), "Internal release procedure leaked into the generated package.");
+$publicDocuments = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($bundledCoreRoot . "/docs", FilesystemIterator::SKIP_DOTS));
+$publicDocumentPaths = [$bundledCoreRoot . "/README.md"];
+foreach ($publicDocuments as $document) {
+    if ($document->isFile() && $document->getExtension() === "md") { $publicDocumentPaths[] = $document->getPathname(); }
+}
+foreach ($publicDocumentPaths as $documentPath) {
+    preg_match_all('~\\[[^\\]\\r\\n]*\\]\\(([^\\s)]+)\\)~', (string) file_get_contents($documentPath), $documentLinks);
+    foreach ($documentLinks[1] as $link) {
+        if (preg_match('~^(?:[a-z][a-z0-9+.-]*:|/|#)~i', $link) === 1) { continue; }
+        $relative = rawurldecode(explode("#", explode("?", $link, 2)[0], 2)[0]);
+        assert_true($relative === "" || file_exists(dirname($documentPath) . "/" . $relative),
+            "Bundled Core public documentation link is missing: " . $documentPath . " -> " . $link);
+    }
+}
+assert_true(is_file($bundledCoreRoot . "/LICENSE.md"), "Core MIT notice missing from the generated application dependency.");
+assert_true(str_contains((string) file_get_contents($target . "/README.md"), "packages/fnlla-core/LICENSE.md"), "Application guidance names an absent root licence.");
+$securityPolicyPath = $target . "/packages/fnlla-core/docs/SECURITY.md";
+assert_true(is_file($securityPolicyPath), "Bundled Core security policy missing from its canonical documentation path.");
+assert_true(!is_file($target . "/packages/fnlla-core/SECURITY.md"), "Bundled Core retained an obsolete duplicate root security policy.");
+assert_same(
+    hash_file("sha256", $root . "/docs/SECURITY.md"),
+    hash_file("sha256", $securityPolicyPath),
+    "Bundled Core security policy differs from the canonical policy."
+);
+preg_match_all('~\[[^\]\r\n]*\]\(([^\s)]+)\)~', (string) file_get_contents($securityPolicyPath), $securityLinks);
+foreach ($securityLinks[1] as $link) {
+    if (preg_match('~^(?:[a-z][a-z0-9+.-]*:|/|#)~i', $link) === 1) { continue; }
+    $relative = rawurldecode(explode("#", explode("?", $link, 2)[0], 2)[0]);
+    assert_true($relative === "" || is_file(dirname($securityPolicyPath) . "/" . $relative),
+        "Bundled Core security policy has a broken relative link: " . $link);
+}
 assert_true(is_file($target . "/packages/fnlla-core/resources/product-specification/fnlla.product.v1.schema.json"), "Bundled Product Specification schema missing.");
 assert_true(is_file($target . "/packages/fnlla-core/resources/security/fnlla.audit-event.v1.schema.json"), "Bundled audit event schema missing.");
 assert_true(is_file($target . "/packages/fnlla-core/resources/events/fnlla.domain-event.v1.schema.json"), "Bundled domain event schema missing.");

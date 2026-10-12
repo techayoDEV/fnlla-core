@@ -46,7 +46,7 @@ final class CoreProjectExporter
 
     private function copyCorePackage(string $sourceRoot, string $packageRoot): void
     {
-        foreach (["src", "bootstrap", "docs/framework", "docs/assets", "branding", "resources/product-specification", "resources/security", "resources/events", "resources/project-templates/core"] as $directory) {
+        foreach (["src", "bootstrap", "docs/framework", "docs/assets", "docs/releases", "branding", "resources/product-specification", "resources/security", "resources/events", "resources/project-templates/core"] as $directory) {
             $source = $sourceRoot . "/" . $directory;
 
             if (is_dir($source)) {
@@ -54,7 +54,7 @@ final class CoreProjectExporter
             }
         }
 
-        foreach (["README.md", "LICENSE.md", "SECURITY.md", "VERSION", "docs/resilience.md"] as $file) {
+        foreach (["README.md", "LICENSE.md", "VERSION", "docs/README.md", "docs/SECURITY.md", "docs/CONTRIBUTING.md", "docs/CHANGELOG.md", "docs/HTTP-UPLOAD-VALIDATION.md", "docs/CSRF-STALE-TABS.md", "docs/resilience.md"] as $file) {
             $source = $sourceRoot . "/" . $file;
 
             if (is_file($source)) {

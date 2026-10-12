@@ -152,8 +152,11 @@ Layouts load `navigation.js` and `navigation.css` once. Shared asset URLs remain
 stable; changed tracked assets cause a native reload. Route styles use dynamic
 head tracking. Existing local font preloads and browser caching remain intact.
 Fetched script/style nonces use the initial document CSP. Core and Full use local
-assets; fnlla.com uses its existing fingerprinted build. Rebuild with `npm ci` and
-`npm run build`; a deployed PHP server does not require npm or a CDN.
+assets; fnlla.com uses its existing fingerprinted build. Generated standalone
+Core applications rebuild with `npm ci` and `npm run build` at their project
+root. The Core maintainer repository uses `npm --prefix tools/assets ci` and
+`npm --prefix tools/assets run build`; a deployed PHP server does not require
+npm or a CDN.
 
 Snapshot caching and speculative prefetch remain disabled. Back/Forward fetches
 fresh SSR rather than retaining sensitive DOM snapshots. Write-enabled Regions,
@@ -183,7 +186,8 @@ additional browser verification.
 
 ## Reproducible navigation assets
 
-`npm ci --ignore-scripts` installs the locked build inputs; `npm run build`
+In a generated standalone Core application, `npm ci --ignore-scripts` installs
+the locked build inputs and `npm run build`
 rebuilds the shipped assets. Turbo remains pinned to **8.0.23**. The builder
 compacts whitespace with esbuild without renaming symbols or rewriting syntax,
 and keeps `TURBO-LICENSE` beside the local ESM. The public asset URL and browser

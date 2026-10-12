@@ -3,7 +3,7 @@
 [![FNLLA Core — the open Web Framework foundation](branding/assets/readme/github-cover.svg)](https://fnlla.com/core)
 
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
-[![Release](https://img.shields.io/badge/release-2.8.0-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.8.0)
+[![Release](https://img.shields.io/badge/release-2.8.1-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.8.1)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE.md)
 [![PHP 8.3+](https://img.shields.io/badge/web%20runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
 [![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
@@ -14,7 +14,7 @@
 [First capability](docs/framework/FIRST-CAPABILITY.md) ·
 [Architecture](docs/framework/ARCHITECTURE.md) ·
 [Documentation](docs/README.md) ·
-[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.8.0)
+[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.8.1)
 
 **Build with AI. Stay in control.** FNLLA Core is a Web application foundation
 with explicit contracts that developers and coding agents can inspect. You
@@ -37,9 +37,10 @@ framework primitives and safe defaults; the wider FNLLA product, documentation
 and licensed access live at [fnlla.com](https://fnlla.com).
 
 Package: `techayodev/fnlla-core`<br>
-Version: `2.8.0`. Install the matching immutable tagged release; a development
-checkout does not establish availability. Read the [2.8.0 upgrade notes](docs/releases/2.8.0.md)
-for the optional contracts and maintenance freeze before deploying that version.
+Version: `2.8.1`. Install the matching immutable tagged release; a development
+checkout does not establish availability. Read the [2.8.1 upgrade notes](docs/releases/2.8.1.md)
+for the maintenance corrections and the [2.8.0 baseline](docs/releases/2.8.0.md)
+for the optional contracts and maintenance freeze before deploying.
 
 ### Build with AI. Stay in control.
 
@@ -118,7 +119,7 @@ Install from the public GitHub VCS repository:
 
 ```powershell
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.8.0
+composer require techayodev/fnlla-core:^2.8.1
 ```
 
 The package autoloads `Fnlla\Php\` from `src/` and includes the shared helper
@@ -153,6 +154,11 @@ php scripts/test.php
 php scripts/lint.php
 php scripts/static-analysis.php
 ```
+
+Repository browser builds use `npm --prefix tools/assets ci` followed by
+`npm --prefix tools/assets run build`. Node is unnecessary for the prebuilt
+assets. On Windows, use `php fnlla` or `scripts/windows/fnlla.cmd`.
+Generated applications keep the tooling layout described by their own README.
 
 ## Queue And Runtime Inspection
 
@@ -258,7 +264,7 @@ as a business/provider idempotency key. See
 - [Actions and domain events](docs/framework/ACTIONS-AND-DOMAIN-EVENTS.md)
 - [Trademark notice](docs/framework/TRADEMARKS.md)
 - [Support boundary](docs/framework/SUPPORT.md)
-- [Security policy](SECURITY.md)
+- [Security policy](docs/SECURITY.md)
 
 ## Branding
 
@@ -281,10 +287,12 @@ commands and namespaces literal, especially `techayodev/fnlla-core` and
 | `resources/project-templates/core/` | Application-owned starter files; edit these templates before exporting |
 | `resources/product-specification/`, `resources/security/`, `resources/events/` | Versioned declarative contracts |
 | `docs/framework/`, `docs/releases/` | Maintained contract guides and historical release notes |
+| `docs/CHANGELOG.md`, `docs/CONTRIBUTING.md`, `docs/SECURITY.md` | Maintenance history, contribution and security policies |
+| `tools/assets/`, `tools/quality/`, `scripts/windows/` | Browser build inputs, static-analysis configuration and the Windows CLI launcher |
 | `scripts/`, `scripts/lib/`, `tests/` | Build, validation and reusable test tooling |
 | `branding/` | Pinned identity consumer, distinct from runtime versions |
 
-`vendor/` and `node_modules/` are installed dependencies. `dist/` contains
+`vendor/` and `tools/assets/node_modules/` are installed dependencies. `dist/` contains
 regenerable package builds; `storage/` holds local runtime and test state.
 Neither is a second source tree. Preserve release evidence outside the product
 tree before removing an old build, and inspect runtime state before cleanup.
@@ -297,6 +305,6 @@ state must stay outside Git. Keep audit evidence outside the product tree.
 already tracked or erase secrets from history. Review staged changes before push.
 
 Changes must remain aligned with the public Core boundary and preserve the
-standalone package contract. See [CONTRIBUTING.md](CONTRIBUTING.md),
-[SECURITY.md](SECURITY.md) and the [Code of Conduct](https://github.com/techayoDEV/fnlla-core/blob/main/.github/CODE_OF_CONDUCT.md)
+standalone package contract. See [contribution guidelines](docs/CONTRIBUTING.md),
+[security policy](docs/SECURITY.md) and the [Code of Conduct](https://github.com/techayoDEV/fnlla-core/blob/main/.github/CODE_OF_CONDUCT.md)
 before opening an issue or pull request.

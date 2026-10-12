@@ -26,5 +26,5 @@ or restrict participation when conduct creates community, legal, delivery or
 security risk. Report conduct concerns privately through
 [TechAyo](https://techayo.co.uk) with the subject `FNLLA CORE CONDUCT`.
 
-Security vulnerabilities must follow [SECURITY.md](../SECURITY.md), never a
+Security vulnerabilities must follow [SECURITY.md](../docs/SECURITY.md), never a
 public conduct report or issue.

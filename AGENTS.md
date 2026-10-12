@@ -57,7 +57,7 @@ Before editing:
 
 1. Inspect `git status --short`; preserve changes outside the task.
 2. Read `composer.json`, the relevant source, its callers and its tests. Check
-   `VERSION`, `CHANGELOG.md` and the installed dependency when comparing versions.
+   `VERSION`, `docs/CHANGELOG.md` and the installed dependency when comparing versions.
    A working-tree change or a local artifact is not a published capability.
 3. Follow the domain reference below. Confirm method signatures and CLI
    registration in code; do not assume Laravel APIs or full-FNLLA commands exist.
@@ -171,7 +171,7 @@ point it at production. `--redis-only` checks only Redis. Linux CI sets
 passes. Report missing tools, services, skipped checks and failures explicitly.
 
 For a public API, persistence or default-behavior change, update the relevant
-contract and `CHANGELOG.md` with compatibility and upgrade effects. Exercise
+contract and `docs/CHANGELOG.md` with compatibility and upgrade effects. Exercise
 negative authorization, cross-tenant, replay, rollback and stale-worker cases
 when those boundaries change. Do not add tests that merely mirror implementation.
 

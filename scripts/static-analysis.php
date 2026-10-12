@@ -33,7 +33,7 @@ if (!is_file($phpstan)) {
 
 passthru(
     escapeshellarg(PHP_BINARY) . " " . escapeshellarg($phpstan)
-    . " analyse --configuration=" . escapeshellarg($root . "/phpstan.neon.dist")
+    . " analyse --configuration=" . escapeshellarg($root . "/tools/quality/phpstan.neon.dist")
     . " --memory-limit=512M --no-progress",
     $exitCode
 );

@@ -6,7 +6,7 @@ FNLLA Core is maintained as a public MIT-licensed framework core by TechAyo LTD
 
 ## Version And Support Boundary
 
-The source edition is recorded in [VERSION](VERSION). A source version is not
+The source edition is recorded in [VERSION](../VERSION). A source version is not
 evidence of a published release or a security certification. Consult the
 repository releases and security advisories for available updates.
 

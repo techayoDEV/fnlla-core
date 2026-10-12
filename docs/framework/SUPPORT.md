@@ -26,7 +26,7 @@ handling, monitoring, backups, patching and incident response.
 - Product reference: `https://fnlla.com`
 - Core package source: `https://github.com/techayoDEV/fnlla-core`
 - Full FNLLA product and documentation: `https://fnlla.com`
-- Security reports: [../../SECURITY.md](../../SECURITY.md)
+- Security reports: [../SECURITY.md](../SECURITY.md)
 - Business, partnership or commercial implementation requests: `https://techayo.co.uk`
 
 ## Self-Service Checks
