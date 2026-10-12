@@ -30,6 +30,12 @@ similarly named registry package.
 The generated homepage and `/api/health` do not open a database connection.
 Database-backed authentication and transactional commands need their own setup.
 
+On Windows, use short checkout, project and temporary paths, such as
+`C:\dev\app` for a project. Leave room for nested dependency, cache and update
+staging directories. Verify the complete install/export workflow with the PHP
+executable and temporary directory you intend to use; see the
+[Windows file-path limits](OPERATIONS.md#windows-file-path-limits).
+
 ## 1. Generate an application from a released source
 
 Run from the directory where you keep projects. Use a new destination:

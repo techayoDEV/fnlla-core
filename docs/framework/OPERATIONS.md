@@ -20,6 +20,21 @@ recovery. Core package publication is maintained separately from your applicatio
 6. Configure supervised workers and application-owned recovery procedures when
    using queues or the outbox. Preserve receipts and delivery markers across restarts.
 
+## Windows file-path limits
+
+Use short checkout, application and temporary roots on Windows. Some PHP
+filesystem calls can reach a path limit while ordinary writes to the final file
+still succeed. The operating system's long-path setting alone does not verify
+atomic staging. Leave headroom for nested packages, caches and file transactions,
+and test installation, export and upgrade with the intended PHP executable.
+
+A `tempnam()` staging warning fails under the shared bootstrap's error handler.
+Keep the error visible and retry a new export at a fresh, shorter destination.
+A failed generation can leave an incomplete scaffold or inert staging metadata;
+validate the destination before reusing it. Preserve real application data and
+any existing update journal/backups, and follow the application's recovery
+procedure before retrying an in-place update.
+
 ## Know what each diagnostic establishes
 
 | Check | Establishes | Does not establish |
