@@ -1,9 +1,9 @@
 # FNLLA Core Changelog
 
-## 2.8.0 — release target
+## 2.8.0 — 2026-10-12
 
-This source prepares the next stable minor release. Publication and exact-commit
-CI remain separate release gates; the published baseline is 2.7.2.
+Stable minor version following 2.7.2. Install the matching immutable release;
+a development checkout does not establish release availability.
 
 - Add optional trusted package configuration defaults through
   `FNLLA_CONFIG_DEFAULTS_ROOT`. Application associative maps override recursively;

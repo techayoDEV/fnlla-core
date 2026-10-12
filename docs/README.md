@@ -11,8 +11,8 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-This is the maintained documentation for the **Core 2.8.0 release target**.
-The published baseline remains 2.7.2 until 2.8.0 passes its release gates.
+This is the maintained documentation for **Core 2.8.0**. Install its matching
+immutable release; development-branch documentation is not release availability.
 Read [2.8.0 upgrade notes](releases/2.8.0.md) for the new optional contracts and
 the frozen maintenance baseline. Guides describe the
 implemented contracts and their limits. The documentation on the development

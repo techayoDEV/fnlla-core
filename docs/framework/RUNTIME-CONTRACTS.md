@@ -1,6 +1,6 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the public runtime surface targeted by FNLLA Core 2.8.0.
+These contracts describe the public runtime surface in FNLLA Core 2.8.0.
 Availability requires its matching immutable release and exact-commit CI.
 Reliability changes and their migration requirements are distinguished
 in [runtime reliability](RUNTIME-RELIABILITY.md); they are absent from Core 2.6.0.
@@ -10,7 +10,7 @@ operations layer separately.
 
 ## Package-layout extension (2.8.0)
 
-The 2.8.0 source target supports trusted `FNLLA_CONFIG_DEFAULTS_ROOT`
+Core 2.8.0 supports trusted `FNLLA_CONFIG_DEFAULTS_ROOT`
 and `view.paths` package defaults. Application configuration overrides package
 defaults recursively for associative maps; lists and empty arrays replace the
 default value, including an entire configuration namespace. Explicit null clears

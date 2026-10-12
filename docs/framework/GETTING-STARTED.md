@@ -2,9 +2,8 @@
 
 [Documentation index](../README.md) · [Architecture](ARCHITECTURE.md) · [First capability](FIRST-CAPABILITY.md)
 
-This guide covers the Core 2.8.0 release target. The commands below use the
-published 2.7.2 baseline until a verified immutable 2.8.0 release is available;
-see [2.8.0 upgrade notes](../releases/2.8.0.md) before choosing that version.
+This guide covers Core 2.8.0. Use its matching immutable tag or verified release
+artifact, and read [2.8.0 upgrade notes](../releases/2.8.0.md) before upgrading.
 It creates a minimal web application with an
 explicit route table, application configuration and local verification tools.
 No AI account, provider SDK or FNLLA Full installation is required.
@@ -41,7 +40,7 @@ executable and temporary directory you intend to use; see the
 Run from the directory where you keep projects. Use a new destination:
 
 ```console
-git clone --branch v2.7.2 --depth 1 https://github.com/techayoDEV/fnlla-core.git fnlla-core
+git clone --branch v2.8.0 --depth 1 https://github.com/techayoDEV/fnlla-core.git fnlla-core
 cd fnlla-core
 composer install
 php fnlla make:project ../my-core-app "My Core App"
@@ -123,7 +122,7 @@ For an existing Composer application, configure the public VCS repository:
 
 ```console
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.7.2
+composer require techayodev/fnlla-core:^2.8.0
 ```
 
 This installs a library; it does not generate an application or configure its

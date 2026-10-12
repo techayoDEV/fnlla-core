@@ -4,8 +4,8 @@
   "canonical_source": "https://github.com/techayoDEV/fnlla-core",
   "published_baseline": "2.7.2",
   "candidate": "2.8.0",
-  "channel": "local-review",
-  "release_approved": false,
+  "channel": "stable",
+  "release_approved": true,
   "framework_compatibility": ">=3.0.0-alpha.1 <5.0.0",
   "requirements": {
     "php": "^8.3",
