@@ -11,7 +11,10 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-This is the maintained documentation for **Core 2.7.1**. Guides describe the
+This is the maintained documentation for **Core 2.8.0**. Install its matching
+immutable release; development-branch documentation is not release availability.
+Read [2.8.0 upgrade notes](releases/2.8.0.md) for the new optional contracts and
+the frozen maintenance baseline. Guides describe the
 implemented contracts and their limits. The documentation on the development
 branch may be newer than the files in an immutable release ZIP; updating a guide
 does not replace that release or upgrade an installed dependency.
@@ -20,7 +23,7 @@ does not replace that release or upgrade an installed dependency.
 
 ## Choose your path
 
-The current 2.7.1 starter includes [FNLLA Navigation Steps 1–4](framework/NAVIGATION.md).
+The current starter includes [FNLLA Navigation Steps 1–4](framework/NAVIGATION.md).
 These optional starter enhancements preserve PHP SSR and native forms. Earlier immutable releases remain unchanged.
 
 | Goal | Read first | Continue with |

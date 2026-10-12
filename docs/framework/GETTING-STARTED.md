@@ -2,9 +2,18 @@
 
 [Documentation index](../README.md) · [Architecture](ARCHITECTURE.md) · [First capability](FIRST-CAPABILITY.md)
 
-This guide targets Core 2.7.2. It creates a minimal web application with an
+This guide covers Core 2.8.0. Use its matching immutable tag or verified release
+artifact, and read [2.8.0 upgrade notes](../releases/2.8.0.md) before upgrading.
+It creates a minimal web application with an
 explicit route table, application configuration and local verification tools.
 No AI account, provider SDK or FNLLA Full installation is required.
+
+Core source is obtained from its versioned GitHub repository or verified release
+artifact. Generated applications resolve `techayodev/fnlla-core` from their bundled
+path repository. Composer's default Packagist repository can resolve third-party
+development/application dependencies; it does not establish the FNLLA release
+identity. Preserve the explicit source and lock rather than substituting a
+similarly named registry package.
 
 ## Requirements
 
@@ -20,12 +29,18 @@ No AI account, provider SDK or FNLLA Full installation is required.
 The generated homepage and `/api/health` do not open a database connection.
 Database-backed authentication and transactional commands need their own setup.
 
+On Windows, use short checkout, project and temporary paths, such as
+`C:\dev\app` for a project. Leave room for nested dependency, cache and update
+staging directories. Verify the complete install/export workflow with the PHP
+executable and temporary directory you intend to use; see the
+[Windows file-path limits](OPERATIONS.md#windows-file-path-limits).
+
 ## 1. Generate an application from a released source
 
 Run from the directory where you keep projects. Use a new destination:
 
 ```console
-git clone --branch v2.7.2 --depth 1 https://github.com/techayoDEV/fnlla-core.git fnlla-core
+git clone --branch v2.8.0 --depth 1 https://github.com/techayoDEV/fnlla-core.git fnlla-core
 cd fnlla-core
 composer install
 php fnlla make:project ../my-core-app "My Core App"
@@ -107,7 +122,7 @@ For an existing Composer application, configure the public VCS repository:
 
 ```console
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.7.2
+composer require techayodev/fnlla-core:^2.8.0
 ```
 
 This installs a library; it does not generate an application or configure its

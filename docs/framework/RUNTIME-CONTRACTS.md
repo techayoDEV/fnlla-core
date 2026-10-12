@@ -1,12 +1,38 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the public runtime surface targeted by FNLLA Core 2.7.2.
+These contracts describe the public runtime surface in FNLLA Core 2.8.0.
 Availability requires its matching immutable release and exact-commit CI.
 Reliability changes and their migration requirements are distinguished
 in [runtime reliability](RUNTIME-RELIABILITY.md); they are absent from Core 2.6.0.
 See [2.5.0 upgrade notes](../releases/2.5.0.md) for capability and security changes.
 Full FNLLA builds on the same primitives and adds the integrated project
 operations layer separately.
+
+## Package-layout extension (2.8.0)
+
+Core 2.8.0 supports trusted `FNLLA_CONFIG_DEFAULTS_ROOT`
+and `view.paths` package defaults. Application configuration overrides package
+defaults recursively for associative maps; lists and empty arrays replace the
+default value, including an entire configuration namespace. Explicit null clears
+the corresponding key. Clear disposable bootstrap caches after changing packages,
+roots or overrides. Cached developer credentials are refreshed from effective
+source configuration; removing that configuration clears stale cached users.
+`View::path()` resolves application views before trusted package roots and rejects
+traversal. These extensions are absent from the immutable 2.7.2 dependency.
+Consumers must require a separately reviewed package containing these contracts.
+
+`FrameworkUpdateTransaction` accepts an explicit `package-publication` purpose
+with a restricted publication path set; legacy application-file updates remain
+denied in package distribution mode. Before mutation it persists a hashed,
+standalone recovery capsule with the journal. A trusted recovery entrypoint must
+verify its receipt and linked paths before requiring the component; it does not
+require application bootstrap. Recovery validates the operation before restoring
+files. Older journals without an operation remain compatible in default framework
+mode. This protects recoverability when the
+updated application cannot boot; it does not replace a database backup.
+The caller must authorize and confine its callback to the declared file payload.
+See [2.8.0 upgrade notes](../releases/2.8.0.md) for the exact path allowlist,
+security requirements and rollback limits.
 
 ## Application Generators
 

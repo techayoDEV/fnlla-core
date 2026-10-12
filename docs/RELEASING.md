@@ -7,6 +7,11 @@ to publish. `published_baseline` records the preceding immutable release;
 
 1. Review public contracts, operational migrations and rollback. Update VERSION,
    distribution policy, changelog, release notes and current-version docs.
+   A prepared target retains `release_approved=false` and `channel=local-review`
+   until the owner approves the concrete release scope. Use a distinct prerelease
+   identifier with `--local-review` for candidate integration; it is not a
+   published or approved stable dependency. Stable policy flags record the
+   owner's acceptance, never an automated check's result.
 2. Run strict Composer validation, the main suite, lint, static analysis,
    service/upgrade and Apache upload checks. Review the diff and commit all
    intended source. Stable building refuses a dirty checkout or mismatched version.
