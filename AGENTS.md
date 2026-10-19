@@ -177,6 +177,15 @@ when those boundaries change. Do not add tests that merely mirror implementation
 
 ## Cross-repository delivery and completion
 
+For changes to public runtime contracts, requirements, defaults, compatibility,
+migration or release scope, assess downstream Framework and fnlla.com impact.
+The website's current claims must match exact validated releases and clearly
+distinguish unreleased source, installed packages and customer availability.
+Record required downstream work or unresolved differences in the existing
+delivery contracts. Keep website copy/commerce out of Core; public Core CI must
+remain independent of private website checkouts or credentials. This assessment
+does not authorize a consumer lock, customer catalogue or deployment change.
+
 If the task also covers FNLLA, read its own `AGENTS.md` and test the consumer and
 export paths there. Core is the canonical runtime source; a consumer must use a
 versioned immutable package. A locally reviewed candidate can prove integration
