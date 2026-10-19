@@ -2,6 +2,11 @@
 
 ## Unreleased source changes
 
+- Keep the upgrade/recovery/rollback service gate against checksum-pinned
+  original Core 2.3.1 and 2.8.1 packages. Reconcile delayed work using the old
+  installation's actual list/sorted-set format, preserving already-published
+  outbox state. Document staged dependency upgrades and application acceptance
+  in `docs/framework/UPGRADING.md`; this does not publish or replace Core 2.8.1.
 - Add an optional `app.live_config_fields` allowlist for cached configuration.
   Reload selected top-level keys from trusted defaults and application files;
   remove missing keys and reject invalid declarations or linked config files.

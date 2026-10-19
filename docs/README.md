@@ -23,6 +23,10 @@ does not replace that release or upgrade an installed dependency.
 
 ## Choose your path
 
+For an existing installation, read the [Core upgrade procedure](framework/UPGRADING.md)
+before changing dependencies. Core package updates and conversion to FNLLA are
+separate operations.
+
 The current starter includes [FNLLA Navigation Steps 1–4](framework/NAVIGATION.md).
 These optional starter enhancements preserve PHP SSR and native forms. Earlier immutable releases remain unchanged.
 

@@ -47,6 +47,7 @@ if ($phase === "seed") {
     $delayed = $queue->pop();
     upgradeAssert($delayed !== null, "Baseline did not reserve seed job.");
     $queue->fail($delayed);
+    $state['baseline_delayed_store'] = $redis->zCard($prefix . ':delayed') > 0 ? 'sorted_set' : 'list';
     $state["ready_id"] = $queue->push("SyntheticUpgradeJob", ["marker" => "ready"]);
     $payload = (new AuditEvent("item.update", "system", null, "item", "synthetic", null, "upgrade-drill"))->toArray();
     $database->transaction(fn () => $store->append("upgrade-audit", "audit", "item.update", $payload));
@@ -84,13 +85,21 @@ if ($phase === "seed") {
     upgradeAssert($redis->hLen($prefix . ":reserved") === 0, "Rollback requires stopped and settled workers.");
     // Explicit reconciliation for a rollback: retain published_at, move delayed
     // envelopes back to the old list. Never blindly restore already-sent effects.
-    $redis->eval("for _, raw in ipairs(redis.call('ZRANGE', KEYS[1], 0, -1)) do redis.call('RPUSH', KEYS[2], raw) end redis.call('DEL', KEYS[1]) return 1",
-        [$prefix . ":delayed", $prefix . ":pending"], 2);
+    if ($state['baseline_delayed_store'] === 'list') {
+        $redis->eval("for _, raw in ipairs(redis.call('ZRANGE', KEYS[1], 0, -1)) do redis.call('RPUSH', KEYS[2], raw) end redis.call('DEL', KEYS[1]) return 1",
+            [$prefix . ":delayed", $prefix . ":pending"], 2);
+    }
 } elseif ($phase === "verify-rollback") {
     upgradeAssert($queue->pendingCount() === 1 && $queue->pop() === null, "Rollback lost or prematurely ran delayed work.");
-    $raw = json_decode($redis->lIndex($prefix . ":pending", 0), true, 32, JSON_THROW_ON_ERROR);
+    $stored = $state['baseline_delayed_store'] === 'list' ? $redis->lIndex($prefix . ':pending', 0) : ($redis->zRange($prefix . ':delayed', 0, 0)[0] ?? false);
+    $raw = json_decode($stored, true, 32, JSON_THROW_ON_ERROR);
     $raw["available_at"] = time() - 1; // Advance synthetic time; do not wait one hour.
-    $redis->lSet($prefix . ":pending", 0, json_encode($raw, JSON_THROW_ON_ERROR));
+    if ($state['baseline_delayed_store'] === 'list') {
+        $redis->lSet($prefix . ':pending', 0, json_encode($raw, JSON_THROW_ON_ERROR));
+    } else {
+        $redis->zRem($prefix . ':delayed', $stored);
+        $redis->zAdd($prefix . ':delayed', time() - 1, json_encode($raw, JSON_THROW_ON_ERROR));
+    }
     $job = $queue->pop();
     upgradeAssert($job !== null && $job["id"] === $state["delayed_id"] && $job["payload"]["marker"] === "delayed", "Old worker cannot consume reconciled envelope.");
     $queue->complete($job);
