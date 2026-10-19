@@ -1,15 +1,39 @@
 import contextlib
 import importlib.util
 import io
+import hashlib
+import json
 import pathlib
 import sys
+import tempfile
 import unittest
+import zipfile
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('release_ci', pathlib.Path(__file__).parents[1] / 'scripts/check-release-ci.py')
 gate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gate)
 SHA = 'a' * 40
+
+artifact_spec = importlib.util.spec_from_file_location('verify_release', pathlib.Path(__file__).parents[1] / 'scripts/verify-release.py')
+artifact = importlib.util.module_from_spec(artifact_spec)
+artifact_spec.loader.exec_module(artifact)
+
+
+class ReleaseVersionTest(unittest.TestCase):
+    def test_malformed_stable_identity_is_rejected_before_consumer_installation(self):
+        for version in ['03.0.0', '3.01.0', '3.0.01', '3.0.0-rc.1', '3.0.0+build.1', 'v3.0.0', '3.0']:
+            with self.subTest(version=version), tempfile.TemporaryDirectory(prefix='fnlla-version-test-') as temporary:
+                archive = pathlib.Path(temporary) / 'candidate.zip'
+                with zipfile.ZipFile(archive, 'w') as package:
+                    package.writestr('package/VERSION', version + '\n')
+                    for name in ['FNLLA-PROVENANCE.json', 'FNLLA-PACKAGE.json']:
+                        package.writestr('package/' + name, json.dumps({}))
+                archive.with_suffix('.zip.sha256').write_text(hashlib.sha256(archive.read_bytes()).hexdigest() + '\n')
+                with patch.object(sys, 'argv', ['verify-release.py', str(archive), SHA]), patch.object(artifact, 'run') as install:
+                    with self.assertRaisesRegex(AssertionError, 'Stable version required'):
+                        artifact.main()
+                    install.assert_not_called()
 
 
 class ReleaseCITest(unittest.TestCase):

@@ -53,6 +53,7 @@ explicit route OpenAPI exporter remains available independently. See the
 
 ## Reference library
 
+- [Semantic Versioning and compatibility](framework/RUNTIME-CONTRACTS.md#semantic-versioning).
 - [Core 2.5.0 upgrade notes](releases/2.5.0.md) and
   [application operations](framework/OPERATIONS.md).
 - [Developer workflow](framework/DEVELOPER-WORKFLOW.md): source-derived context,

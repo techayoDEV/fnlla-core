@@ -5,7 +5,7 @@ declare(strict_types=1);
 $releaseArtifactSourceRoot = dirname(__DIR__);
 // Exercise stable publication using an isolated synthetic identity even when
 // this suite is running from a prerelease package.
-$releaseArtifactVersion = "9.8.7";
+$releaseArtifactVersion = "9.18.27";
 $releaseArtifactCase = $releaseArtifactSourceRoot . "/dist/test-release-artifact-"
     . getmypid() . "-" . bin2hex(random_bytes(4));
 $releaseArtifactRoot = $releaseArtifactCase . "/source";
@@ -23,6 +23,17 @@ try {
     $fixturePolicy["release_approved"] = true;
     file_put_contents($releaseArtifactRoot . "/resources/package-distribution.json",
         json_encode($fixturePolicy, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
+    foreach (['09.0.0', '9.01.0', '9.0.01', '9.0.0-01', '9.0.0-alpha..1',
+        '9.0.0-', '9.0.0+', '9.0.0+build..1', 'v9.0.0', '9.0', '9.0.0-rc/1'] as $index => $invalid) {
+        $invalidOutput = $releaseArtifactRoot . '/dist/invalid-' . $index;
+        [$invalidCode, $invalidText] = release_artifact_run_process([PHP_BINARY,
+            $releaseArtifactRoot . '/scripts/build-local-artifact.php', $invalid, $invalidOutput, '--local-review'],
+            $releaseArtifactRoot);
+        release_artifact_assert($invalidCode === 2 && str_contains($invalidText, 'Usage:'),
+            'Malformed SemVer was not rejected before packaging: ' . $invalid);
+        release_artifact_assert(!file_exists($invalidOutput) && !file_exists($invalidOutput . '.zip'),
+            'Rejected SemVer created package output.');
+    }
     file_put_contents($releaseArtifactRoot . "/.gitignore", "/dist/\n/ignored.tmp\n");
     // Commit synthetic dependencies too: stable Git-blob packaging must exclude
     // them before scoped paths or dependency contents reach manifest validation.
@@ -131,7 +142,7 @@ try {
     // Their synthetic unsafe contents must never enter secret/manifest checks.
     $localOutput = $releaseArtifactRoot . '/dist/local-review';
     [$localExit, $localText] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . '/scripts/build-local-artifact.php',
-        '9.8.8-alpha.1', $localOutput, '--local-review'], $releaseArtifactRoot);
+        '9.18.28-alpha.10+build.001', $localOutput, '--local-review'], $releaseArtifactRoot);
     release_artifact_assert($localExit === 0, 'Local artifact dependency pruning failed: ' . $localText);
     release_artifact_assert_dependencies_pruned($localOutput);
 

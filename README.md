@@ -6,6 +6,9 @@ separate release are recorded under **Unreleased source changes** in
 CSRF hardening and Workspace upgrade classification. Published dependency
 versions and existing package bytes remain unchanged.
 
+Core follows [Semantic Versioning](https://semver.org/) with no single-digit
+minor/patch limit. See the [compatibility policy](docs/framework/RUNTIME-CONTRACTS.md#semantic-versioning).
+
 [![FNLLA Core — the open Web Framework foundation](branding/assets/readme/github-cover.svg)](https://fnlla.com/core)
 
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)

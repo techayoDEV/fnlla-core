@@ -215,6 +215,16 @@ local source overrides outside the product tree.
 
 ## Version and delivery maintenance
 
+Follow [Semantic Versioning 2.0.0](https://semver.org/) and the maintained
+[compatibility policy](docs/framework/RUNTIME-CONTRACTS.md#semantic-versioning).
+Minor and patch components have no single-digit limit. Never roll a major at
+`x.9.9`. The owner-approved next-generation target is Core 3.x with compatible
+patches/minors; the published Core 2.8.1 remains unchanged until a separately
+accepted immutable release is available. Breaking public contracts requires a
+major, migration guidance and a separate owner decision. Release reviews must
+record the previous/proposed versions, compatibility classification and evidence;
+syntax validation never establishes compatibility or publication authority.
+
 Preserve immutable historical artifacts, dependency pins and upgrade fixtures.
 Update current-version labels and introduced-version explanations separately.
 Brand edition is independent of product, web runtime and UI runtime versions.

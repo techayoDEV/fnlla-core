@@ -5,6 +5,23 @@ asset. A successful build or the policy's `release_approved` flag is not authori
 to publish. `published_baseline` records the preceding immutable release;
 `candidate` and `VERSION` identify the source being prepared.
 
+## Version selection
+
+Follow the public [Semantic Versioning policy](framework/RUNTIME-CONTRACTS.md#semantic-versioning).
+For every release, record the preceding immutable version, proposed version,
+change classification, affected contracts and compatibility/migration evidence
+in the release review. Counters are not limited to 0-9; `x.9.9` never forces a
+major. Breaking contracts require a major and a separate owner decision, with
+documented migration and recovery. Syntax checks cannot prove compatibility.
+
+The accepted next-generation direction is Core 3.x, maintained through compatible
+patch/minor releases. Core 3 is not yet published or accepted for production;
+Core 2.8.1 remains the current immutable release. Preparing the next generation
+requires the complete release and Framework-consumer checks below. Updating
+policy text does not change VERSION, distribution approval or a consumer lock.
+
+## Release sequence
+
 1. Review public contracts, operational migrations and rollback. Update VERSION,
    distribution policy, changelog, release notes and current-version docs.
    A prepared target retains `release_approved=false` and `channel=local-review`

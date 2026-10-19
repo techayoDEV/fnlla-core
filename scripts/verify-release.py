@@ -40,7 +40,7 @@ def main():
         provenance = json.loads((source / "FNLLA-PROVENANCE.json").read_text())
         metadata = json.loads((source / "FNLLA-PACKAGE.json").read_text())
         version = (source / "VERSION").read_text().strip()
-        assert re.fullmatch(r"\d+\.\d+\.\d+", version), "Stable version required"
+        assert re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)", version), "Stable version required"
         assert provenance["base_commit"] == commit and metadata["source"]["commit"] == commit
         assert provenance["version"] == metadata["version"] == version
         assert provenance["channel"] == metadata["channel"] == "stable"

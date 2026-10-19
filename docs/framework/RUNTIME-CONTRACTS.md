@@ -8,6 +8,27 @@ See [2.5.0 upgrade notes](../releases/2.5.0.md) for capability and security chan
 Full FNLLA builds on the same primitives and adds the integrated project
 operations layer separately.
 
+## Semantic Versioning
+
+Core follows [Semantic Versioning 2.0.0](https://semver.org/). Backward-compatible
+defect/security fixes increment patch; backward-compatible public functionality
+and deprecations increment minor and reset patch; incompatible public-contract
+changes increment major and reset minor and patch. Minor and patch have no
+single-digit limit: `3.9.9 -> 3.9.10` is a patch, and `3.9.10 -> 3.10.0` is a minor.
+Reaching nine or performing a large internal refactor does not require a major.
+
+Compatibility includes documented APIs, extension interfaces, constructor/method
+signatures, CLI behavior, configuration and persisted formats. Review runtime
+and security behavior as well as declarations. A data migration still needs
+documented upgrade and recovery acceptance even when it preserves compatibility.
+Deprecate in a minor and provide a replacement/migration path before removal in
+a later major. Never disguise an incompatible change as a patch or minor.
+
+Core and Framework version independently. An upstream consumer must validate
+its own public contracts against the exact immutable Core package. Published
+tags and package bytes never change. A version label alone does not prove
+release availability, compatibility or application production readiness.
+
 ## Package-layout extension (2.8.0)
 
 Core 2.8.0 supports trusted `FNLLA_CONFIG_DEFAULTS_ROOT`

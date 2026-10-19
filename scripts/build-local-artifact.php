@@ -9,7 +9,8 @@ $version = trim((string) ($argv[1] ?? ""));
 $output = $argv[2] ?? ($root . "/dist/local/fnlla-core-" . $version);
 $localReview = in_array("--local-review", $argv, true);
 
-if (preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/D', $version) !== 1) {
+// SemVer 2.0.0, including multi-digit components and nonempty dotted identifiers.
+if (preg_match('/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/D', $version) !== 1) {
     fwrite(STDERR, "Usage: php scripts/build-local-artifact.php <semver> [output-directory] [--local-review]" . PHP_EOL);
     exit(2);
 }
@@ -39,7 +40,7 @@ if ($localReview) {
 }
 $channel = $policy["channel"] ?? null;
 $releaseApproved = $policy["release_approved"] ?? null;
-$stableVersion = preg_match('/^\d+\.\d+\.\d+$/D', $version) === 1;
+$stableVersion = !str_contains($version, '-') && !str_contains($version, '+');
 if (($policy["schema"] ?? null) !== "fnlla.core_distribution.v1"
     || ($policy["package"] ?? null) !== "techayodev/fnlla-core"
     || ($policy["candidate"] ?? null) !== $version

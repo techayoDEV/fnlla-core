@@ -2,6 +2,10 @@
 
 ## Unreleased source changes
 
+- Adopt explicit Semantic Versioning without single-digit minor/patch limits.
+  Require documented compatibility/migration classification for every release;
+  reject malformed version labels before creating package outputs. Published
+  artifacts, distribution approval and consumer dependency pins are unchanged.
 - Keep the upgrade/recovery/rollback service gate against checksum-pinned
   original Core 2.3.1 and 2.8.1 packages. Reconcile delayed work using the old
   installation's actual list/sorted-set format, preserving already-published
