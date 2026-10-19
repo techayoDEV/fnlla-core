@@ -1,5 +1,11 @@
 # FNLLA Core
 
+The published Core release remains **2.8.1**. Maintainer changes awaiting a
+separate release are recorded under **Unreleased source changes** in
+[the changelog](docs/CHANGELOG.md): starter verification, configuration freshness,
+CSRF hardening and Workspace upgrade classification. Published dependency
+versions and existing package bytes remain unchanged.
+
 [![FNLLA Core — the open Web Framework foundation](branding/assets/readme/github-cover.svg)](https://fnlla.com/core)
 
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
@@ -225,7 +231,7 @@ owner-reviewed or package-manager operation.
 Core includes deny-by-default role/permission and resource-policy primitives,
 server-resolved tenant context, explicit tenant-scoped adapters for repositories,
 cache, files, exports and tools, and a versioned allowlist-based audit event.
-These controls do not require the FNLLA Developer Panel.
+These controls do not require the FNLLA Workspace.
 
 The default `TENANCY_MODE=none` preserves single-tenant behavior. For
 `organization` or `custom`, use the `tenant` middleware on scoped routes and

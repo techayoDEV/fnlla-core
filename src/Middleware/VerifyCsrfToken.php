@@ -32,7 +32,8 @@ final class VerifyCsrfToken implements MiddlewareInterface
             return $next($request);
         }
 
-        if (verify_csrf_token((string) $request->input("_token", ""))) {
+        $token = $request->input("_token", "");
+        if (is_string($token) && verify_csrf_token($token)) {
             return $next($request);
         }
 
@@ -55,9 +56,18 @@ final class VerifyCsrfToken implements MiddlewareInterface
             "text" => "Refresh the page and submit the form again.", "toast" => false,
         ]);
 
-        $referer = (string) $request->header("Referer", "");
-        $fallbackPath = $referer !== "" ? (parse_url($referer, PHP_URL_PATH) ?: "/") : "/";
+        // Referer is untrusted navigation input, not an authorization signal.
+        $referer = $request->header("Referer", "");
+        $fallbackPath = "/";
+        if (is_string($referer) && strlen($referer) <= 2048
+            && preg_match('/[\x00-\x20\x7f\\\\]/', $referer) !== 1) {
+            $path = parse_url($referer, PHP_URL_PATH);
+            if (is_string($path) && str_starts_with($path, "/") && !str_starts_with($path, "//")) {
+                $fallbackPath = $path;
+            }
+        }
 
-        return Response::redirect(url(ltrim((string) $fallbackPath, "/")));
+        return Response::redirect(url(ltrim($fallbackPath, "/")))
+            ->withHeader("Cache-Control", "private, no-store");
     }
 }

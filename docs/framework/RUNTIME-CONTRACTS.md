@@ -260,3 +260,23 @@ packages are immutable and do not acquire these changes automatically.
   probe instead of counting every match. As before, selected columns, ordering,
   limit and offset do not narrow `exists()`; its filters remain unchanged and
   the builder can be reused. No index or database schema change is required.
+
+### Live configuration fields (unreleased source candidate)
+
+An application may declare `app.live_config_fields`, for example
+`['credentials' => ['users']]`. With cached configuration, only those trusted
+namespaced fields are reloaded from package defaults followed by application
+files using the normal merge contract. Missing fields are removed. This is a
+cache freshness mechanism, not authorization, a secret store or permission to
+execute untrusted PHP. Use at most 32 namespaces and 32 fields per namespace;
+names are restricted identifiers. Workspace-specific accounts are owned by the
+Framework adapter, not Core.
+
+The published 2.8 `developer_access.users` freshness safeguard is retained for
+existing cached consumers, including when the new allowlist is empty or selects
+other namespaces. Rotation reloads the current value and removal yields the
+existing empty-string denial value. This historical compatibility behavior does
+not provide Workspace accounts or register old runtime aliases. New applications
+declare their own live fields. Configuration PHP files remain trusted deployment
+input; live files cannot be symlinks. Declaration changes require rebuilding the
+bootstrap cache, as the declaration itself comes from that cache.

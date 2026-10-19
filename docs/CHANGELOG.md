@@ -1,5 +1,33 @@
 # FNLLA Core Changelog
 
+## Unreleased source changes
+
+- Add an optional `app.live_config_fields` allowlist for cached configuration.
+  Reload selected top-level keys from trusted defaults and application files;
+  remove missing keys and reject invalid declarations or linked config files.
+  Existing 2.8 consumers retain automatic `developer_access.users` refresh and
+  revocation without adopting the new declaration. Other namespaces remain
+  cached unless explicitly selected. No account or authorization API is added.
+- Use Workspace names in new optional Framework template references and
+  recognize its current managed paths. Keep historical inventory paths in
+  upgrade/profile classification so existing applications retain update
+  tracking; this does not register old routes, middleware aliases or classes.
+- Reject an empty generated-application test selection instead of reporting
+  success. Discover nested `*Test.php` files while excluding fixtures, the
+  PHPUnit shim, dependencies and symlinks.
+- Limit the generated lightweight analysis fallback to application `app/` and
+  `src/`; bundled `packages/` retains independent package verification. PHPStan
+  and Psalm delegation is unchanged. Fresh-export smoke coverage exercises both
+  tools and rejects an application source error and an empty test filter.
+- Identify generated configuration and quality tools as application-owned while preserving
+  their copyright and MIT attribution. Existing installed applications and
+  immutable released packages are not rewritten by these source changes.
+- Reject non-string CSRF tokens without PHP conversion warnings, preserve the
+  valid session token, and reject malformed Referer navigation on the HTML
+  rejection path. Rejected forms return a private, non-storable response.
+  Valid forms and ordinary local redirects retain their behavior. No dependency
+  or released artifact is replaced; delivery requires a new immutable release.
+
 ## 2.8.1 — 2026-10-12
 
 - Keep maintenance history, contribution guidance and the security policy in

@@ -43,7 +43,7 @@ enforces permissions, executes actions and projects machine-readable metadata.
 FNLLA Full owns optional REST, capability discovery, MCP and SDK tooling.
 Applications own domain handlers, identity and explicit exposure decisions.
 
-Installing Core does not enable an HTTP API or add a Developer Panel. Core's
+Installing Core does not enable an HTTP API or add a Workspace. Core's
 explicit route OpenAPI exporter remains available independently. See the
 [responsibility matrix](framework/ARCHITECTURE.md#core-application-and-full).
 

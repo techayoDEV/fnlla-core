@@ -42,13 +42,18 @@ final class ProjectProfile
 
     public static function isPanelFile(string $path): bool
     {
-        return str_starts_with($path, "views/developer/") || str_starts_with($path, "views/customer/")
+        // Existing application inventories can contain pre-Workspace paths.
+        // Keep classifying them without creating old runtime entrypoints.
+        return str_starts_with($path, "views/workspace/") || str_starts_with($path, "views/developer/")
+            || str_starts_with($path, "views/customer/")
             || str_starts_with($path, "public/assets/brand/fnlla/")
-            || str_starts_with($path, "views/maintenance/") || str_starts_with($path, "src/Controllers/Developer")
+            || str_starts_with($path, "views/maintenance/") || str_starts_with($path, "src/Controllers/Workspace")
+            || str_starts_with($path, "src/Controllers/Developer")
             || in_array($path, ["routes/maintenance.php", "views/partials/framework-wordmark.php", "src/Controllers/CustomerAccessController.php",
                 "config/newsletter.php", "views/partials/public-support-widget.php", "views/partials/support-widget.php", "views/partials/support-widget-settings.php", "views/partials/seo-settings.php", "views/partials/newsletter-settings.php", "public/assets/support-widget.css",
                 "config/panel_navigation.php", "views/partials/panel-switcher.php", "public/assets/panel-switcher.css",
-                "src/Controllers/FrameworkUpdateController.php", "public/assets/developer-panel.css",
-                "public/assets/developer-panel.js", "public/assets/debug-toolbar.css"], true);
+                "src/Controllers/FrameworkUpdateController.php", "public/assets/panels.css",
+                "public/assets/panels.js", "public/assets/developer-panel.css", "public/assets/developer-panel.js",
+                "public/assets/debug-toolbar.css"], true);
     }
 }

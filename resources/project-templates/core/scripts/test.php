@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 /*
 ===============================================================================
-FNLLA MAINTAINER SCRIPT
+FNLLA CORE APPLICATION TOOL
 File: scripts\test.php
 Copyright (c) 2026 TechAyo LTD (techayo.co.uk). Released under the MIT License.
 ===============================================================================
 
-FNLLA is produced, maintained and distributed by TechAyo LTD
-(techayo.co.uk). This repository is the authoritative maintainer workspace for
-the FNLLA framework released under the MIT License and its related delivery scripts, tests,
-templates and release metadata.
+FNLLA Core is produced, maintained and distributed by TechAyo LTD
+(techayo.co.uk). This tool verifies application-owned tests. Its inclusion does
+not make the application a Core maintainer workspace.
 
 Purpose:
 - Supports framework maintenance, validation, release hygiene or repository hardening.
@@ -77,11 +76,23 @@ if (!in_array($suite, ["fast", "slow", "all"], true)) {
     exit(1);
 }
 
-$testFiles = glob(dirname(__DIR__) . DIRECTORY_SEPARATOR . "tests" . DIRECTORY_SEPARATOR . "*Test.php");
+$testRoot = dirname(__DIR__) . DIRECTORY_SEPARATOR . "tests";
+$testFiles = [];
 
-if ($testFiles === false) {
+if (!is_dir($testRoot)) {
     fwrite(STDERR, "Unable to discover tests." . PHP_EOL);
     exit(1);
+}
+
+$testDirectories = new RecursiveCallbackFilterIterator(
+    new RecursiveDirectoryIterator($testRoot, FilesystemIterator::SKIP_DOTS),
+    static fn (SplFileInfo $entry): bool => !$entry->isLink()
+        && (!$entry->isDir() || !in_array($entry->getFilename(), ["PHPUnit", "fixtures", "vendor", "node_modules"], true))
+);
+foreach (new RecursiveIteratorIterator($testDirectories) as $entry) {
+    if ($entry->isFile() && str_ends_with($entry->getFilename(), "Test.php")) {
+        $testFiles[] = $entry->getPathname();
+    }
 }
 
 sort($testFiles);
@@ -172,7 +183,11 @@ foreach ($results as $result) {
 
 fwrite(STDOUT, PHP_EOL);
 
-if ($failed !== []) {
+if ($totalTests === 0) {
+    fwrite(STDERR, "No tests matched the requested suite/filter; verification was not performed." . PHP_EOL);
+}
+
+if ($failed !== [] || $totalTests === 0) {
     fwrite(STDOUT, sprintf("FAILED (%d tests, %d assertions, %d failures)", $totalTests, TestCase::assertionCount(), count($failed)) . PHP_EOL);
     exit(1);
 }

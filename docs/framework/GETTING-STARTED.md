@@ -92,11 +92,19 @@ A service that has not been configured need not report ready.
 
 The generated project includes `php scripts/static-analysis.php` (also exposed
 as `composer analyse`). It delegates to PHPStan/Psalm when installed and otherwise
-runs a lightweight source check. In the 2.7.1 starter, that fallback also scans
-bundled Core view templates and reports four missing `strict_types` declarations.
-This is a known limitation of the generated fallback check, distinct from PHP
-lint or a failing application request. Do not report it as a passing analysis
-gate. The repository's maintained Core PHPStan suite is a separate check.
+runs a lightweight source check. Current unreleased source limits that fallback
+to application-owned `app/` and `src/`; dependency integrity and Core analysis
+remain separate checks. Published starters through 2.8.1 retain the older
+fallback, which also scans bundled view templates and can report four missing
+`strict_types` declarations. Consume a reviewed tooling update rather than
+editing immutable dependencies or calling that failed check a pass.
+
+The source starter discovers nested application `*Test.php` files, excludes
+`tests/fixtures`, the PHPUnit shim and dependencies, and rejects an empty
+suite/filter with exit code 1. Use `php scripts/test.php --filter=CaseName`
+for a focused loop and the complete application suites before acceptance.
+A selected passing suite establishes only its declared scope. These tooling
+fixes need a new immutable release; they do not change existing package bytes.
 
 ## 4. Know which files you own
 

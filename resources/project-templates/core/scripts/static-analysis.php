@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 /*
 ===============================================================================
-FNLLA MAINTAINER SCRIPT
+FNLLA CORE APPLICATION TOOL
 File: scripts\static-analysis.php
 Copyright (c) 2026 TechAyo LTD (techayo.co.uk). Released under the MIT License.
 ===============================================================================
 
-FNLLA is produced, maintained and distributed by TechAyo LTD
-(techayo.co.uk). This repository is the authoritative maintainer workspace for
-the FNLLA framework released under the MIT License and its related delivery scripts, tests,
-templates and release metadata.
+FNLLA Core is produced, maintained and distributed by TechAyo LTD
+(techayo.co.uk). This tool checks application-owned source. Installed packages
+retain their own verification and are not application customization points.
 
 Purpose:
 - Provides a dependency-light static analysis profile and delegates to PHPStan
@@ -37,7 +36,7 @@ if (is_file($psalm)) {
 
 $errors = [];
 $files = [];
-foreach (["src", "app", "packages"] as $sourceDirectory) {
+foreach (["src", "app"] as $sourceDirectory) {
     if (is_dir($root . "/" . $sourceDirectory)) {
         $files = array_merge($files, php_source_files($root . "/" . $sourceDirectory));
     }

@@ -11,7 +11,7 @@ product_positioning:
   category: Web Framework
   primary: Built for developers working with AI.
   specialization: AI-assisted engineering
-  flagship_experience: Developer Operations Panel (owned by FNLLA, not Core)
+  flagship_experience: FNLLA Workspace (owned by FNLLA, not Core)
   complementary_capability: business administration (owned upstream)
   internal_quality_ambition: The best AI-assisted web framework
   quality_ambition_is_public_claim: false
@@ -34,7 +34,7 @@ release:
   owner_authorization_for: [push, tag, release, visibility_change]
 ```
 
-Core must remain usable without the commercial FNLLA package, Developer Panel,
+Core must remain usable without the commercial FNLLA package, Workspace,
 fnlla.com, an AI account or a search-provider account. Keep public contracts
 small and provider-neutral. Product orchestration, dashboards, provider adapters
 and marketing claims belong upstream in `techayodev/fnlla` or on fnlla.com.
@@ -85,7 +85,7 @@ bootstrap and `bootstrap/router.php` -> `Application` -> middleware/router ->
 controller -> response. Application bootstrap resolves the installed engine;
 `APP_ROOT` and `FNLLA_ENGINE_ROOT` need not point to the same directory.
 
-Core owns generic runtime contracts. FNLLA owns the Developer Panel, product
+Core owns generic runtime contracts. FNLLA owns the Workspace, product
 orchestration, provider adapters and commercial workflows. Applications own
 their `app/`, `routes/`, `config/`, business policies and data. Change a generator's
 source template, not an already generated copy. Never patch a consumer's

@@ -276,19 +276,50 @@ function load_config_directory(string $directory): array
 
         if (is_array($config)) {
             $GLOBALS["fnlla_config_source"] = "bootstrap_cache";
-            // Credentials must not outlive a password rotation in the bootstrap cache.
-            if (isset($config["developer_access"])) {
-                $accessConfig = [];
-                foreach ($directories as $sourceDirectory) {
-                    $accessConfigPath = rtrim($sourceDirectory, "\\/") . DIRECTORY_SEPARATOR . 'developer_access.php';
-                    if (!is_file($accessConfigPath)) { continue; }
-                    $loaded = require $accessConfigPath;
-                    if (!is_array($loaded)) {
-                        throw new RuntimeException("Config file must return an array: " . $accessConfigPath);
-                    }
-                    $accessConfig = $merge($accessConfig, $loaded);
+            // Applications declare the small set of live fields that must not
+            // outlive rotation/revocation. Validate before evaluating any files.
+            $live = $config['app']['live_config_fields'] ?? [];
+            if (!is_array($live) || count($live) > 32) { throw new RuntimeException('Invalid live configuration field declaration.'); }
+            foreach ($live as $group => $fields) {
+                if (!is_string($group) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $group) !== 1
+                    || !is_array($fields) || !array_is_list($fields) || count($fields) > 32) {
+                    throw new RuntimeException('Invalid live configuration namespace.');
                 }
-                $config["developer_access"]["users"] = (string) ($accessConfig["users"] ?? "");
+                foreach ($fields as $field) {
+                    if (!is_string($field) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $field) !== 1) {
+                        throw new RuntimeException('Invalid live configuration field.');
+                    }
+                }
+                if (array_key_exists($group, $config) && !is_array($config[$group])) {
+                    throw new RuntimeException('Live configuration namespace must be an array.');
+                }
+            }
+            // Preserve the published 2.8 credential-revocation safeguard for
+            // pre-Workspace consumers. This does not register runtime aliases.
+            $legacyCredentials = isset($config['developer_access']);
+            if ($legacyCredentials) {
+                if (!is_array($config['developer_access'])) {
+                    throw new RuntimeException('Live configuration namespace must be an array.');
+                }
+                $live['developer_access'] = array_unique([...($live['developer_access'] ?? []), 'users']);
+            }
+            foreach ($live as $group => $fields) {
+                if ($fields === []) { continue; }
+                $fresh = [];
+                foreach ($directories as $sourceDirectory) {
+                    $path = rtrim($sourceDirectory, "\\/") . DIRECTORY_SEPARATOR . $group . '.php';
+                    if (is_link($path)) { throw new RuntimeException('Linked live configuration is forbidden.'); }
+                    if (!is_file($path)) { continue; }
+                    $loaded = require $path;
+                    if (!is_array($loaded)) { throw new RuntimeException('Live configuration must return an array.'); }
+                    $fresh = $merge($fresh, $loaded);
+                }
+                foreach ($fields as $field) {
+                    if ($legacyCredentials && $group === 'developer_access' && $field === 'users') {
+                        $config[$group][$field] = (string) ($fresh[$field] ?? '');
+                    } elseif (array_key_exists($field, $fresh)) { $config[$group][$field] = $fresh[$field]; }
+                    else { unset($config[$group][$field]); }
+                }
             }
             return $config;
         }

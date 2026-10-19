@@ -41,17 +41,67 @@ try {
     unlink($root . '/config/invalid.php');
     // Cached package configuration must not preserve rotated or removed credentials.
     $cachePath = framework_config_cache_path();
-    file_put_contents($cachePath, '<?php return ["developer_access" => ["users" => "stale-synthetic"], "sample" => ["cached" => true]];');
-    file_put_contents($root . '/defaults/developer_access.php', '<?php return ["users" => "rotated-synthetic"];');
-    file_put_contents($root . '/config/developer_access.php', '<?php return ["enabled" => false];');
+    file_put_contents($cachePath, '<?php return ["app" => ["live_config_fields" => ["credentials" => ["users"]]], "credentials" => ["users" => "stale-synthetic"], "sample" => ["cached" => true]];');
+    file_put_contents($root . '/defaults/credentials.php', '<?php return ["users" => "rotated-synthetic"];');
+    file_put_contents($root . '/config/credentials.php', '<?php return ["enabled" => false];');
     $config = load_config_directory($root . '/config');
-    $check($config['developer_access']['users'] === 'rotated-synthetic');
+    $check($config['credentials']['users'] === 'rotated-synthetic');
     $check($config['sample'] === ['cached' => true]);
-    file_put_contents($root . '/config/developer_access.php', '<?php return ["users" => "application-synthetic"];');
-    $check(load_config_directory($root . '/config')['developer_access']['users'] === 'application-synthetic');
-    unlink($root . '/defaults/developer_access.php');
-    unlink($root . '/config/developer_access.php');
-    $check(load_config_directory($root . '/config')['developer_access']['users'] === '');
+    file_put_contents($root . '/config/credentials.php', '<?php return ["users" => "application-synthetic"];');
+    $check(load_config_directory($root . '/config')['credentials']['users'] === 'application-synthetic');
+    unlink($root . '/defaults/credentials.php');
+    unlink($root . '/config/credentials.php');
+    $check(!array_key_exists('users', load_config_directory($root . '/config')['credentials']));
+    // The existing 2.8 safety behavior must survive without any new declaration.
+    foreach ([[], ['app' => ['live_config_fields' => ['credentials' => ['users']]]],
+        ['app' => ['live_config_fields' => ['developer_access' => []]]]] as $extraConfig) {
+        file_put_contents($cachePath, '<?php return ' . var_export($extraConfig + [
+            'developer_access' => ['users' => 'stale-synthetic', 'enabled' => true],
+        ], true) . ';');
+        file_put_contents($root . '/defaults/developer_access.php', '<?php return ["users" => "rotated-synthetic"];');
+        file_put_contents($root . '/config/developer_access.php', '<?php return ["enabled" => false];');
+        $config = load_config_directory($root . '/config');
+        $check($config['developer_access']['users'] === 'rotated-synthetic');
+        $check($config['developer_access']['enabled'] === true);
+        file_put_contents($root . '/config/developer_access.php', '<?php return ["users" => "application-synthetic"];');
+        $check(load_config_directory($root . '/config')['developer_access']['users'] === 'application-synthetic');
+        unlink($root . '/defaults/developer_access.php');
+        unlink($root . '/config/developer_access.php');
+        $check(load_config_directory($root . '/config')['developer_access']['users'] === '');
+    }
+    // Live-field declarations cannot traverse files or reload arbitrary namespaces.
+    foreach (['invalid', ['../credentials' => ['users']], ['credentials' => ['../users']],
+        ['credentials' => 'users'], ['credentials' => ['named' => 'users']],
+        ['credentials' => [null]], ['credentials' => array_fill(0, 33, 'users')],
+        array_fill_keys(array_map(static fn (int $n): string => 'group_' . $n, range(1, 33)), ['users'])] as $invalid) {
+        file_put_contents($cachePath, '<?php return ' . var_export(['app' => ['live_config_fields' => $invalid]], true) . ';');
+        $deny(static fn () => load_config_directory($root . '/config'));
+    }
+    file_put_contents($cachePath, '<?php return ["app" => ["live_config_fields" => ["credentials" => ["users"]]], "credentials" => "invalid"];');
+    $deny(static fn () => load_config_directory($root . '/config'));
+    file_put_contents($cachePath, '<?php return ["app" => ["live_config_fields" => ["credentials" => ["users"]]]];');
+    file_put_contents($root . '/config/credentials.php', '<?php return "invalid";');
+    $deny(static fn () => load_config_directory($root . '/config'));
+    file_put_contents($root . '/config/credentials.php', '<?php return ["users" => null, "unselected" => "fresh"];');
+    $config = load_config_directory($root . '/config');
+    $check(array_key_exists('users', $config['credentials']) && $config['credentials']['users'] === null);
+    $check(!array_key_exists('unselected', $config['credentials']));
+    unlink($root . '/config/credentials.php');
+    file_put_contents($root . '/outside-live.php', '<?php throw new RuntimeException("Linked configuration was evaluated.");');
+    if (@symlink($root . '/outside-live.php', $root . '/config/credentials.php')) {
+        // Check the denial diagnostic, so executing the target cannot pass this test.
+        try { load_config_directory($root . '/config'); throw new LogicException('Linked live configuration accepted.'); }
+        catch (RuntimeException $exception) { $check($exception->getMessage() === 'Linked live configuration is forbidden.'); }
+        unlink($root . '/config/credentials.php');
+    } elseif (getenv('FNLLA_REQUIRE_SYMLINK_TESTS') === '1') {
+        throw new RuntimeException('Required live configuration symlink test unavailable.');
+    } else {
+        echo "[SKIP] Live configuration symlink (platform privileges unavailable).\n";
+    }
+    file_put_contents($cachePath, '<?php return ["credentials" => ["users" => "cached-without-opt-in"]];');
+    file_put_contents($root . '/config/credentials.php', '<?php return ["users" => "not-selected"];');
+    $check(load_config_directory($root . '/config')['credentials']['users'] === 'cached-without-opt-in');
+    unlink($root . '/config/credentials.php');
     rename($root . '/defaults', $root . '/moved-defaults');
     try { $deny(static fn () => load_config_directory($root . '/config')); }
     finally { rename($root . '/moved-defaults', $root . '/defaults'); }

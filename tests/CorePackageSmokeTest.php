@@ -284,6 +284,40 @@ assert_same("product_modules_not_configured", $moduleReport["warnings"][0]["id"]
 [$testExit, $testOutput] = run_process([PHP_BINARY, "scripts/test.php"], $target);
 assert_same(0, $testExit, "Exported Core tests failed: " . $testOutput);
 
+[$emptyExit, $emptyOutput] = run_process([PHP_BINARY, "scripts/test.php", "--filter=MissingStarterToolingCase"], $target);
+assert_same(1, $emptyExit, "A filter matching no application tests must reject verification.");
+assert_true(str_contains($emptyOutput, "No tests matched"), "Empty test selection needs an explicit diagnostic.");
+assert_true(!str_contains($emptyOutput, "OK ("), "Empty test selection must not print a passing summary.");
+
+mkdir($target . "/tests/Nested", 0777, true);
+mkdir($target . "/tests/fixtures", 0777, true);
+file_put_contents($target . "/tests/fixtures/ExcludedFixtureTest.php", '<?php throw new RuntimeException("Fixture must not be discovered as a test.");');
+file_put_contents($target . "/tests/Nested/StarterToolingTest.php", <<<'PHP'
+<?php
+declare(strict_types=1);
+namespace App\Tests\Nested;
+final class StarterToolingTest extends \PHPUnit\Framework\TestCase
+{
+    public function testNestedApplicationBehavior(): void
+    {
+        self::assertSame(2, 1 + 1);
+    }
+}
+PHP);
+[$nestedExit, $nestedOutput] = run_process([PHP_BINARY, "scripts/test.php", "--filter=StarterToolingTest"], $target);
+assert_same(0, $nestedExit, "Nested application tests were not discovered: " . $nestedOutput);
+assert_true(str_contains($nestedOutput, "OK (1 tests,"), "Nested selection must execute a nonempty suite.");
+
+[$analysisExit, $analysisOutput] = run_process([PHP_BINARY, "scripts/static-analysis.php"], $target);
+assert_same(0, $analysisExit, "Fresh exported application baseline analysis failed: " . $analysisOutput);
+foreach (["config/database.php", "scripts/test.php", "scripts/static-analysis.php"] as $applicationTool) {
+    assert_true(!str_contains((string) file_get_contents($target . '/' . $applicationTool), 'This repository is the authoritative maintainer workspace'), 'Application export retains upstream ownership instructions: ' . $applicationTool);
+}
+file_put_contents($target . "/app/StarterAnalysisFailure.php", '<?php function applicationDebug(): void { var_dump("synthetic"); }');
+[$invalidAnalysisExit, $invalidAnalysisOutput] = run_process([PHP_BINARY, "scripts/static-analysis.php"], $target);
+assert_same(1, $invalidAnalysisExit, "Application-owned source errors must still fail baseline analysis.");
+assert_true(str_contains($invalidAnalysisOutput, "StarterAnalysisFailure.php"), "Analysis must identify invalid application source.");
+
 remove_directory($target);
 
 assert_true(\Fnlla\Php\Support\FrameworkLock::isFrameworkManagedPath('views/partials/support-widget.php'), 'Shared support component must be managed.');
