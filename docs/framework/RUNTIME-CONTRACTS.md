@@ -1,7 +1,9 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the public runtime surface in FNLLA Core 2.8.0.
-Availability requires its matching immutable release and exact-commit CI.
+These contracts describe the Core 3.0.0-rc.1 source candidate over the published
+2.8 runtime. Read the [Core 3 migration](../releases/3.0.0-rc.1.md); the candidate
+is not approved stable. Availability requires its matching immutable release
+and exact-commit CI.
 Reliability changes and their migration requirements are distinguished
 in [runtime reliability](RUNTIME-RELIABILITY.md); they are absent from Core 2.6.0.
 See [2.5.0 upgrade notes](../releases/2.5.0.md) for capability and security changes.
@@ -293,11 +295,17 @@ execute untrusted PHP. Use at most 32 namespaces and 32 fields per namespace;
 names are restricted identifiers. Workspace-specific accounts are owned by the
 Framework adapter, not Core.
 
-The published 2.8 `developer_access.users` freshness safeguard is retained for
-existing cached consumers, including when the new allowlist is empty or selects
-other namespaces. Rotation reloads the current value and removal yields the
-existing empty-string denial value. This historical compatibility behavior does
-not provide Workspace accounts or register old runtime aliases. New applications
-declare their own live fields. Configuration PHP files remain trusted deployment
-input; live files cannot be symlinks. Declaration changes require rebuilding the
-bootstrap cache, as the declaration itself comes from that cache.
+Core 3 no longer implicitly selects `developer_access.users`. An application
+still using that historical namespace must explicitly declare its `users` field;
+otherwise fresh or cached configuration loading fails with a migration diagnostic.
+With a valid declaration, rotation reloads the current value; removal unsets the
+field so callers use their denial default. This is an application-owned namespace,
+not a Core account API or a runtime alias. Published Core 2.8 packages keep their
+original automatic refresh behavior.
+
+Configuration PHP files remain trusted deployment input; live files cannot be
+symlinks. Declaration changes require rebuilding the bootstrap cache, as the
+declaration itself comes from that cache. `load_config_directory($directory,
+false)` bypasses the cache but preserves the same defaults/application merge and
+declaration validation. `config:cache` uses that path, retaining package-only
+namespaces and application overrides and validating before replacing its cache.

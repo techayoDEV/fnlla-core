@@ -146,6 +146,39 @@ try {
     release_artifact_assert($localExit === 0, 'Local artifact dependency pruning failed: ' . $localText);
     release_artifact_assert_dependencies_pruned($localOutput);
 
+    // A committed prerelease uses Git blobs too, without acquiring stable approval.
+    $candidateVersion = '9.18.28-rc.1';
+    $fixturePolicy['candidate'] = $candidateVersion;
+    $fixturePolicy['channel'] = 'local-review';
+    $fixturePolicy['release_approved'] = false;
+    file_put_contents($releaseArtifactRoot . '/VERSION', $candidateVersion . "\n");
+    file_put_contents($releaseArtifactRoot . '/resources/package-distribution.json',
+        json_encode($fixturePolicy, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
+    foreach ([['git', 'add', '.'], ['git', '-c', 'commit.gpgsign=false', 'commit', '-q', '-m', 'Synthetic candidate']] as $command) {
+        [$code, $text] = release_artifact_run_process($command, $releaseArtifactRoot);
+        release_artifact_assert($code === 0, 'Cannot commit synthetic candidate: ' . $text);
+    }
+    [$code, $candidateCommit] = release_artifact_run_process(['git', 'rev-parse', 'HEAD'], $releaseArtifactRoot);
+    release_artifact_assert($code === 0, 'Cannot identify synthetic candidate.');
+    foreach (['candidate', 'candidate-repeat'] as $suffix) {
+        [$code, $text] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . '/scripts/build-local-artifact.php',
+            $candidateVersion, $releaseArtifactRoot . '/dist/' . $suffix, '--expected-commit=' . $candidateCommit], $releaseArtifactRoot);
+        release_artifact_assert($code === 0, 'Committed candidate failed: ' . $text);
+    }
+    release_artifact_assert(hash_file('sha256', $releaseArtifactRoot . '/dist/candidate.zip')
+        === hash_file('sha256', $releaseArtifactRoot . '/dist/candidate-repeat.zip'), 'Committed candidates are not reproducible.');
+    $candidateProvenance = release_artifact_json($releaseArtifactRoot . '/dist/candidate/FNLLA-PROVENANCE.json');
+    release_artifact_assert($candidateProvenance['release_approved'] === false
+        && $candidateProvenance['channel'] === 'local-review' && $candidateProvenance['workspace_dirty'] === false,
+        'Committed candidate acquired stable approval or dirty sources.');
+    [$wrongCode] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . '/scripts/build-local-artifact.php',
+        $candidateVersion, $releaseArtifactRoot . '/dist/candidate-wrong', '--expected-commit=' . str_repeat('0', 40)], $releaseArtifactRoot);
+    release_artifact_assert($wrongCode !== 0, 'Committed candidate accepted a mismatched source commit.');
+    file_put_contents($releaseArtifactRoot . '/dirty-candidate.php', '<?php // synthetic untracked input');
+    [$dirtyCode] = release_artifact_run_process([PHP_BINARY, $releaseArtifactRoot . '/scripts/build-local-artifact.php',
+        $candidateVersion, $releaseArtifactRoot . '/dist/candidate-dirty'], $releaseArtifactRoot);
+    release_artifact_assert($dirtyCode !== 0, 'Committed candidate accepted dirty sources.');
+
     fwrite(STDOUT, "FNLLA Core release artifact builder tests passed." . PHP_EOL);
 } finally {
     release_artifact_remove_tree($releaseArtifactCase);

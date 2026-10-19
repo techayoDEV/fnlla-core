@@ -57,14 +57,15 @@ $commitEpoch = (int) trim(run(["git", "show", "-s", "--format=%ct", "HEAD"], $ro
 $patch = run(["git", "diff", "--binary", "HEAD", "--", "."], $root);
 $status = run(["git", "status", "--porcelain=v1", "--untracked-files=all", "--", ".", ":(exclude)dist"], $root);
 $builtAt = gmdate(DATE_ATOM, $commitEpoch);
+$committedInput = !$localReview;
 
-if ($releaseApproved) {
+if ($committedInput) {
     if (trim($status) !== "" || trim((string) file_get_contents($root . "/VERSION")) !== $version) {
-        throw new RuntimeException("Stable artifacts require clean committed sources and a matching VERSION.");
+        throw new RuntimeException("Committed artifacts require clean sources and a matching VERSION. Use --local-review only for diagnostic prerelease builds.");
     }
     foreach (array_slice($argv, 3) as $argument) {
         if (str_starts_with($argument, "--expected-commit=") && substr($argument, 18) !== $baseCommit) {
-            throw new RuntimeException("Stable artifact commit does not match the requested source commit.");
+            throw new RuntimeException("Artifact commit does not match the requested source commit.");
         }
     }
 }
@@ -102,7 +103,7 @@ foreach ($iterator as $item) {
 }
 ksort($files, SORT_STRING);
 
-if ($releaseApproved) {
+if ($committedInput) {
     // Commit blobs, rather than checkout bytes, make Windows/Linux builds identical
     // and prevent ignored or untracked files from entering an approved package.
     $files = [];
@@ -126,7 +127,7 @@ foreach ($files as $relative => $source) {
     if (!is_dir(dirname($target)) && !mkdir(dirname($target), 0755, true) && !is_dir(dirname($target))) {
         throw new RuntimeException("Cannot create artifact directory: " . dirname($target));
     }
-    $contents = $releaseApproved ? run(["git", "cat-file", "blob", $source], $root) : (string) file_get_contents($source);
+    $contents = $committedInput ? run(["git", "cat-file", "blob", $source], $root) : (string) file_get_contents($source);
     assert_no_secret($relative, $contents);
     if ($relative === "VERSION") {
         $contents = $version . "\n";

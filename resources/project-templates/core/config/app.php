@@ -11,6 +11,7 @@ return [
     "timezone" => (string) env("APP_TIMEZONE", "UTC"),
     "locale" => (string) env("APP_LOCALE", "en"),
     "fallback_locale" => "en",
+    "live_config_fields" => [],
     "log_path" => storage_path("logs/app.log"),
     "session_path" => storage_path("framework/sessions"),
     "providers" => [\Fnlla\Php\Providers\CoreServiceProvider::class, \Fnlla\Php\Providers\AuthServiceProvider::class],

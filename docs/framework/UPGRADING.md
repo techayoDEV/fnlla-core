@@ -8,6 +8,10 @@ patch the installed `vendor/` or offline package tree.
 
 ## Select and inspect the target
 
+The Core 3 source candidate has an explicit configuration migration. Read
+[3.0.0-rc.1 migration and limits](../releases/3.0.0-rc.1.md) before testing it;
+the candidate does not replace published stable Core 2.8.1.
+
 Choose an immutable, approved Core release and read every intervening release's
 compatibility notes. Start with the installed `composer.lock`, not the latest
 online documentation. Check the target PHP/extensions, custom adapter contracts,

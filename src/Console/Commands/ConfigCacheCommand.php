@@ -21,8 +21,6 @@ Purpose:
 namespace Fnlla\Php\Console\Commands;
 
 use Fnlla\Php\Console\Command;
-use RuntimeException;
-
 final class ConfigCacheCommand extends Command
 {
     public function name(): string
@@ -41,35 +39,13 @@ final class ConfigCacheCommand extends Command
         if ($input->option("help", false)) { $this->printHelp(); return 0; }
         $path = framework_config_cache_path();
 
-        $config = $this->loadFreshConfig(base_path("config"));
+        // The same loader preserves package defaults, application overrides and
+        // live-field validation. Never compile from an existing bootstrap cache.
+        $config = load_config_directory(base_path("config"), false);
         \Fnlla\Php\Support\PhpArrayCache::write($path, $config);
         $this->line("Configuration cached: " . $path);
 
         return 0;
-    }
-
-    private function loadFreshConfig(string $directory): array
-    {
-        $config = [];
-        $files = glob(rtrim($directory, "\\/") . DIRECTORY_SEPARATOR . "*.php");
-
-        if ($files === false) {
-            return $config;
-        }
-
-        sort($files);
-
-        foreach ($files as $file) {
-            $loaded = require $file;
-
-            if (!is_array($loaded)) {
-                throw new RuntimeException("Config file must return an array: " . $file);
-            }
-
-            $config[pathinfo($file, PATHINFO_FILENAME)] = $loaded;
-        }
-
-        return $config;
     }
 
 }

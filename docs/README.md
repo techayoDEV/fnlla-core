@@ -11,7 +11,9 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-This is the maintained documentation for **Core 2.8.1**. Install its matching
+This development checkout documents **Core 3.0.0-rc.1**. Read its
+[migration and limits](releases/3.0.0-rc.1.md); the candidate is not approved stable.
+The published stable version remains **Core 2.8.1**. Install its matching
 immutable release; development-branch documentation is not release availability.
 Read [2.8.1 upgrade notes](releases/2.8.1.md) for the maintenance corrections and
 [2.8.0 contracts](releases/2.8.0.md) for the frozen feature baseline. Guides describe the

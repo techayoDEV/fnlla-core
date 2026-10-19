@@ -251,7 +251,7 @@ function config_set(string $key, mixed $value): void
     $GLOBALS["fnlla_php_config"] = $config;
 }
 
-function load_config_directory(string $directory): array
+function load_config_directory(string $directory, bool $useCache = true): array
 {
     $defaults = defined('FNLLA_CONFIG_DEFAULTS_ROOT') ? FNLLA_CONFIG_DEFAULTS_ROOT : null;
     if ($defaults !== null && (!is_string($defaults) || !is_dir($defaults))) {
@@ -268,41 +268,42 @@ function load_config_directory(string $directory): array
         }
         return $base;
     };
+    $liveFields = static function (array $config): array {
+        $live = $config['app']['live_config_fields'] ?? [];
+        if (!is_array($live) || count($live) > 32) { throw new RuntimeException('Invalid live configuration field declaration.'); }
+        foreach ($live as $group => $fields) {
+            if (!is_string($group) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $group) !== 1
+                || !is_array($fields) || !array_is_list($fields) || count($fields) > 32) {
+                throw new RuntimeException('Invalid live configuration namespace.');
+            }
+            foreach ($fields as $field) {
+                if (!is_string($field) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $field) !== 1) {
+                    throw new RuntimeException('Invalid live configuration field.');
+                }
+            }
+            if (array_key_exists($group, $config) && !is_array($config[$group])) {
+                throw new RuntimeException('Live configuration namespace must be an array.');
+            }
+        }
+        // Migration guard only: Core 3 no longer implicitly refreshes a product's accounts.
+        // Refuse a stale legacy cache instead of silently weakening credential revocation.
+        if (array_key_exists('developer_access', $config)
+            && !in_array('users', $live['developer_access'] ?? [], true)) {
+            throw new RuntimeException('Core 3 migration requires app.live_config_fields[developer_access] to include users. Rebuild configuration with the old Core before upgrading; see docs/framework/UPGRADING.md.');
+        }
+        return $live;
+    };
     $directories = $defaults === null ? [$directory] : [$defaults, $directory];
     $cachedConfig = framework_config_cache_path();
 
-    if (is_file($cachedConfig)) {
+    if ($useCache && is_file($cachedConfig)) {
         $config = require $cachedConfig;
 
         if (is_array($config)) {
             $GLOBALS["fnlla_config_source"] = "bootstrap_cache";
             // Applications declare the small set of live fields that must not
             // outlive rotation/revocation. Validate before evaluating any files.
-            $live = $config['app']['live_config_fields'] ?? [];
-            if (!is_array($live) || count($live) > 32) { throw new RuntimeException('Invalid live configuration field declaration.'); }
-            foreach ($live as $group => $fields) {
-                if (!is_string($group) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $group) !== 1
-                    || !is_array($fields) || !array_is_list($fields) || count($fields) > 32) {
-                    throw new RuntimeException('Invalid live configuration namespace.');
-                }
-                foreach ($fields as $field) {
-                    if (!is_string($field) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $field) !== 1) {
-                        throw new RuntimeException('Invalid live configuration field.');
-                    }
-                }
-                if (array_key_exists($group, $config) && !is_array($config[$group])) {
-                    throw new RuntimeException('Live configuration namespace must be an array.');
-                }
-            }
-            // Preserve the published 2.8 credential-revocation safeguard for
-            // pre-Workspace consumers. This does not register runtime aliases.
-            $legacyCredentials = isset($config['developer_access']);
-            if ($legacyCredentials) {
-                if (!is_array($config['developer_access'])) {
-                    throw new RuntimeException('Live configuration namespace must be an array.');
-                }
-                $live['developer_access'] = array_unique([...($live['developer_access'] ?? []), 'users']);
-            }
+            $live = $liveFields($config);
             foreach ($live as $group => $fields) {
                 if ($fields === []) { continue; }
                 $fresh = [];
@@ -315,9 +316,7 @@ function load_config_directory(string $directory): array
                     $fresh = $merge($fresh, $loaded);
                 }
                 foreach ($fields as $field) {
-                    if ($legacyCredentials && $group === 'developer_access' && $field === 'users') {
-                        $config[$group][$field] = (string) ($fresh[$field] ?? '');
-                    } elseif (array_key_exists($field, $fresh)) { $config[$group][$field] = $fresh[$field]; }
+                    if (array_key_exists($field, $fresh)) { $config[$group][$field] = $fresh[$field]; }
                     else { unset($config[$group][$field]); }
                 }
             }
@@ -343,6 +342,7 @@ function load_config_directory(string $directory): array
         }
     }
 
+    $liveFields($config);
     return $config;
 }
 

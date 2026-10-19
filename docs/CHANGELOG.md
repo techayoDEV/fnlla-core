@@ -2,6 +2,17 @@
 
 ## Unreleased source changes
 
+- Require PHP 8.3/8.4/8.5 Linux/Windows and service coverage in the release matrix.
+  Verify committed prerelease packages explicitly without granting stable approval;
+  build clean candidate packages from Git blobs for cross-platform reproducibility.
+  CI/artifact gates remain active under optimized Python and reject duplicated
+  required jobs as well as missing, skipped or failed checks.
+- Prepare Core 3.0.0-rc.1 with `release_approved=false`; stable remains 2.8.1.
+  Replace the implicit `developer_access.users` refresh with an explicit
+  `app.live_config_fields` declaration and a fail-closed migration diagnostic.
+  Core 3 configuration compilation uses the same package-default/application
+  merge as bootstrap and bypasses existing caches. Published package pins,
+  interfaces and historical upgrade anchors are preserved.
 - Adopt explicit Semantic Versioning without single-digit minor/patch limits.
   Require documented compatibility/migration classification for every release;
   reject malformed version labels before creating package outputs. Published
@@ -14,9 +25,9 @@
 - Add an optional `app.live_config_fields` allowlist for cached configuration.
   Reload selected top-level keys from trusted defaults and application files;
   remove missing keys and reject invalid declarations or linked config files.
-  Existing 2.8 consumers retain automatic `developer_access.users` refresh and
-  revocation without adopting the new declaration. Other namespaces remain
-  cached unless explicitly selected. No account or authorization API is added.
+  The published 2.8 runtime retains automatic `developer_access.users` refresh;
+  the Core 3 candidate requires the explicit migration described above. Other
+  namespaces remain cached unless selected. No account or authorization API is added.
 - Use Workspace names in new optional Framework template references and
   recognize its current managed paths. Keep historical inventory paths in
   upgrade/profile classification so existing applications retain update

@@ -41,6 +41,23 @@ try {
     unlink($root . '/config/invalid.php');
     // Cached package configuration must not preserve rotated or removed credentials.
     $cachePath = framework_config_cache_path();
+    file_put_contents($root . '/defaults/package_only.php', '<?php return ["retained" => true];');
+    file_put_contents($cachePath, '<?php return ["obsolete" => true];');
+    $command = new \Fnlla\Php\Console\Commands\ConfigCacheCommand(new \Fnlla\Php\Container\Container());
+    ob_start();
+    try { $check($command->handle([]) === 0); }
+    finally { ob_end_clean(); }
+    $compiled = require $cachePath;
+    $check($compiled['package_only'] === ['retained' => true]);
+    $check($compiled['items'] === ['replacement']);
+    $check($compiled['sample']['nested'] === [] && $compiled['sample']['list'] === []);
+    $check(!array_key_exists('obsolete', $compiled));
+    $check(load_config_directory($root . '/config') === $compiled);
+    file_put_contents($root . '/config/app.php', '<?php return ["live_config_fields" => ["../escape" => ["users"]]];');
+    $before = hash_file('sha256', $cachePath);
+    $deny(static fn () => $command->handle([]));
+    $check(hash_file('sha256', $cachePath) === $before);
+    unlink($root . '/config/app.php');
     file_put_contents($cachePath, '<?php return ["app" => ["live_config_fields" => ["credentials" => ["users"]]], "credentials" => ["users" => "stale-synthetic"], "sample" => ["cached" => true]];');
     file_put_contents($root . '/defaults/credentials.php', '<?php return ["users" => "rotated-synthetic"];');
     file_put_contents($root . '/config/credentials.php', '<?php return ["enabled" => false];');
@@ -52,7 +69,7 @@ try {
     unlink($root . '/defaults/credentials.php');
     unlink($root . '/config/credentials.php');
     $check(!array_key_exists('users', load_config_directory($root . '/config')['credentials']));
-    // The existing 2.8 safety behavior must survive without any new declaration.
+    // Core 3 requires explicit migration of the former product-specific exception.
     foreach ([[], ['app' => ['live_config_fields' => ['credentials' => ['users']]]],
         ['app' => ['live_config_fields' => ['developer_access' => []]]]] as $extraConfig) {
         file_put_contents($cachePath, '<?php return ' . var_export($extraConfig + [
@@ -60,15 +77,31 @@ try {
         ], true) . ';');
         file_put_contents($root . '/defaults/developer_access.php', '<?php return ["users" => "rotated-synthetic"];');
         file_put_contents($root . '/config/developer_access.php', '<?php return ["enabled" => false];');
-        $config = load_config_directory($root . '/config');
-        $check($config['developer_access']['users'] === 'rotated-synthetic');
-        $check($config['developer_access']['enabled'] === true);
-        file_put_contents($root . '/config/developer_access.php', '<?php return ["users" => "application-synthetic"];');
-        $check(load_config_directory($root . '/config')['developer_access']['users'] === 'application-synthetic');
-        unlink($root . '/defaults/developer_access.php');
-        unlink($root . '/config/developer_access.php');
-        $check(load_config_directory($root . '/config')['developer_access']['users'] === '');
+        try { load_config_directory($root . '/config'); throw new LogicException('Unmigrated credentials were accepted.'); }
+        catch (RuntimeException $exception) { $check(str_contains($exception->getMessage(), 'Core 3 migration requires')); }
     }
+    file_put_contents($cachePath, '<?php return ' . var_export([
+        'app' => ['live_config_fields' => ['developer_access' => ['users']]],
+        'developer_access' => ['users' => 'stale-synthetic', 'enabled' => true],
+    ], true) . ';');
+    $config = load_config_directory($root . '/config');
+    $check($config['developer_access']['users'] === 'rotated-synthetic');
+    $check($config['developer_access']['enabled'] === true);
+    // Fresh compilation also refuses an unmigrated declaration before changing the cache.
+    $before = hash_file('sha256', $cachePath);
+    $deny(static fn () => $command->handle([]));
+    $check(hash_file('sha256', $cachePath) === $before);
+    file_put_contents($root . '/config/app.php', '<?php return ["live_config_fields" => ["developer_access" => ["users"]]];');
+    ob_start();
+    try { $check($command->handle([]) === 0); }
+    finally { ob_end_clean(); }
+    $check(load_config_directory($root . '/config')['developer_access']['users'] === 'rotated-synthetic');
+    file_put_contents($root . '/config/developer_access.php', '<?php return ["users" => "application-synthetic"];');
+    $check(load_config_directory($root . '/config')['developer_access']['users'] === 'application-synthetic');
+    unlink($root . '/defaults/developer_access.php');
+    unlink($root . '/config/developer_access.php');
+    $check(!array_key_exists('users', load_config_directory($root . '/config')['developer_access']));
+    unlink($root . '/config/app.php');
     // Live-field declarations cannot traverse files or reload arbitrary namespaces.
     foreach (['invalid', ['../credentials' => ['users']], ['credentials' => ['../users']],
         ['credentials' => 'users'], ['credentials' => ['named' => 'users']],

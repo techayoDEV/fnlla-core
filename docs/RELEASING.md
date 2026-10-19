@@ -22,6 +22,15 @@ policy text does not change VERSION, distribution approval or a consumer lock.
 
 ## Release sequence
 
+For a committed prerelease, VERSION and the policy must name the same candidate
+with `channel=local-review` and `release_approved=false`. Build normally with the
+expected commit so Git blobs produce identical Windows/Linux bytes. Verify with
+`python scripts/verify-release.py ZIP FULL_SHA --local-review`. This explicit
+mode verifies a clean candidate and never grants stable approval. A diagnostic
+`build-local-artifact.php --local-review` may capture dirty source; its provenance
+remains dirty and the exact-source verifier rejects it. Stable verification
+without the flag rejects every prerelease and false approval state.
+
 1. Review public contracts, operational migrations and rollback. Update VERSION,
    distribution policy, changelog, release notes and current-version docs.
    A prepared target retains `release_approved=false` and `channel=local-review`
@@ -60,17 +69,17 @@ remote tag/draft first; do not rewrite an existing version to hide a failure.
 
 ## CI compute and required checks
 
-Linux is the production target. The public repository retains PHP 8.3/8.4
+Linux is the production target. The public repository retains PHP 8.3/8.4/8.5
 runtime checks on Linux and Windows and deterministic packages on both systems:
 filesystem locking, path handling, mail HTTP transport and consumer installation
 are development-platform boundaries. MySQL/Redis, upgrade and Apache checks run
 on Linux. Standard public runners do not incur runner-minute charges; useful
 portable-runtime coverage is retained rather than moved into private consumers.
 
-The stable protected checks `PHP 8.3` and `PHP 8.4` are aggregators. Both require
+The stable checks `PHP 8.3`, `PHP 8.4` and `PHP 8.5` are aggregators. All require
 all runtime, service, upload and package jobs to succeed and fail on cancellation
 or skipping. Expanded OS matrix names alone do not satisfy those stable names.
-The release CI reader also requires both aggregators and all nine underlying jobs.
+The release CI reader also requires all three aggregators and all twelve underlying jobs.
 Branch protection is not modified by workflow maintenance.
 
 Only superseded PR validation can be cancelled. Main and manual acceptance have
