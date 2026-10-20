@@ -313,6 +313,10 @@ declaration validation. `config:cache` uses that path, retaining unselected pack
 defaults and application overrides and validating before replacing its cache.
 Malformed caches and null live-field declarations fail; they never trigger a
 silent fallback. Fresh and cached loading reject linked configuration files.
+When OPcache is active, configuration source bytecode is invalidated before
+evaluation, including when timestamp validation is disabled. A restricted or
+unavailable invalidation API fails closed; it cannot supply cached credentials
+as a fallback. Application code/worker deployments still require restart.
 
 The standard bootstrap captures a `ConfigurationGeneration` before environment
 loading. Queue/outbox workers check it before the next reservation and the cache

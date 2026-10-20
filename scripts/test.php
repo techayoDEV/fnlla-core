@@ -34,4 +34,7 @@ echo $packageOutput;
 [$configExit, $configOutput] = run_process([PHP_BINARY, 'tests/ConfigurationSecurityTest.php'], dirname(__DIR__));
 assert_same(0, $configExit, 'Configuration security failed: ' . $configOutput);
 echo $configOutput;
+[$opcacheExit, $opcacheOutput] = run_process([PHP_BINARY, 'tests/ConfigurationOpcacheTest.php'], dirname(__DIR__));
+assert_same(0, $opcacheExit, 'Configuration OPcache security failed: ' . $opcacheOutput);
+echo $opcacheOutput;
 require __DIR__ . "/../tests/ReleaseArtifactBuilderTest.php";

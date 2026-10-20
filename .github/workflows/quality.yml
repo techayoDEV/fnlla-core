@@ -78,7 +78,7 @@ jobs:
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: pdo_sqlite, pdo_mysql, fileinfo, mbstring
+          extensions: pdo_sqlite, pdo_mysql, fileinfo, mbstring, opcache
           coverage: none
           tools: composer:v2
 
@@ -102,6 +102,7 @@ jobs:
       - name: Run smoke tests
         env:
           FNLLA_REQUIRE_SYMLINK_TESTS: ${{ runner.os == 'Linux' && '1' || '0' }}
+          FNLLA_REQUIRE_OPCACHE_TESTS: '1'
         run: php scripts/test.php
 
       - name: Lint PHP

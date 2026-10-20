@@ -24,6 +24,9 @@ default, malformed input/cache, cached/fresh permission equivalence, stale-proce
 reservation and cache-publication denial, and partial-update recovery.
 `tests/ConfigurationSecurityTest.php` reports individual assertions; package
 runtime, snapshot and service upgrade tests cover complementary boundaries.
+`ConfigurationOpcacheTest.php` enables real bytecode caching with timestamp
+validation disabled, proves the stale-bytecode fixture, then asserts rotation
+and removal in both configuration modes and denial with a restricted OPcache API.
 
 Selected live fields are application-owned. Missing selected application fields
 are removed; package defaults cannot restore them. Other configuration is cached

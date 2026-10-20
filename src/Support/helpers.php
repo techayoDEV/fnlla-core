@@ -305,6 +305,20 @@ function load_config_directory(string $directory, bool $useCache = true): array
             if (file_exists($path)) { throw new RuntimeException('Configuration path must be a regular file.'); }
             return [];
         }
+        // Live configuration must not execute stale bytecode when a deployment
+        // disables OPcache timestamp validation. Restricted APIs fail closed.
+        if (filter_var(ini_get('opcache.enable'), FILTER_VALIDATE_BOOL)
+            && (PHP_SAPI !== 'cli' || filter_var(ini_get('opcache.enable_cli'), FILTER_VALIDATE_BOOL))) {
+            if (!function_exists('opcache_invalidate') || !function_exists('opcache_is_script_cached')) {
+                throw new RuntimeException('Configuration bytecode freshness cannot be verified.');
+            }
+            set_error_handler(static function (): never { throw new RuntimeException('Configuration bytecode invalidation failed.'); });
+            try {
+                if (!opcache_invalidate($path, true) && opcache_is_script_cached($path)) {
+                    throw new RuntimeException('Configuration bytecode invalidation failed.');
+                }
+            } finally { restore_error_handler(); }
+        }
         $loaded = require $path;
         if (!is_array($loaded)) { throw new RuntimeException('Configuration must return an array.'); }
         return $loaded;

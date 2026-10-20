@@ -9,6 +9,10 @@
   process configuration/environment inputs change. Add named security assertions,
   a disposable Composer/HTTP developer exercise and explicit engineering/release/
   deployment acceptance scopes. No stable publication is approved.
+- Preserve config-free minimal bootstrap while watching for a newly added config
+  directory. Invalidate configuration source bytecode before evaluation under
+  active OPcache; restricted invalidation fails closed. Require real OPcache
+  rotation/removal and restricted-API tests in every runtime CI cell.
 
 - Require PHP 8.3/8.4/8.5 Linux/Windows and service coverage in the release matrix.
   Verify committed prerelease packages explicitly without granting stable approval;
