@@ -76,7 +76,7 @@ that retains cookies and sends `Accept: application/json`:
 
 1. `/` renders; `/api/health` responds; anonymous `/demo/report` returns 401.
 2. GET `/demo/token`; retain its session cookie. POST JSON email/password to
-   `/demo/login`, sending the token as `X-CSRF-Token`. Missing CSRF returns 419;
+   `/demo/login`, including the token in the JSON `_token` field. Missing CSRF returns 419;
    wrong password returns 401.
 3. The local fixtures are `editor@example.test` and `reader@example.test`, with
    password `local-demo-only`. Editor report returns 200 with `cache_ready=true`;

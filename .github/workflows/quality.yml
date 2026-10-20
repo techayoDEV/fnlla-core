@@ -166,6 +166,15 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y mysql-client
       - run: php tests/ApplicationSnapshotServiceTest.php
       - run: python3 scripts/test-upgrade.py
+      - name: Rehearse documented Composer install, HTTP permissions and original 2.8.1 upgrade
+        shell: python
+        run: |
+          import pathlib, subprocess, sys
+          version = pathlib.Path('VERSION').read_text().strip()
+          commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          folder = 'dist/developer-experience/fnlla-core-' + version
+          subprocess.run(['php', 'scripts/build-local-artifact.php', version, folder, '--expected-commit=' + commit], check=True)
+          subprocess.run([sys.executable, 'scripts/test-developer-experience.py', '--artifact', folder + '.zip', '--commit', commit], check=True)
 
   upload-http:
     runs-on: ubuntu-24.04

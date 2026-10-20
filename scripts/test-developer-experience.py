@@ -178,7 +178,7 @@ def exercise_http(php, app, steps, label, revoked=False):
                 def request(path, data=None, token=None):
                     headers = {'Accept': 'application/json'}
                     if data is not None: headers['Content-Type'] = 'application/json'
-                    if token: headers['X-CSRF-Token'] = token
+                    if token and data is not None: data = {**data, '_token': token}
                     query = urllib.request.Request(base + path, data=None if data is None else json.dumps(data).encode(), headers=headers)
                     try:
                         with client.open(query, timeout=5) as response: return response.status, response.read()
@@ -189,7 +189,8 @@ def exercise_http(php, app, steps, label, revoked=False):
                 token = json.loads(payload)['token']
                 credentials = {'email': email, 'password': 'local-demo-only'}
                 require(request('/demo/login', credentials)[0] == 419, 'Missing CSRF was not denied.')
-                require(request('/demo/login', {**credentials, 'password': 'incorrect'}, token)[0] == 401, 'Wrong credential accepted.')
+                invalid_status = request('/demo/login', {**credentials, 'password': 'incorrect'}, token)[0]
+                require(invalid_status == 401, 'Invalid credential must return 401, received ' + str(invalid_status))
                 status, _ = request('/demo/login', credentials, token)
                 require(status == (401 if revoked and email.startswith('editor') else 200), 'Login result differs.')
                 status, payload = request('/demo/report?role=editor')
