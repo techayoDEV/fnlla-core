@@ -32,9 +32,20 @@ final class ConfigurationGeneration
         if (defined('FNLLA_CONFIG_DEFAULTS_ROOT')) { $directories[] = FNLLA_CONFIG_DEFAULTS_ROOT; }
         $state = [];
         foreach ($directories as $directory) {
-            if (!is_string($directory) || !is_dir($directory) || !is_readable($directory)) {
+            if (!is_string($directory)) {
                 throw new RuntimeException('Configuration generation directory is unavailable.');
             }
+            clearstatcache(true, $directory);
+            if (!file_exists($directory) && !is_link($directory)) {
+                // The public loader supports config-free minimal consumers.
+                // Watch absence too: adding the directory changes generation.
+                $state['directory:' . $directory] = null;
+                continue;
+            }
+            if (!is_dir($directory) || !is_readable($directory)) {
+                throw new RuntimeException('Configuration generation directory is unavailable.');
+            }
+            $state['directory:' . $directory] = 'present';
             $files = glob(rtrim($directory, '\\/') . '/*.php');
             if ($files === false) { throw new RuntimeException('Cannot enumerate configuration generation.'); }
             $paths = array_merge($paths, $files);

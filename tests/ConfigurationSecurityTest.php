@@ -156,6 +156,20 @@ try {
     if (!is_resource($process)) { throw new RuntimeException('Cannot start fresh generation process.'); }
     fclose($pipes[0]);
     $check('restarted process observes the new environment', proc_close($process) === 0);
+    $minimal = $root . '/minimal';
+    mkdir($minimal, 0700);
+    $child = $root . '/minimal.php';
+    file_put_contents($child, '<?php require ' . var_export(dirname(__DIR__) . '/vendor/autoload.php', true)
+        . '; define("APP_ROOT",' . var_export($minimal, true) . '); define("FNLLA_ENGINE_ROOT",' . var_export(dirname(__DIR__), true) . ');'
+        . '$container = require FNLLA_ENGINE_ROOT."/bootstrap/common.php";'
+        . 'if (!$container instanceof \\Fnlla\\Php\\Container\\Container || config() !== []) { throw new RuntimeException("Invalid minimal bootstrap."); }'
+        . 'mkdir(APP_ROOT."/config",0700); try { \\Fnlla\\Php\\Support\\ConfigurationGeneration::assertCurrent(); }'
+        . 'catch (RuntimeException $error) { if (str_contains($error->getMessage(),"generation changed")) { exit(0); } throw $error; }'
+        . 'throw new RuntimeException("New configuration directory was not fenced.");');
+    $process = proc_open([PHP_BINARY, $child], [0 => ['pipe', 'r'], 1 => ['file', $root . '/minimal.out', 'w'], 2 => ['file', $root . '/minimal.err', 'w']], $pipes);
+    if (!is_resource($process)) { throw new RuntimeException('Cannot start minimal application fixture.'); }
+    fclose($pipes[0]);
+    $check('config-free standard bootstrap works and fences a newly added directory', proc_close($process) === 0);
     echo json_encode(['suite' => 'configuration-security', 'status' => 'passed', 'assertions' => $passed], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";
 } finally {
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $item) {
