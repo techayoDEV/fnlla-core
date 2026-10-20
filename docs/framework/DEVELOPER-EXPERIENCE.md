@@ -81,8 +81,10 @@ that retains cookies and sends `Accept: application/json`:
 3. The local fixtures are `editor@example.test` and `reader@example.test`, with
    password `local-demo-only`. Editor report returns 200 with `cache_ready=true`;
    reader report returns 403, including with a forged `role=editor` input.
-4. Run `php scripts/demo-setup.php revoke`. The editor's existing session must
-   now receive 401. Authentication re-resolves the database actor.
+4. Run `php scripts/demo-setup.php revoke`. The editor's existing session and
+   another login with that removed identity must receive 401. Authentication
+   re-resolves the database actor. `restore-editor` reinstalls this synthetic
+   fixture only when continuing an exercise; it is never a production recovery action.
 
 Stop the server before dependency/config changes. These account fixtures do not
 grant real application rights. Remove demo routes/files after the exercise.
@@ -105,7 +107,10 @@ Rehearse failure after installing the dependency but before activation. Keep
 writers stopped, restore the old code and exact lock in a separate directory,
 run `composer install --no-dev`, rebuild generated configuration with the old
 engine and repeat critical behavior checks. A code-only rollback retains the
-existing database, including current identity revocations. Schema/data changes
+existing database, including current identity revocations. The automated drill
+revokes the editor before activating rollback, verifies the exact remaining
+record identity/role and denies the removed identity on the old engine.
+Schema/data changes
 need the [compatible snapshots and reconciliation](UPGRADING.md#recovery-and-rollback);
 restoring a ZIP is insufficient. Never reactivate revoked secrets/roles from an
 old backup. A failed recovery verification leaves traffic blocked.

@@ -134,6 +134,7 @@ def main():
                     require(before == {p: digest(app / p) for p in before}, 'Upgrade changed application-owned files.')
                     run([php, 'scripts/demo-setup.php', 'verify'], app)
                     exercise_http(php, app, steps, 'upgrade-after')
+                    run([php, 'scripts/demo-setup.php', 'revoke'], app)
                     # Simulate failure after dependency installation, before activation.
                     (app / 'partial-update.txt').write_text('not activated')
                     rollback = work / 'rollback-release'
@@ -141,9 +142,7 @@ def main():
                     run(composer + ['install', '--no-dev', '--no-interaction', '--no-progress'], rollback)
                     run([php, 'fnlla', 'config:cache'], rollback)
                     require(not (rollback / 'partial-update.txt').exists(), 'Partial update survived code rollback.')
-                    run([php, 'scripts/demo-setup.php', 'verify'], rollback)
-                    exercise_http(php, rollback, steps, 'rollback')
-                    run([php, 'scripts/demo-setup.php', 'revoke'], rollback)
+                    run([php, 'scripts/demo-setup.php', 'verify-revoked'], rollback)
                     exercise_http(php, rollback, steps, 'rollback-revocation', revoked=True)
                 run(composer + ['check-platform-reqs', '--no-dev'], app)
                 run([php, 'scripts/test.php'], app)
@@ -173,6 +172,8 @@ def exercise_http(php, app, steps, label, revoked=False):
                     time.sleep(.1)
             else:
                 raise RuntimeError('Exercise HTTP server did not start.')
+            with urllib.request.urlopen(base + '/', timeout=5) as response:
+                require(response.status == 200 and b'Developer Exercise' in response.read(), 'Minimal homepage failed.')
             for email, expected in [('reader@example.test', 403), ('editor@example.test', 401 if revoked else 200)]:
                 client = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
                 def request(path, data=None, token=None):
@@ -196,7 +197,14 @@ def exercise_http(php, app, steps, label, revoked=False):
                 status, payload = request('/demo/report?role=editor')
                 require(status == expected, 'Permission boundary failed: ' + label)
                 if expected == 200: require(json.loads(payload) == {'report': 'ready', 'cache_ready': True}, 'Configured cache/report failed.')
-            steps.append({'http': label, 'status': 'passed', 'assertions': ['anonymous-401', 'missing-csrf-419', 'invalid-credential-401', 'reader-and-forged-role-403', 'editor-401' if revoked else 'editor-and-cache-200']})
+                if expected == 200:
+                    subprocess.run([php, 'scripts/demo-setup.php', 'revoke'], cwd=app, check=True, timeout=20, stdout=subprocess.DEVNULL)
+                    try:
+                        require(request('/demo/report')[0] == 401, 'Existing session survived identity revocation.')
+                        require(request('/demo/login', credentials, token)[0] == 401, 'Revoked credential still authenticates.')
+                    finally:
+                        subprocess.run([php, 'scripts/demo-setup.php', 'restore-editor'], cwd=app, check=True, timeout=20, stdout=subprocess.DEVNULL)
+            steps.append({'http': label, 'status': 'passed', 'assertions': ['home-200', 'anonymous-401', 'missing-csrf-419', 'invalid-credential-401', 'reader-and-forged-role-403', 'revoked-identity-and-existing-session-401' if not revoked else 'rollback-preserves-revocation-401', 'editor-401' if revoked else 'editor-and-cache-200']})
         finally:
             process.terminate()
             try: process.wait(timeout=5)

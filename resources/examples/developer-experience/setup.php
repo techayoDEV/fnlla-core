@@ -15,10 +15,18 @@ $pdo = app(\Fnlla\Php\Database\DatabaseManager::class)->connection();
 $mode = $argv[1] ?? 'seed';
 if ($mode === 'cleanup') { $pdo->exec("DROP TABLE IF EXISTS `{$table}`"); return; }
 if ($mode === 'revoke') { $pdo->exec("DELETE FROM `{$table}` WHERE email='editor@example.test'"); return; }
-if ($mode === 'verify') {
-    if ((int) $pdo->query("SELECT COUNT(*) FROM `{$table}`")->fetchColumn() !== 2) {
+if ($mode === 'verify' || $mode === 'verify-revoked') {
+    $expected = $mode === 'verify' ? [[1, 'editor@example.test', 'editor'], [2, 'reader@example.test', 'reader']] : [[2, 'reader@example.test', 'reader']];
+    $rows = $pdo->query("SELECT id,email,role,password FROM `{$table}` ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+    $actual = array_map(static fn (array $row): array => [(int) $row['id'], $row['email'], $row['role']], $rows);
+    if ($actual !== $expected || array_filter($rows, static fn (array $row): bool => !password_verify('local-demo-only', $row['password'])) !== []) {
         throw new RuntimeException('Developer exercise data changed.');
     }
+    return;
+}
+if ($mode === 'restore-editor') {
+    $insert = $pdo->prepare("INSERT INTO `{$table}` (id,email,password,role) VALUES (1,?,?,?)");
+    $insert->execute(['editor@example.test', password_hash('local-demo-only', PASSWORD_DEFAULT), 'editor']);
     return;
 }
 if ($mode !== 'seed') { throw new RuntimeException('Unknown developer exercise operation.'); }
