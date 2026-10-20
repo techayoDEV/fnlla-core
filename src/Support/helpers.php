@@ -268,33 +268,43 @@ function load_config_directory(string $directory, bool $useCache = true): array
         }
         return $base;
     };
-    $liveFields = static function (array $config): array {
+    $liveFields = static function (array &$config): array {
         if (array_key_exists('app', $config) && !is_array($config['app'])) {
             throw new RuntimeException('Application configuration must be an array.');
         }
         $app = $config['app'] ?? [];
-        $live = array_key_exists('live_config_fields', $app) ? $app['live_config_fields'] : [];
-        if (!is_array($live) || count($live) > 32) { throw new RuntimeException('Invalid live configuration field declaration.'); }
-        foreach ($live as $group => $fields) {
-            if (!is_string($group) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $group) !== 1
-                || !is_array($fields) || !array_is_list($fields) || count($fields) > 32) {
-                throw new RuntimeException('Invalid live configuration namespace.');
-            }
-            foreach ($fields as $field) {
-                if (!is_string($field) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $field) !== 1) {
-                    throw new RuntimeException('Invalid live configuration field.');
+        $declared = array_key_exists('live_config_fields', $app) ? $app['live_config_fields'] : [];
+        $required = defined('FNLLA_REQUIRED_LIVE_CONFIG_FIELDS') ? FNLLA_REQUIRED_LIVE_CONFIG_FIELDS : [];
+        $live = [];
+        foreach ([$declared, $required] as $declaration) {
+            if (!is_array($declaration) || count($declaration) > 32) { throw new RuntimeException('Invalid live configuration field declaration.'); }
+            foreach ($declaration as $group => $fields) {
+                if (!is_string($group) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $group) !== 1
+                    || !is_array($fields) || !array_is_list($fields) || count($fields) > 32) {
+                    throw new RuntimeException('Invalid live configuration namespace.');
                 }
-            }
-            if (array_key_exists($group, $config) && !is_array($config[$group])) {
-                throw new RuntimeException('Live configuration namespace must be an array.');
+                foreach ($fields as $field) {
+                    if (!is_string($field) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $field) !== 1) {
+                        throw new RuntimeException('Invalid live configuration field.');
+                    }
+                }
+                if (array_key_exists($group, $config) && !is_array($config[$group])) {
+                    throw new RuntimeException('Live configuration namespace must be an array.');
+                }
+                $live[$group] = array_values(array_unique([...($live[$group] ?? []), ...$fields]));
+                if (count($live[$group]) > 32) { throw new RuntimeException('Combined live configuration fields exceed their limit.'); }
             }
         }
+        if (count($live) > 32) { throw new RuntimeException('Combined live configuration namespaces exceed their limit.'); }
         // Migration guard only: Core 3 no longer implicitly refreshes a product's accounts.
         // Refuse a stale legacy cache instead of silently weakening credential revocation.
         if (array_key_exists('developer_access', $config)
             && !in_array('users', $live['developer_access'] ?? [], true)) {
             throw new RuntimeException('Core 3 migration requires app.live_config_fields[developer_access] to include users. Rebuild configuration with the old Core before upgrading; see docs/framework/UPGRADING.md.');
         }
+        // Trusted integration bootstrap may require freshness without changing
+        // application-owned files. Empty app declarations cannot disable it.
+        if ($required !== []) { $config['app']['live_config_fields'] = $live; }
         return $live;
     };
     $directories = $defaults === null ? [$directory] : [$defaults, $directory];
@@ -367,7 +377,8 @@ function load_config_directory(string $directory, bool $useCache = true): array
         }
     }
 
-    return $refresh($config, $liveFields($config));
+    $live = $liveFields($config);
+    return $refresh($config, $live);
 }
 
 function framework_cache_path(string $path = ""): string

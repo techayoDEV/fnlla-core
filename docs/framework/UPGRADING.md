@@ -63,6 +63,10 @@ Framework Workspace naming and account/data migration belong to Framework.
 ## Recovery and rollback
 
 Selected live fields in Core 3 must exist in application-owned configuration.
+An integrating framework may supply required fields through the documented
+trusted bootstrap declaration. FNLLA's compatible bootstrap supplies Workspace
+freshness without rewriting an older application's app.php or using stale cache
+values. Library-only applications declare their own actual credential fields.
 Move any selected package default into the application's trusted configuration
 before upgrading; its absence is revocation, not permission to use a default.
 Test cached and uncached authorization equivalence. Add the declaration and

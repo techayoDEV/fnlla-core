@@ -37,4 +37,7 @@ echo $configOutput;
 [$opcacheExit, $opcacheOutput] = run_process([PHP_BINARY, 'tests/ConfigurationOpcacheTest.php'], dirname(__DIR__));
 assert_same(0, $opcacheExit, 'Configuration OPcache security failed: ' . $opcacheOutput);
 echo $opcacheOutput;
+[$requiredExit, $requiredOutput] = run_process([PHP_BINARY, 'tests/RequiredLiveConfigurationTest.php'], dirname(__DIR__));
+assert_same(0, $requiredExit, 'Required live configuration failed: ' . $requiredOutput);
+echo $requiredOutput;
 require __DIR__ . "/../tests/ReleaseArtifactBuilderTest.php";

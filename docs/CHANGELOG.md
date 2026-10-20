@@ -13,6 +13,9 @@
   directory. Invalidate configuration source bytecode before evaluation under
   active OPcache; restricted invalidation fails closed. Require real OPcache
   rotation/removal and restricted-API tests in every runtime CI cell.
+- Add a neutral trusted-bootstrap required live-field map, unioned and bounded
+  with application selections. Integrators preserve mandatory freshness through
+  old application files/caches without rewriting them or restoring defaults.
 
 - Require PHP 8.3/8.4/8.5 Linux/Windows and service coverage in the release matrix.
   Verify committed prerelease packages explicitly without granting stable approval;

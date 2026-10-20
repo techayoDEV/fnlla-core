@@ -286,6 +286,15 @@ packages are immutable and do not acquire these changes automatically.
 
 ### Live configuration fields (unreleased source candidate)
 
+Trusted integration bootstrap may define `FNLLA_REQUIRED_LIVE_CONFIG_FIELDS`
+before loading Core, using the same namespace/field map. Core validates and
+unions it with application selections within the same combined 32/32 limits.
+An empty application selection cannot disable these required fields; invalid
+application declarations still fail. The effective map is returned in
+`app.live_config_fields`, including for an old bootstrap cache. Required fields
+still read only application configuration, never package credential defaults.
+This declares freshness, not permissions. Only trusted deployment PHP sets it.
+
 An application may declare `app.live_config_fields`, for example
 `['credentials' => ['users']]`. With cached configuration, only those trusted
 namespaced fields are reloaded from application-owned files. Package defaults
