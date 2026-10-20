@@ -1,9 +1,20 @@
 # FNLLA Core
 
+This edition targets **Core 3.0.0 stable**. The owner authorized finalization and
+publication of this exact release, conditional on all final-source release gates.
+Read [the Core 3 migration and limits](docs/releases/3.0.0.md) and
+[the changelog](docs/CHANGELOG.md). Source metadata alone is not a publication
+receipt or application production acceptance. Install only the matching official
+tag or verified release artifact. See the separate
+[engineering, release and deployment acceptance scopes](docs/framework/READINESS.md).
+
+Core follows [Semantic Versioning](https://semver.org/) with no single-digit
+minor/patch limit. See the [compatibility policy](docs/framework/RUNTIME-CONTRACTS.md#semantic-versioning).
+
 [![FNLLA Core — the open Web Framework foundation](branding/assets/readme/github-cover.svg)](https://fnlla.com/core)
 
 [![Website](https://img.shields.io/badge/website-fnlla.com-2563eb?style=flat-square)](https://fnlla.com)
-[![Release](https://img.shields.io/badge/release-2.8.1-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.8.1)
+[![Release](https://img.shields.io/badge/release-3.0.0-18352f?style=flat-square)](https://github.com/techayoDEV/fnlla-core/releases/tag/v3.0.0)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE.md)
 [![PHP 8.3+](https://img.shields.io/badge/web%20runtime-PHP%208.3%2B-777BB4?style=flat-square)](composer.json)
 [![TechAyo](https://img.shields.io/badge/by-TechAyo-0b1220?style=flat-square)](https://techayo.co.uk)
@@ -14,7 +25,7 @@
 [First capability](docs/framework/FIRST-CAPABILITY.md) ·
 [Architecture](docs/framework/ARCHITECTURE.md) ·
 [Documentation](docs/README.md) ·
-[Release notes](https://github.com/techayoDEV/fnlla-core/releases/tag/v2.8.1)
+[Release notes](docs/releases/3.0.0.md)
 
 **Build with AI. Stay in control.** FNLLA Core is a Web application foundation
 with explicit contracts that developers and coding agents can inspect. You
@@ -37,10 +48,11 @@ framework primitives and safe defaults; the wider FNLLA product, documentation
 and licensed access live at [fnlla.com](https://fnlla.com).
 
 Package: `techayodev/fnlla-core`<br>
-Version: `2.8.1`. Install the matching immutable tagged release; a development
-checkout does not establish availability. Read the [2.8.1 upgrade notes](docs/releases/2.8.1.md)
-for the maintenance corrections and the [2.8.0 baseline](docs/releases/2.8.0.md)
-for the optional contracts and maintenance freeze before deploying.
+Edition: `3.0.0`. Require the matching immutable official tag or verified release
+ZIP and commit the resulting Composer lock. The preceding stable package is
+`2.8.1`; its bytes remain unchanged. Existing applications must follow the
+[Core 3 upgrade and rollback guidance](docs/releases/3.0.0.md#upgrade-from-core-2x)
+before changing dependencies. A source checkout is not proof of publication.
 
 ### Build with AI. Stay in control.
 
@@ -119,7 +131,7 @@ Install from the public GitHub VCS repository:
 
 ```powershell
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.8.1
+composer require techayodev/fnlla-core:3.0.0
 ```
 
 The package autoloads `Fnlla\Php\` from `src/` and includes the shared helper
@@ -225,7 +237,7 @@ owner-reviewed or package-manager operation.
 Core includes deny-by-default role/permission and resource-policy primitives,
 server-resolved tenant context, explicit tenant-scoped adapters for repositories,
 cache, files, exports and tools, and a versioned allowlist-based audit event.
-These controls do not require the FNLLA Developer Panel.
+These controls do not require the FNLLA Workspace.
 
 The default `TENANCY_MODE=none` preserves single-tenant behavior. For
 `organization` or `custom`, use the `tenant` middleware on scoped routes and

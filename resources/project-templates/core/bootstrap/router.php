@@ -18,9 +18,9 @@ if ($cachedRoutes !== null) {
     $router->loadCachedRoutes($cachedRoutes);
 } else {
     if (\Fnlla\Php\Support\ProjectProfile::hasPanel() && is_file(base_path("routes/maintenance.php"))) {
-        foreach (["developer-operations" => \Fnlla\Php\Middleware\AuthorizeDeveloperOperations::class,
+        foreach (["workspace-operations" => \Fnlla\Php\Middleware\AuthorizeWorkspaceOperations::class,
             "customer-session" => \Fnlla\Php\Middleware\RequireCustomerSession::class,
-            "developer-session" => \Fnlla\Php\Middleware\RequireDeveloperSession::class,
+            "workspace-session" => \Fnlla\Php\Middleware\RequireWorkspaceSession::class,
             "maintenance" => \Fnlla\Php\Middleware\EnforceMaintenanceAccess::class] as $alias => $class) {
             $router->middleware($alias, $class);
         }

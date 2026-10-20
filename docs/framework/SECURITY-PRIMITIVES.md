@@ -2,7 +2,7 @@
 
 FNLLA Core provides neutral, deny-by-default authorization, tenancy and audit building blocks.
 They are available to a standalone Core application and do not depend on the
-FNLLA Developer Panel or any commercial package.
+FNLLA Workspace or any commercial package.
 
 ## Roles, Permissions And Policies
 
@@ -97,3 +97,15 @@ tenant middleware to scoped routes, bind the correct identity resolver, migrate
 business repositories/cache/files/exports/tools to the explicit adapters and
 run negative cross-tenant tests. Enabling multi-tenancy before those steps is
 not a safe partial migration.
+
+## CSRF rejection boundary (Core 3.0.0)
+
+The CSRF middleware accepts a token only as a string. Array/object/scalar type
+confusion is rejected before token comparison and never dispatches the protected
+handler or rotates a valid session token. JSON rejection remains HTTP 419. HTML
+rejection redirects only to a local path; malformed, oversized or control-character
+Referer values fall back to the application home. Rejection responses use
+`Cache-Control: private, no-store`. A Referer value supplies no identity or permission.
+
+This boundary is included in Core 3.0.0. Existing immutable Core dependencies
+retain their original bytes until their operator installs the validated target.

@@ -9,10 +9,10 @@ File: config\security.php
 Copyright (c) 2026 TechAyo LTD (techayo.co.uk). Released under the MIT License.
 ===============================================================================
 
-FNLLA is produced, maintained and distributed by TechAyo LTD
-(techayo.co.uk). This repository is the authoritative maintainer workspace for
-the FNLLA framework released under the MIT License and its related delivery scripts, tests,
-templates and release metadata.
+FNLLA Core is produced, maintained and distributed by TechAyo LTD
+(techayo.co.uk). This file is application-owned configuration or tooling in the
+generated project. Core remains an independent dependency; its attribution does
+not make the application a framework maintainer workspace.
 
 Purpose:
 - Defines maintained application or framework configuration for the official FNLLA stack.

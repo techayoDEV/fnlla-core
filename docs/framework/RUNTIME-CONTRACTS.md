@@ -1,12 +1,36 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the public runtime surface in FNLLA Core 2.8.0.
-Availability requires its matching immutable release and exact-commit CI.
+These contracts describe Core 3.0.0 and distinguish its changes from the preceding
+2.8 runtime. Read the [Core 3 migration](../releases/3.0.0.md). Availability requires
+the matching official immutable release and final exact-commit CI through the
+[approved hosted or signed local venue](https://github.com/techayoDEV/fnlla-core/blob/v3.0.0/docs/RELEASING.md#ci-compute-and-required-checks);
+source documentation alone does not establish publication.
 Reliability changes and their migration requirements are distinguished
 in [runtime reliability](RUNTIME-RELIABILITY.md); they are absent from Core 2.6.0.
 See [2.5.0 upgrade notes](../releases/2.5.0.md) for capability and security changes.
 Full FNLLA builds on the same primitives and adds the integrated project
 operations layer separately.
+
+## Semantic Versioning
+
+Core follows [Semantic Versioning 2.0.0](https://semver.org/). Backward-compatible
+defect/security fixes increment patch; backward-compatible public functionality
+and deprecations increment minor and reset patch; incompatible public-contract
+changes increment major and reset minor and patch. Minor and patch have no
+single-digit limit: `3.9.9 -> 3.9.10` is a patch, and `3.9.10 -> 3.10.0` is a minor.
+Reaching nine or performing a large internal refactor does not require a major.
+
+Compatibility includes documented APIs, extension interfaces, constructor/method
+signatures, CLI behavior, configuration and persisted formats. Review runtime
+and security behavior as well as declarations. A data migration still needs
+documented upgrade and recovery acceptance even when it preserves compatibility.
+Deprecate in a minor and provide a replacement/migration path before removal in
+a later major. Never disguise an incompatible change as a patch or minor.
+
+Core and Framework version independently. An upstream consumer must validate
+its own public contracts against the exact immutable Core package. Published
+tags and package bytes never change. A version label alone does not prove
+release availability, compatibility or application production readiness.
 
 ## Package-layout extension (2.8.0)
 
@@ -260,3 +284,53 @@ packages are immutable and do not acquire these changes automatically.
   probe instead of counting every match. As before, selected columns, ordering,
   limit and offset do not narrow `exists()`; its filters remain unchanged and
   the builder can be reused. No index or database schema change is required.
+
+### Live configuration fields (Core 3.0.0)
+
+Trusted integration bootstrap may define `FNLLA_REQUIRED_LIVE_CONFIG_FIELDS`
+before loading Core, using the same namespace/field map. Core validates and
+unions it with application selections within the same combined 32/32 limits.
+An empty application selection cannot disable these required fields; invalid
+application declarations still fail. The effective map is returned in
+`app.live_config_fields`, including for an old bootstrap cache. Required fields
+still read only application configuration, never package credential defaults.
+This declares freshness, not permissions. Only trusted deployment PHP sets it.
+
+An application may declare `app.live_config_fields`, for example
+`['credentials' => ['users']]`. With cached configuration, only those trusted
+namespaced fields are reloaded from application-owned files. Package defaults
+cannot supply a selected field: missing application fields are removed in both
+fresh and cached modes, even if an old package default survives. Other fields
+retain the normal defaults/application merge contract. This is a
+cache freshness mechanism, not authorization, a secret store or permission to
+execute untrusted PHP. Use at most 32 namespaces and 32 fields per namespace;
+names are restricted identifiers. Workspace-specific accounts are owned by the
+Framework adapter, not Core.
+
+Core 3 no longer implicitly selects `developer_access.users`. An application
+still using that historical namespace must explicitly declare its `users` field;
+otherwise fresh or cached configuration loading fails with a migration diagnostic.
+With a valid declaration, rotation reloads the current value; removal unsets the
+field so callers use their denial default. This is an application-owned namespace,
+not a Core account API or a runtime alias. Published Core 2.8 packages keep their
+original automatic refresh behavior.
+
+Configuration PHP files remain trusted deployment input; live files cannot be
+symlinks. Declaration changes require rebuilding the bootstrap cache, as the
+declaration itself comes from that cache. `load_config_directory($directory,
+false)` bypasses the cache but preserves the same defaults/application merge and
+declaration validation. `config:cache` uses that path, retaining unselected package
+defaults and application overrides and validating before replacing its cache.
+Malformed caches and null live-field declarations fail; they never trigger a
+silent fallback. Fresh and cached loading reject linked configuration files.
+When OPcache is active, configuration source bytecode is invalidated before
+evaluation, including when timestamp validation is disabled. A restricted or
+unavailable invalidation API fails closed; it cannot supply cached credentials
+as a fallback. Application code/worker deployments still require restart.
+
+The standard bootstrap captures a `ConfigurationGeneration` before environment
+loading. Queue/outbox workers check it before the next reservation and the cache
+compiler checks before compilation/publication. Changed configuration, `.env`,
+the lock or bootstrap cache requires a new process. This does not interrupt an
+active handler or reload external secrets. Drain all writers and restart workers;
+see [readiness and configuration acceptance](READINESS.md).

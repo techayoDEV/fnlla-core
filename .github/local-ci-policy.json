@@ -1,0 +1,60 @@
+{
+  "schema": "fnlla.local-ci.policy.v1",
+  "repository": "techayoDEV/fnlla-core",
+  "required_checks": [
+    "MySQL and Redis PHP 8.3",
+    "MySQL and Redis PHP 8.4",
+    "MySQL and Redis PHP 8.5",
+    "PHP 8.3",
+    "PHP 8.3 on ubuntu-latest",
+    "PHP 8.3 on windows-latest",
+    "PHP 8.4",
+    "PHP 8.4 on ubuntu-latest",
+    "PHP 8.4 on windows-latest",
+    "PHP 8.5",
+    "PHP 8.5 on ubuntu-latest",
+    "PHP 8.5 on windows-latest",
+    "Package on ubuntu-latest",
+    "Package on windows-latest",
+    "upload-http"
+  ],
+  "check_prefix": "Local CI / ",
+  "workflow_path": ".github/workflows/quality.yml",
+  "lock_path": "composer.lock",
+  "adapter_paths": [
+    "scripts/local-ci/receipt.mjs",
+    "scripts/local-ci/lib/receipt.mjs",
+    "scripts/check-release-ci.py"
+  ],
+  "max_age_seconds": 86400,
+  "max_future_seconds": 120,
+  "allowed_omissions": {
+    "PHP 8.3 on windows-latest": [
+      "SKIP: symlink escape test (symlink creation unavailable).",
+      "SKIP: configured root symlink test (symlink creation unavailable).",
+      "[SKIP] Live configuration symlink (platform privileges unavailable).",
+      "[SKIP] Package view symlink escape (platform privileges unavailable)."
+    ],
+    "PHP 8.4 on windows-latest": [
+      "SKIP: symlink escape test (symlink creation unavailable).",
+      "SKIP: configured root symlink test (symlink creation unavailable).",
+      "[SKIP] Live configuration symlink (platform privileges unavailable).",
+      "[SKIP] Package view symlink escape (platform privileges unavailable)."
+    ],
+    "PHP 8.5 on windows-latest": [
+      "SKIP: symlink escape test (symlink creation unavailable).",
+      "SKIP: configured root symlink test (symlink creation unavailable).",
+      "[SKIP] Live configuration symlink (platform privileges unavailable).",
+      "[SKIP] Package view symlink escape (platform privileges unavailable)."
+    ]
+  },
+  "omission_counterparts": {
+    "PHP 8.3 on windows-latest": "PHP 8.3 on ubuntu-latest",
+    "PHP 8.4 on windows-latest": "PHP 8.4 on ubuntu-latest",
+    "PHP 8.5 on windows-latest": "PHP 8.5 on ubuntu-latest"
+  },
+  "allowed_refs": {
+    "release": "refs/heads/main",
+    "pull-request": "refs/heads/release/core-3.0.0"
+  }
+}

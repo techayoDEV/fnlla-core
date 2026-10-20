@@ -24,9 +24,15 @@ $cleanProject = $upgradeWorkspace . DIRECTORY_SEPARATOR . "clean-core";
 $modifiedProject = $upgradeWorkspace . DIRECTORY_SEPARATOR . "modified-core";
 $transactionProject = $upgradeWorkspace . DIRECTORY_SEPARATOR . "transaction-core";
 
-foreach (["views/partials/panel-switcher.php", "public/assets/panel-switcher.css", "views/developer/confirm-identity.php"] as $panelFile) {
+foreach (["views/partials/panel-switcher.php", "public/assets/panel-switcher.css", "views/workspace/confirm-identity.php",
+    "views/developer/confirm-identity.php", "public/assets/panels.css", "public/assets/panels.js",
+    "public/assets/developer-panel.css", "public/assets/developer-panel.js",
+    "src/Controllers/WorkspaceController.php", "src/Controllers/DeveloperPanelController.php"] as $panelFile) {
     fnlla_upgrade_assert_true(FrameworkLock::isFrameworkManagedPath($panelFile), "Panel dependency is missing from update tracking: " . $panelFile);
     fnlla_upgrade_assert_true(ProjectProfile::isPanelFile($panelFile), "Panel dependency is missing from profile classification: " . $panelFile);
+}
+foreach (["views/layouts/framework-panel.php", "views/layouts/developer.php"] as $layoutFile) {
+    fnlla_upgrade_assert_true(FrameworkLock::isFrameworkManagedPath($layoutFile), "Current or historical layout missing from update tracking: " . $layoutFile);
 }
 fnlla_upgrade_assert_true(!FrameworkLock::isFrameworkManagedPath("config/panel_navigation.php"), "Application panel destinations must remain application-owned.");
 fnlla_upgrade_assert_true(ProjectProfile::isPanelFile("config/panel_navigation.php"), "Panel destination configuration must not belong to the plain Core profile.");

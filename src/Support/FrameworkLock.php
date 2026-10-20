@@ -273,7 +273,7 @@ final class FrameworkLock
             return false;
         }
 
-        if (in_array($relativePath, ["views/layouts/developer.php", "views/partials/framework-wordmark.php", "views/partials/panel-switcher.php", "public/assets/panel-switcher.css", "views/partials/public-support-widget.php", "views/partials/support-widget.php", "views/partials/support-widget-settings.php", "views/partials/seo-settings.php", "views/partials/newsletter-settings.php", "public/assets/support-widget.css", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-chat.css", "public/assets/support-assistant.js", "public/assets/app-base.css", "public/assets/developer-panel.css", "public/assets/developer-panel.js", "public/assets/debug-toolbar.css"], true)) {
+        if (in_array($relativePath, ["views/layouts/framework-panel.php", "views/partials/framework-wordmark.php", "views/partials/panel-switcher.php", "public/assets/panel-switcher.css", "views/partials/public-support-widget.php", "views/partials/support-widget.php", "views/partials/support-widget-settings.php", "views/partials/seo-settings.php", "views/partials/newsletter-settings.php", "public/assets/support-widget.css", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-inbox.js", "views/partials/support-inbox-alerts.php", "public/assets/support-chat.css", "public/assets/support-assistant.js", "public/assets/app-base.css", "public/assets/panels.css", "public/assets/panels.js", "public/assets/debug-toolbar.css"], true)) {
             return true;
         }
 
@@ -281,7 +281,11 @@ final class FrameworkLock
             return true;
         }
 
-        if (str_starts_with($relativePath, "views/developer/")) {
+        // Recognize historical managed files during upgrade planning as well as
+        // current Workspace files; these are inventory paths, not route aliases.
+        if (in_array($relativePath, ["views/layouts/developer.php", "public/assets/developer-panel.css", "public/assets/developer-panel.js"], true)
+            || str_starts_with($relativePath, "views/developer/")
+            || str_starts_with($relativePath, "views/workspace/")) {
             return true;
         }
 

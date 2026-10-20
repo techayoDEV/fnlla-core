@@ -2,9 +2,11 @@
 
 [Documentation index](../README.md) · [Architecture](ARCHITECTURE.md) · [First capability](FIRST-CAPABILITY.md)
 
-This guide covers Core 2.8.0. Use its matching immutable tag or verified release
-artifact, and read [2.8.0 upgrade notes](../releases/2.8.0.md) before upgrading.
-It creates a minimal web application with an
+This guide targets the official **Core 3.0.0** tag and verified release artifact.
+Read the [Core 3 migration and limits](../releases/3.0.0.md), and use documentation
+from the same immutable version. Before its tag/release is available, source
+preparation is not an installable stable release. The generator creates a minimal
+web application with an
 explicit route table, application configuration and local verification tools.
 No AI account, provider SDK or FNLLA Full installation is required.
 
@@ -40,7 +42,7 @@ executable and temporary directory you intend to use; see the
 Run from the directory where you keep projects. Use a new destination:
 
 ```console
-git clone --branch v2.8.0 --depth 1 https://github.com/techayoDEV/fnlla-core.git fnlla-core
+git clone --branch v3.0.0 --depth 1 https://github.com/techayoDEV/fnlla-core.git fnlla-core
 cd fnlla-core
 composer install
 php fnlla make:project ../my-core-app "My Core App"
@@ -92,11 +94,20 @@ A service that has not been configured need not report ready.
 
 The generated project includes `php scripts/static-analysis.php` (also exposed
 as `composer analyse`). It delegates to PHPStan/Psalm when installed and otherwise
-runs a lightweight source check. In the 2.7.1 starter, that fallback also scans
-bundled Core view templates and reports four missing `strict_types` declarations.
-This is a known limitation of the generated fallback check, distinct from PHP
-lint or a failing application request. Do not report it as a passing analysis
-gate. The repository's maintained Core PHPStan suite is a separate check.
+runs a lightweight source check. Core 3.0.0 limits that fallback
+to application-owned `app/` and `src/`; dependency integrity and Core analysis
+remain separate checks. Published starters through 2.8.1 retain the older
+fallback, which also scans bundled view templates and can report four missing
+`strict_types` declarations. Upgrade through the reviewed package procedure rather than
+editing immutable dependencies or calling that failed check a pass.
+
+The Core 3.0.0 starter discovers nested application `*Test.php` files, excludes
+`tests/fixtures`, the PHPUnit shim and dependencies, and rejects an empty
+suite/filter with exit code 1. Use `php scripts/test.php --filter=CaseName`
+for a focused loop and the complete application suites before acceptance.
+A selected passing suite establishes only its declared scope. Installing Core
+3.0.0 does not rewrite application-owned tooling in an older generated project;
+review and migrate those files separately. Original package bytes stay immutable.
 
 ## 4. Know which files you own
 
@@ -122,7 +133,7 @@ For an existing Composer application, configure the public VCS repository:
 
 ```console
 composer config repositories.fnlla-core vcs https://github.com/techayoDEV/fnlla-core.git
-composer require techayodev/fnlla-core:^2.8.0
+composer require techayodev/fnlla-core:3.0.0
 ```
 
 This installs a library; it does not generate an application or configure its

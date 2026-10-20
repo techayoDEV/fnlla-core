@@ -64,6 +64,22 @@ try {
         }
     }
     if (flash('status') !== null) { sec_fail('JSON CSRF rejection must not add a cross-tab flash.'); }
+
+    set_error_handler(static function (int $level, string $message): never { throw new RuntimeException($message); });
+    try {
+        foreach ([[], ['nested' => $csrf], 123, true, null] as $invalidToken) {
+            $called = false;
+            $request = new Request('POST', '/form', request: ['_token' => $invalidToken], headers: ['accept' => 'application/json']);
+            $response = $csrfMiddleware->handle($request, static function () use (&$called): Response { $called = true; return Response::text('unsafe'); });
+            if ($called || $response->status() !== 419 || csrf_token() !== $csrf) { sec_fail('Malformed CSRF values must fail without warnings, dispatch or token rotation.'); }
+        }
+        foreach (["https://example.test/bad\r\nHeader: value", 'http://[invalid', 'https://example.test/\\elsewhere'] as $referer) {
+            $response = $csrfMiddleware->handle(new Request('POST', '/form', request: ['_token' => 'expired'], headers: ['referer' => $referer]), static fn (): Response => Response::text('unsafe'));
+            if ($response->status() !== 302 || ($response->headers()['Location'] ?? '') !== url('')
+                || ($response->headers()['Cache-Control'] ?? '') !== 'private, no-store') { sec_fail('Malformed CSRF referers must fall back to the local home without caching.'); }
+        }
+    } finally { restore_error_handler(); }
+
     $validPost = new Request('POST', '/form', request: ['_token' => $csrf]);
     if ($csrfMiddleware->handle($validPost, static fn (): Response => Response::text('accepted'))->body() !== 'accepted') { sec_fail('Valid CSRF token was invalidated.'); }
 

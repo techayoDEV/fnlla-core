@@ -11,7 +11,7 @@ product_positioning:
   category: Web Framework
   primary: Built for developers working with AI.
   specialization: AI-assisted engineering
-  flagship_experience: Developer Operations Panel (owned by FNLLA, not Core)
+  flagship_experience: FNLLA Workspace (owned by FNLLA, not Core)
   complementary_capability: business administration (owned upstream)
   internal_quality_ambition: The best AI-assisted web framework
   quality_ambition_is_public_claim: false
@@ -34,7 +34,7 @@ release:
   owner_authorization_for: [push, tag, release, visibility_change]
 ```
 
-Core must remain usable without the commercial FNLLA package, Developer Panel,
+Core must remain usable without the commercial FNLLA package, Workspace,
 fnlla.com, an AI account or a search-provider account. Keep public contracts
 small and provider-neutral. Product orchestration, dashboards, provider adapters
 and marketing claims belong upstream in `techayodev/fnlla` or on fnlla.com.
@@ -85,7 +85,7 @@ bootstrap and `bootstrap/router.php` -> `Application` -> middleware/router ->
 controller -> response. Application bootstrap resolves the installed engine;
 `APP_ROOT` and `FNLLA_ENGINE_ROOT` need not point to the same directory.
 
-Core owns generic runtime contracts. FNLLA owns the Developer Panel, product
+Core owns generic runtime contracts. FNLLA owns the Workspace, product
 orchestration, provider adapters and commercial workflows. Applications own
 their `app/`, `routes/`, `config/`, business policies and data. Change a generator's
 source template, not an already generated copy. Never patch a consumer's
@@ -177,6 +177,15 @@ when those boundaries change. Do not add tests that merely mirror implementation
 
 ## Cross-repository delivery and completion
 
+For changes to public runtime contracts, requirements, defaults, compatibility,
+migration or release scope, assess downstream Framework and fnlla.com impact.
+The website's current claims must match exact validated releases and clearly
+distinguish unreleased source, installed packages and customer availability.
+Record required downstream work or unresolved differences in the existing
+delivery contracts. Keep website copy/commerce out of Core; public Core CI must
+remain independent of private website checkouts or credentials. This assessment
+does not authorize a consumer lock, customer catalogue or deployment change.
+
 If the task also covers FNLLA, read its own `AGENTS.md` and test the consumer and
 export paths there. Core is the canonical runtime source; a consumer must use a
 versioned immutable package. A locally reviewed candidate can prove integration
@@ -191,6 +200,16 @@ verification and CI for the exact intended commit. Never rewrite a released tag
 or artifact, and never describe dirty-tree results as exact-commit CI.
 Follow [the release procedure](docs/RELEASING.md); `scripts/check-release-ci.py`
 requires every mandatory job on the current remote main commit.
+The owner-approved local venue retains all 15 native checks and uses the
+versioned `.github/local-ci-policy.json`, an external trusted controller policy,
+signed evidence and a dedicated GitHub App. Select it explicitly; never report
+local execution as GitHub Actions or publish Actions check identities from a
+local runner. Main's source-specific App bindings remain protected. The local
+release gate requires the latest verified receipt and matching successful remote
+App checks on actual main. PR evidence alone cannot authorize a release.
+Python 3 and Node.js 22+ are maintainer release-verification tools; they add no
+application runtime or Composer dependency. Keep signing/App private keys and
+operator state outside source, artifacts and evidence bundles.
 
 Finish with what changed, the checks actually run, compatibility/export impact
 and any remaining limitations. Keep this entrypoint concise; put domain details
@@ -214,6 +233,19 @@ Keep one-off coding-session reports, private evidence, temporary consumers and
 local source overrides outside the product tree.
 
 ## Version and delivery maintenance
+
+Follow [Semantic Versioning 2.0.0](https://semver.org/) and the maintained
+[compatibility policy](docs/framework/RUNTIME-CONTRACTS.md#semantic-versioning).
+Minor and patch components have no single-digit limit. Never roll a major at
+`x.9.9`. Maintain Core 3.x through compatible patches/minors. The owner authorized
+finalization, protected integration, tagging and publication of Core 3.0.0 and
+Framework 5.1.0 on 2026-10-20, conditional on each product's complete final-source
+release gates. This exact-release authority does not cover future releases,
+consumer applications, catalogue activation or deployment. The preceding
+immutable Core 2.8.1 remains unchanged. Breaking public contracts requires a
+major, migration guidance and a separate owner decision. Release reviews must
+record the previous/proposed versions, compatibility classification and evidence;
+syntax validation never establishes compatibility or publication authority.
 
 Preserve immutable historical artifacts, dependency pins and upgrade fixtures.
 Update current-version labels and introduced-version explanations separately.

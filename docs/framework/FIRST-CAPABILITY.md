@@ -12,7 +12,7 @@ commands must load authoritative prices and authorize the relevant resources.
 Start with a generated Core application. Application authentication and trusted
 tenant context must already be configured as described in
 [security primitives](SECURITY-PRIMITIVES.md). The default context provider
-requires an authenticated application actor; a Developer Panel session or a
+requires an authenticated application actor; a Workspace session or a
 manually constructed context does not grant access.
 
 ## 1. Write the application service

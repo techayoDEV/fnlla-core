@@ -1,4 +1,4 @@
-"""Verify a stable ZIP, its manifest and a fresh Composer consumer. No publication."""
+"""Verify an immutable stable or explicitly selected review ZIP and a fresh consumer."""
 import hashlib
 import json
 import os
@@ -19,42 +19,56 @@ def run(command, cwd):
     subprocess.run(command, cwd=cwd, check=True, timeout=180)
 
 
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
 def main():
     archive = Path(sys.argv[1]).resolve()
     commit = sys.argv[2]
-    assert re.fullmatch(r"[a-f0-9]{40}", commit), "Expected source commit is required"
+    options = sys.argv[3:]
+    require(options in ([], ['--local-review']), "Unknown artifact verification options")
+    local_review = options == ['--local-review']
+    require(re.fullmatch(r"[a-f0-9]{40}", commit), "Expected source commit is required")
     expected = archive.with_suffix(archive.suffix + ".sha256").read_text().split()[0]
-    assert digest(archive.read_bytes()) == expected, "Archive checksum mismatch"
+    require(digest(archive.read_bytes()) == expected, "Archive checksum mismatch")
     with tempfile.TemporaryDirectory(prefix="fnlla-release-") as temp:
         root = Path(temp)
         with zipfile.ZipFile(archive) as package:
             names = package.namelist()
-            assert len(names) == len(set(names)), "Duplicate ZIP entries"
+            require(len(names) == len(set(names)), "Duplicate ZIP entries")
             for name in names:
-                assert re.fullmatch(r"[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*", name), "Unsafe ZIP path"
-                assert all(part not in (".", "..") for part in name.split("/")), "Unsafe ZIP component"
+                require(re.fullmatch(r"[A-Za-z0-9_.+-]+(?:/[A-Za-z0-9_.+-]+)*", name), "Unsafe ZIP path")
+                require(all(part not in (".", "..") for part in name.split("/")), "Unsafe ZIP component")
             package.extractall(root / "expanded")
         folders = list((root / "expanded").iterdir())
-        assert len(folders) == 1 and folders[0].is_dir(), "Expected one package root"
+        require(len(folders) == 1 and folders[0].is_dir(), "Expected one package root")
         source = folders[0]
         provenance = json.loads((source / "FNLLA-PROVENANCE.json").read_text())
         metadata = json.loads((source / "FNLLA-PACKAGE.json").read_text())
         version = (source / "VERSION").read_text().strip()
-        assert re.fullmatch(r"\d+\.\d+\.\d+", version), "Stable version required"
-        assert provenance["base_commit"] == commit and metadata["source"]["commit"] == commit
-        assert provenance["version"] == metadata["version"] == version
-        assert provenance["channel"] == metadata["channel"] == "stable"
-        assert provenance["release_approved"] is True and metadata["release_approved"] is True
-        assert provenance["workspace_dirty"] is False
+        number = r"(?:0|[1-9][0-9]*)"
+        if local_review:
+            identifier = r"(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+            pattern = rf"{number}\.{number}\.{number}-{identifier}(?:\.{identifier})*(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+            require(re.fullmatch(pattern, version), "Distinct SemVer prerelease required for local review")
+        else:
+            require(re.fullmatch(rf"{number}\.{number}\.{number}", version), "Stable version required")
+        require(provenance["base_commit"] == commit and metadata["source"]["commit"] == commit, "Source commit mismatch")
+        require(provenance["version"] == metadata["version"] == version, "Package version mismatch")
+        require(provenance["channel"] == metadata["channel"] == ('local-review' if local_review else 'stable'), "Package channel mismatch")
+        require(provenance["release_approved"] is (not local_review) and metadata["release_approved"] is (not local_review), "Package approval mismatch")
+        require(provenance["workspace_dirty"] is False, "Artifact source must be clean and committed")
         manifested = set()
         for line in (source / "FNLLA-MANIFEST.sha256").read_text().splitlines():
             checksum, relative = line.split("  ", 1)
-            assert relative not in manifested, "Duplicate manifest entry"
-            assert (source / relative).resolve().is_relative_to(source.resolve()), "Unsafe manifest path"
-            assert digest((source / relative).read_bytes()) == checksum, "Manifest mismatch: " + relative
+            require(relative not in manifested, "Duplicate manifest entry")
+            require((source / relative).resolve().is_relative_to(source.resolve()), "Unsafe manifest path")
+            require(digest((source / relative).read_bytes()) == checksum, "Manifest mismatch: " + relative)
             manifested.add(relative)
         actual = {path.relative_to(source).as_posix() for path in source.rglob("*") if path.is_file()}
-        assert actual == manifested | {"FNLLA-MANIFEST.sha256"}, "Unmanifested package files"
+        require(actual == manifested | {"FNLLA-MANIFEST.sha256"}, "Unmanifested package files")
         consumer = root / "consumer"
         consumer.mkdir()
         package = json.loads((source / "composer.json").read_text())
@@ -74,11 +88,12 @@ def main():
         run(composer + ["install", "--no-interaction", "--prefer-dist", "--no-scripts", "--no-plugins"], consumer)
         installed = consumer / "vendor/techayodev/fnlla-core"
         for relative in actual:
-            assert (installed / relative).read_bytes() == (source / relative).read_bytes(), "Installed bytes differ"
+            require((installed / relative).read_bytes() == (source / relative).read_bytes(), "Installed bytes differ")
         run(["php", "-r", "require 'vendor/autoload.php'; foreach ([Fnlla\\Php\\Support\\RuntimeInspector::class, "
              "Fnlla\\Php\\Support\\RuntimeDoctor::class, Fnlla\\Php\\Events\\OutboxWorker::class] as $class) "
              "{ if (!class_exists($class)) { exit(1); } }"], consumer)
         print(json.dumps({"verified": True, "version": version, "commit": commit, "sha256": expected,
+                          "channel": 'local-review' if local_review else 'stable', "release_approved": not local_review,
                           "manifest_sha256": digest((source / "FNLLA-MANIFEST.sha256").read_bytes())}))
 
 

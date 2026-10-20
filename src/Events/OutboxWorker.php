@@ -26,6 +26,7 @@ final class OutboxWorker
         $attempts = max(1, min(100, (int) config("actions.outbox.max_attempts", 5)));
         $lease = max(1, min(3600, (int) config("actions.outbox.lease_seconds", 60)));
         for ($index = 0; $index < max(1, min(10000, $limit)) && hrtime(true) < $deadline; $index++) {
+            \Fnlla\Php\Support\ConfigurationGeneration::assertCurrent();
             $message = $this->store->claimDelivery($lease, $attempts);
             if ($message === null) { break; }
             $id = (string) $message["id"];

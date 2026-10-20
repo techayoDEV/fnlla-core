@@ -9,7 +9,8 @@ $version = trim((string) ($argv[1] ?? ""));
 $output = $argv[2] ?? ($root . "/dist/local/fnlla-core-" . $version);
 $localReview = in_array("--local-review", $argv, true);
 
-if (preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/D', $version) !== 1) {
+// SemVer 2.0.0, including multi-digit components and nonempty dotted identifiers.
+if (preg_match('/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/D', $version) !== 1) {
     fwrite(STDERR, "Usage: php scripts/build-local-artifact.php <semver> [output-directory] [--local-review]" . PHP_EOL);
     exit(2);
 }
@@ -39,7 +40,7 @@ if ($localReview) {
 }
 $channel = $policy["channel"] ?? null;
 $releaseApproved = $policy["release_approved"] ?? null;
-$stableVersion = preg_match('/^\d+\.\d+\.\d+$/D', $version) === 1;
+$stableVersion = !str_contains($version, '-') && !str_contains($version, '+');
 if (($policy["schema"] ?? null) !== "fnlla.core_distribution.v1"
     || ($policy["package"] ?? null) !== "techayodev/fnlla-core"
     || ($policy["candidate"] ?? null) !== $version
@@ -56,14 +57,15 @@ $commitEpoch = (int) trim(run(["git", "show", "-s", "--format=%ct", "HEAD"], $ro
 $patch = run(["git", "diff", "--binary", "HEAD", "--", "."], $root);
 $status = run(["git", "status", "--porcelain=v1", "--untracked-files=all", "--", ".", ":(exclude)dist"], $root);
 $builtAt = gmdate(DATE_ATOM, $commitEpoch);
+$committedInput = !$localReview;
 
-if ($releaseApproved) {
+if ($committedInput) {
     if (trim($status) !== "" || trim((string) file_get_contents($root . "/VERSION")) !== $version) {
-        throw new RuntimeException("Stable artifacts require clean committed sources and a matching VERSION.");
+        throw new RuntimeException("Committed artifacts require clean sources and a matching VERSION. Use --local-review only for diagnostic prerelease builds.");
     }
     foreach (array_slice($argv, 3) as $argument) {
         if (str_starts_with($argument, "--expected-commit=") && substr($argument, 18) !== $baseCommit) {
-            throw new RuntimeException("Stable artifact commit does not match the requested source commit.");
+            throw new RuntimeException("Artifact commit does not match the requested source commit.");
         }
     }
 }
@@ -101,7 +103,7 @@ foreach ($iterator as $item) {
 }
 ksort($files, SORT_STRING);
 
-if ($releaseApproved) {
+if ($committedInput) {
     // Commit blobs, rather than checkout bytes, make Windows/Linux builds identical
     // and prevent ignored or untracked files from entering an approved package.
     $files = [];
@@ -125,7 +127,7 @@ foreach ($files as $relative => $source) {
     if (!is_dir(dirname($target)) && !mkdir(dirname($target), 0755, true) && !is_dir(dirname($target))) {
         throw new RuntimeException("Cannot create artifact directory: " . dirname($target));
     }
-    $contents = $releaseApproved ? run(["git", "cat-file", "blob", $source], $root) : (string) file_get_contents($source);
+    $contents = $committedInput ? run(["git", "cat-file", "blob", $source], $root) : (string) file_get_contents($source);
     assert_no_secret($relative, $contents);
     if ($relative === "VERSION") {
         $contents = $version . "\n";

@@ -1,5 +1,79 @@
 # FNLLA Core Changelog
 
+## 3.0.0 — 2026-10-20
+
+- Harden Core 3 after owner review: selected live fields have
+  application-only authority in fresh and cached configuration; removed values
+  cannot return from package defaults. Reject malformed caches/null declarations.
+  Fence standard queue/outbox reservations and config-cache publication when
+  process configuration/environment inputs change. Add named security assertions,
+  a disposable Composer/HTTP developer exercise and explicit engineering/release/
+  deployment acceptance scopes. The owner authorized exactly Core 3.0.0 stable
+  conditional on all final-source CI, artifact and installation gates;
+  source metadata does not establish their completion or a production deployment.
+- Add an explicitly selected, owner-approved signed local CI release venue
+  retaining all 15 native checks. Bind controller signatures/latest sequence,
+  approved tool bytes, committed source/policy/workflow/lock/verifiers and original
+  per-job logs/artifacts; issue distinct checks from a dedicated GitHub App.
+  Final release verification requires actual remote main and that App's latest
+  complete successful checks referencing the same receipt. Hosted Actions remains
+  separate; no protection, test or publication requirement is waived. Python 3
+  and Node.js 22+ are maintainer tools, not application runtime dependencies.
+- Preserve config-free minimal bootstrap while watching for a newly added config
+  directory. Invalidate configuration source bytecode before evaluation under
+  active OPcache; restricted invalidation fails closed. Require real OPcache
+  rotation/removal and restricted-API tests in every runtime CI cell.
+- Add a neutral trusted-bootstrap required live-field map, unioned and bounded
+  with application selections. Integrators preserve mandatory freshness through
+  old application files/caches without rewriting them or restoring defaults.
+
+- Require PHP 8.3/8.4/8.5 Linux/Windows and service coverage in the release matrix.
+  Verify committed prerelease packages explicitly without granting stable approval;
+  build clean candidate packages from Git blobs for cross-platform reproducibility.
+  CI/artifact gates remain active under optimized Python and reject duplicated
+  required jobs as well as missing, skipped or failed checks.
+- Finalize the Core 3.0.0 stable edition following rc.1/rc.2 review and remediation.
+  Preserve the original Core 2.8.1 package and historical candidate evidence.
+  Replace the implicit `developer_access.users` refresh with an explicit
+  `app.live_config_fields` declaration and a fail-closed migration diagnostic.
+  Core 3 configuration compilation uses the same package-default/application
+  merge as bootstrap and bypasses existing caches. Published package pins,
+  interfaces and historical upgrade anchors are preserved.
+- Adopt explicit Semantic Versioning without single-digit minor/patch limits.
+  Require documented compatibility/migration classification for every release;
+  reject malformed version labels before creating package outputs. Published
+  artifacts, distribution approval and consumer dependency pins are unchanged.
+- Keep the upgrade/recovery/rollback service gate against checksum-pinned
+  original Core 2.3.1 and 2.8.1 packages. Reconcile delayed work using the old
+  installation's actual list/sorted-set format, preserving already-published
+  outbox state. Document staged dependency upgrades and application acceptance
+  in `docs/framework/UPGRADING.md`; this does not publish or replace Core 2.8.1.
+- Add an optional `app.live_config_fields` allowlist for cached configuration.
+  Reload selected top-level keys from trusted application files;
+  remove missing keys and reject invalid declarations or linked config files.
+  The published 2.8 runtime retains automatic `developer_access.users` refresh;
+  Core 3 requires the explicit migration described above. Other
+  namespaces remain cached unless selected. No account or authorization API is added.
+- Use Workspace names in new optional Framework template references and
+  recognize its current managed paths. Keep historical inventory paths in
+  upgrade/profile classification so existing applications retain update
+  tracking; this does not register old routes, middleware aliases or classes.
+- Reject an empty generated-application test selection instead of reporting
+  success. Discover nested `*Test.php` files while excluding fixtures, the
+  PHPUnit shim, dependencies and symlinks.
+- Limit the generated lightweight analysis fallback to application `app/` and
+  `src/`; bundled `packages/` retains independent package verification. PHPStan
+  and Psalm delegation is unchanged. Fresh-export smoke coverage exercises both
+  tools and rejects an application source error and an empty test filter.
+- Identify generated configuration and quality tools as application-owned while preserving
+  their copyright and MIT attribution. Existing installed applications and
+  immutable released packages are not rewritten by these source changes.
+- Reject non-string CSRF tokens without PHP conversion warnings, preserve the
+  valid session token, and reject malformed Referer navigation on the HTML
+  rejection path. Rejected forms return a private, non-storable response.
+  Valid forms and ordinary local redirects retain their behavior. No dependency
+  or released artifact is replaced; delivery requires a new immutable release.
+
 ## 2.8.1 — 2026-10-12
 
 - Keep maintenance history, contribution guidance and the security policy in

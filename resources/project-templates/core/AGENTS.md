@@ -39,6 +39,13 @@ then test wrong-role, wrong-tenant, stale-version and replay denial.
 
 ## AI guidance
 
+Read the current application scope, acceptance gaps and diff. State the user
+outcome, invariants and relevant behavior checks before editing. Resolve routine
+reversible choices within scope; ask for consequential missing business decisions.
+Keep one current task in the existing plan. Use installed Core product/module
+validation and runtime inspection; do not assume Full-only commands exist.
+Declarations and source-control activity never establish human acceptance.
+
 AI is optional. Prefer versioned local source, `docs/framework/`, application
 tests and `php fnlla runtime:inspect`. AI output grants no identity, permission,
 tool authority or permission to export private tenant context.
@@ -53,7 +60,7 @@ tool authority or permission to export private tenant context.
 ## Ownership and tests
 
 Declare application Actions and policies explicitly. Test positive access and
-negative authorization boundaries. Core has no Developer Panel or the full
+negative authorization boundaries. Core has no Workspace or the full
 FNLLA project-identity and delivery-acceptance command surface.
 
 ## Understand the installed engine
