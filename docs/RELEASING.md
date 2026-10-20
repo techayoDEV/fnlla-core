@@ -14,11 +14,14 @@ in the release review. Counters are not limited to 0-9; `x.9.9` never forces a
 major. Breaking contracts require a major and a separate owner decision, with
 documented migration and recovery. Syntax checks cannot prove compatibility.
 
-The accepted next-generation direction is Core 3.x, maintained through compatible
-patch/minor releases. Core 3 is not yet published or accepted for production;
-Core 2.8.1 remains the current immutable release. Preparing the next generation
-requires the complete release and Framework-consumer checks below. Updating
-policy text does not change VERSION, distribution approval or a consumer lock.
+Maintain Core 3.x through compatible patch/minor releases. On 2026-10-20 the owner
+authorized finalizing and publishing exactly Core 3.0.0, followed by Framework
+5.1.0 consuming that official package, conditional on every final-source gate.
+This standing authority removes another generic approval round for these two
+versions; their technical acceptance remains separate and mandatory. It does not
+cover future releases, application/catalogue/provider changes or deployment.
+Core 2.8.1 is the preceding immutable release and remains unchanged. Source
+metadata is not proof of publication or acceptance of a production host.
 
 ## Release sequence
 
@@ -51,7 +54,8 @@ without the flag rejects every prerelease and false approval state.
    and a fresh Composer consumer. Validate the exact ZIP in the full FNLLA
    consumer/export suite before publication. A local path proves integration,
    not public availability.
-5. Push the authorized commit to main. Require the latest exact-commit quality
+5. Push the authorized stabilization branch and integrate through the protected
+   pull-request process below. Require the latest exact-commit quality
    run: `python scripts/check-release-ci.py FULL_SHA`. This read-only gate
    rejects missing, skipped, failed or incomplete required jobs, an older run,
    or a commit different from remote main. Save its JSON as `CI-EVIDENCE.json`.
@@ -64,7 +68,9 @@ without the flag rejects every prerelease and false approval state.
 8. Download the published ZIP, verify its SHA256 and provenance, then update
    FNLLA's canonical Composer package metadata (source, release URL, SHA1,
    SHA256, manifest) and lock. Install through Composer and rerun boundary,
-   consumer and export checks. Framework publication is a separate decision.
+   consumer and export checks. Framework 5.1.0 has standing owner authorization,
+   but its own complete final-source/lock acceptance is required before its tag
+   and publication; Core's 15 checks do not replace the Framework matrix.
 
 Any source change invalidates the earlier commit's CI evidence. Repeat the
 required gates for the new commit. If publication stops halfway, inspect the

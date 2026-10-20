@@ -1,14 +1,16 @@
 # FNLLA Core Changelog
 
-## Unreleased source changes
+## 3.0.0 — 2026-10-20
 
-- Harden the Core 3 candidate after owner review: selected live fields have
+- Harden Core 3 after owner review: selected live fields have
   application-only authority in fresh and cached configuration; removed values
   cannot return from package defaults. Reject malformed caches/null declarations.
   Fence standard queue/outbox reservations and config-cache publication when
   process configuration/environment inputs change. Add named security assertions,
   a disposable Composer/HTTP developer exercise and explicit engineering/release/
-  deployment acceptance scopes. No stable publication is approved.
+  deployment acceptance scopes. The owner authorized exactly Core 3.0.0 stable
+  conditional on all final-source public CI, artifact and installation gates;
+  source metadata does not establish their completion or a production deployment.
 - Preserve config-free minimal bootstrap while watching for a newly added config
   directory. Invalidate configuration source bytecode before evaluation under
   active OPcache; restricted invalidation fails closed. Require real OPcache
@@ -22,7 +24,8 @@
   build clean candidate packages from Git blobs for cross-platform reproducibility.
   CI/artifact gates remain active under optimized Python and reject duplicated
   required jobs as well as missing, skipped or failed checks.
-- Prepare Core 3.0.0-rc.2 with `release_approved=false`; stable remains 2.8.1.
+- Finalize the Core 3.0.0 stable edition following rc.1/rc.2 review and remediation.
+  Preserve the original Core 2.8.1 package and historical candidate evidence.
   Replace the implicit `developer_access.users` refresh with an explicit
   `app.live_config_fields` declaration and a fail-closed migration diagnostic.
   Core 3 configuration compilation uses the same package-default/application
@@ -41,7 +44,7 @@
   Reload selected top-level keys from trusted application files;
   remove missing keys and reject invalid declarations or linked config files.
   The published 2.8 runtime retains automatic `developer_access.users` refresh;
-  the Core 3 candidate requires the explicit migration described above. Other
+  Core 3 requires the explicit migration described above. Other
   namespaces remain cached unless selected. No account or authorization API is added.
 - Use Workspace names in new optional Framework template references and
   recognize its current managed paths. Keep historical inventory paths in

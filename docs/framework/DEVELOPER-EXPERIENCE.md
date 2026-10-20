@@ -6,15 +6,16 @@ Use only synthetic accounts and a dedicated MySQL database named
 or credentials on a public host. Production login also needs its own rate limits,
 recovery, verification and operational acceptance.
 
-Core 3 is currently an unapproved candidate. Its official stable Composer/tag
-installation cannot be accepted before publication. A verified local candidate
-can rehearse this procedure; label it explicitly. Use matching package docs.
+This exercise targets official Core 3.0.0 and its matching immutable documentation.
+Verify the published tag or release ZIP before installing; source metadata and
+local package rehearsals do not establish official availability. Before publication
+only an explicitly labelled local rehearsal is possible.
 
 ## Package and minimal application
 
 Use the [requirements and Composer instructions](GETTING-STARTED.md). For a
 library-only consumer, configure the official public VCS repository, require
-the approved exact version, review and commit the resulting lock. Generate a
+the exact version `3.0.0`, review and commit the resulting lock. Generate a
 separate application with:
 
 ```console
@@ -124,7 +125,7 @@ table. Remove only the disposable exercise environment.
 rehearses the library install, fresh app and original 2.8.1 upgrade using the
 packaged examples above. It needs PHP/Composer, a dedicated MySQL service and
 the `FNLLA_CORE_TEST_MYSQL_*` environment from the service CI. It verifies the
-candidate with the release verifier, validates the pinned old ZIP and reports
+selected package with the release verifier, validates the pinned old ZIP and reports
 the actual steps/negative HTTP assertions. It neither publishes nor activates
 a dependency in the canonical Framework or website.
 

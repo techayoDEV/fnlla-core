@@ -227,9 +227,12 @@ local source overrides outside the product tree.
 Follow [Semantic Versioning 2.0.0](https://semver.org/) and the maintained
 [compatibility policy](docs/framework/RUNTIME-CONTRACTS.md#semantic-versioning).
 Minor and patch components have no single-digit limit. Never roll a major at
-`x.9.9`. The owner-approved next-generation target is Core 3.x with compatible
-patches/minors; the published Core 2.8.1 remains unchanged until a separately
-accepted immutable release is available. Breaking public contracts requires a
+`x.9.9`. Maintain Core 3.x through compatible patches/minors. The owner authorized
+finalization, protected integration, tagging and publication of Core 3.0.0 and
+Framework 5.1.0 on 2026-10-20, conditional on each product's complete final-source
+release gates. This exact-release authority does not cover future releases,
+consumer applications, catalogue activation or deployment. The preceding
+immutable Core 2.8.1 remains unchanged. Breaking public contracts requires a
 major, migration guidance and a separate owner decision. Release reviews must
 record the previous/proposed versions, compatibility classification and evidence;
 syntax validation never establishes compatibility or publication authority.

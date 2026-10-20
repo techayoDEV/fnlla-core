@@ -8,9 +8,10 @@ patch the installed `vendor/` or offline package tree.
 
 ## Select and inspect the target
 
-The Core 3 source candidate has an explicit configuration migration. Read
-[3.0.0-rc.2 migration and limits](../releases/3.0.0-rc.2.md) before testing it;
-the candidate does not replace published stable Core 2.8.1.
+Core 3.0.0 has an explicit configuration migration. Read its
+[migration and limits](../releases/3.0.0.md) before testing the upgrade. Use its
+matching official immutable tag or verified release artifact. Preparing stable
+source does not establish publication or update an installed Core 2.8.1 package.
 
 Choose an immutable, approved Core release and read every intervening release's
 compatibility notes. Start with the installed `composer.lock`, not the latest
@@ -25,6 +26,7 @@ changes is not an available package upgrade.
 | Core 2.4.0 and later delayed queues | Preserve sorted-set delayed work and restart coordinated workers. Rollback must retain the original store format rather than unconditionally converting it to the older list format. |
 | Opt-in reliable outbox and snapshots | Read the corresponding schema/operation contracts before activation. Installing new code does not enable a feature, create permissions or establish recovery readiness. |
 | Core 2.8.1 | Its published maintenance patch retains runtime contracts from 2.8.0. New source-only fixes need a separate release; do not rewrite 2.8.1. |
+| Core 3.0.0 | Replace implicit product-specific credential refresh with explicit application live fields or the trusted required bootstrap selection. Move selected values into application-owned configuration; missing values mean revocation. Rebuild only generated bootstrap cache, drain/restart writers and reconcile revocations during rollback. |
 | Unknown or untracked engine copy | Recover its original package/source identity first. Do not invent a baseline from modified application files or assume that every `src/` file belongs to Core. |
 
 This is a compatibility contract, not a claim that arbitrary application code,

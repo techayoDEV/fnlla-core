@@ -3,9 +3,9 @@
   "package": "techayodev/fnlla-core",
   "canonical_source": "https://github.com/techayoDEV/fnlla-core",
   "published_baseline": "2.8.1",
-  "candidate": "3.0.0-rc.2",
-  "channel": "local-review",
-  "release_approved": false,
+  "candidate": "3.0.0",
+  "channel": "stable",
+  "release_approved": true,
   "framework_compatibility": ">=5.0.0 <6.0.0",
   "requirements": {
     "php": "^8.3",

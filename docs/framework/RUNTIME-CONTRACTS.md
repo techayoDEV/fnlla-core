@@ -1,9 +1,9 @@
 # FNLLA Core Runtime Contracts
 
-These contracts describe the Core 3.0.0-rc.1 source candidate over the published
-2.8 runtime. Read the [Core 3 migration](../releases/3.0.0-rc.1.md); the candidate
-is not approved stable. Availability requires its matching immutable release
-and exact-commit CI.
+These contracts describe Core 3.0.0 and distinguish its changes from the preceding
+2.8 runtime. Read the [Core 3 migration](../releases/3.0.0.md). Availability requires
+the matching official immutable release and final exact-commit public CI;
+source documentation alone does not establish publication.
 Reliability changes and their migration requirements are distinguished
 in [runtime reliability](RUNTIME-RELIABILITY.md); they are absent from Core 2.6.0.
 See [2.5.0 upgrade notes](../releases/2.5.0.md) for capability and security changes.
@@ -284,7 +284,7 @@ packages are immutable and do not acquire these changes automatically.
   limit and offset do not narrow `exists()`; its filters remain unchanged and
   the builder can be reused. No index or database schema change is required.
 
-### Live configuration fields (unreleased source candidate)
+### Live configuration fields (Core 3.0.0)
 
 Trusted integration bootstrap may define `FNLLA_REQUIRED_LIVE_CONFIG_FIELDS`
 before loading Core, using the same namespace/field map. Core validates and
