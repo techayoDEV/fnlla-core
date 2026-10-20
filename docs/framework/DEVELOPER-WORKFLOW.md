@@ -6,7 +6,7 @@ Coding agents can use the same local contracts and checks. No runtime AI, model
 account, provider SDK or commercial FNLLA package is required.
 
 The developer tools below were introduced in Core 2.4.0 and remain available in
-the 2.8.0 release target. Core 2.5.0 introduced the [capability schema](CAPABILITIES.md)
+the published Core 3.0.0 stable release. Core 2.5.0 introduced the [capability schema](CAPABILITIES.md)
 in local inspection. Use the [getting-started guide](GETTING-STARTED.md) for a
 new application and upgrade older immutable dependencies before adopting contracts.
 

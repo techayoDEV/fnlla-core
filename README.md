@@ -1,7 +1,9 @@
 # FNLLA Core
 
-This edition targets **Core 3.0.0 stable**. The owner authorized finalization and
-publication of this exact release, conditional on all final-source release gates.
+**Core 3.0.0 stable** is published in the
+[official v3.0.0 release](https://github.com/techayoDEV/fnlla-core/releases/tag/v3.0.0).
+The owner authorized this exact release, and its final-source gates and official
+installation were verified before completion.
 Read [the Core 3 migration and limits](docs/releases/3.0.0.md) and
 [the changelog](docs/CHANGELOG.md). Source metadata alone is not a publication
 receipt or application production acceptance. Install only the matching official

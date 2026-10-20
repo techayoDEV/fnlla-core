@@ -11,10 +11,10 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-This edition documents **Core 3.0.0**. Read its
-[migration and limits](releases/3.0.0.md). The owner authorized this release
-conditional on all final-source gates; source documentation is not a publication
-receipt. Install the matching official immutable release and preserve its lock.
+This edition documents the published **Core 3.0.0 stable** release. Read its
+[migration and limits](releases/3.0.0.md). Install the matching
+[official immutable release](https://github.com/techayoDEV/fnlla-core/releases/tag/v3.0.0)
+and preserve its lock. Documentation updates do not replace released package bytes.
 The preceding stable release is **Core 2.8.1**; its original bytes remain unchanged.
 Read its [upgrade notes](releases/2.8.1.md) and the
 [2.8.0 contracts](releases/2.8.0.md) when crossing those boundaries. Guides describe the

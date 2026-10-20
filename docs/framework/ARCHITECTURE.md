@@ -1,6 +1,6 @@
 # Architecture and responsibility boundaries
 
-[Documentation index](../README.md) · Applies to the Core 2.8.0 release target
+[Documentation index](../README.md) · Applies to the Core 3.0.0 stable release
 
 FNLLA Core supplies the web runtime and reusable application contracts.
 Applications define business behavior. FNLLA Full consumes Core and provides

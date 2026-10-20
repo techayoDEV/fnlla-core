@@ -1,6 +1,6 @@
 # Operating and upgrading Core applications
 
-[Documentation index](../README.md) · Applies to the Core 2.8.0 release target
+[Documentation index](../README.md) · Applies to the Core 3.0.0 stable release
 
 This guide describes application operations, reviewed dependency updates and
 recovery. Core package publication is maintained separately from your application.
