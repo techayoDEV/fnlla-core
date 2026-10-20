@@ -84,8 +84,10 @@ if (is_file($composerAutoload)) {
 $engineRoot = defined("FNLLA_ENGINE_ROOT") ? FNLLA_ENGINE_ROOT : APP_ROOT;
 require_once $engineRoot . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "Support" . DIRECTORY_SEPARATOR . "helpers.php";
 
+\Fnlla\Php\Support\ConfigurationGeneration::capture();
 Env::load(env_file_path());
 $GLOBALS["fnlla_config"] = load_config_directory(base_path("config"));
+\Fnlla\Php\Support\ConfigurationGeneration::assertCurrent();
 $GLOBALS["fnlla_php_config"] = $GLOBALS["fnlla_config"];
 
 date_default_timezone_set((string) config("app.timezone", "UTC"));

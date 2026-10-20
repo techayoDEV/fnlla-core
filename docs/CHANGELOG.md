@@ -2,12 +2,20 @@
 
 ## Unreleased source changes
 
+- Harden the Core 3 candidate after owner review: selected live fields have
+  application-only authority in fresh and cached configuration; removed values
+  cannot return from package defaults. Reject malformed caches/null declarations.
+  Fence standard queue/outbox reservations and config-cache publication when
+  process configuration/environment inputs change. Add named security assertions,
+  a disposable Composer/HTTP developer exercise and explicit engineering/release/
+  deployment acceptance scopes. No stable publication is approved.
+
 - Require PHP 8.3/8.4/8.5 Linux/Windows and service coverage in the release matrix.
   Verify committed prerelease packages explicitly without granting stable approval;
   build clean candidate packages from Git blobs for cross-platform reproducibility.
   CI/artifact gates remain active under optimized Python and reject duplicated
   required jobs as well as missing, skipped or failed checks.
-- Prepare Core 3.0.0-rc.1 with `release_approved=false`; stable remains 2.8.1.
+- Prepare Core 3.0.0-rc.2 with `release_approved=false`; stable remains 2.8.1.
   Replace the implicit `developer_access.users` refresh with an explicit
   `app.live_config_fields` declaration and a fail-closed migration diagnostic.
   Core 3 configuration compilation uses the same package-default/application
@@ -23,7 +31,7 @@
   outbox state. Document staged dependency upgrades and application acceptance
   in `docs/framework/UPGRADING.md`; this does not publish or replace Core 2.8.1.
 - Add an optional `app.live_config_fields` allowlist for cached configuration.
-  Reload selected top-level keys from trusted defaults and application files;
+  Reload selected top-level keys from trusted application files;
   remove missing keys and reject invalid declarations or linked config files.
   The published 2.8 runtime retains automatic `developer_access.users` refresh;
   the Core 3 candidate requires the explicit migration described above. Other

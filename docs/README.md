@@ -11,8 +11,8 @@ coding agents can inspect together. The developer remains responsible for
 direction, decisions and changes; Core requires no AI model or provider at
 runtime.
 
-This development checkout documents **Core 3.0.0-rc.1**. Read its
-[migration and limits](releases/3.0.0-rc.1.md); the candidate is not approved stable.
+This development checkout documents **Core 3.0.0-rc.2**. Read its
+[migration and limits](releases/3.0.0-rc.2.md); the candidate is not approved stable.
 The published stable version remains **Core 2.8.1**. Install its matching
 immutable release; development-branch documentation is not release availability.
 Read [2.8.1 upgrade notes](releases/2.8.1.md) for the maintenance corrections and
@@ -24,6 +24,9 @@ does not replace that release or upgrade an installed dependency.
 - [Resilience: safe defaults and operations](resilience.md)
 
 ## Choose your path
+
+Read [readiness and evidence](framework/READINESS.md) for the distinct Engineering
+Verified, Release Verified and Deployment Verified scopes and developer exercise.
 
 For an existing installation, read the [Core upgrade procedure](framework/UPGRADING.md)
 before changing dependencies. Core package updates and conversion to FNLLA are

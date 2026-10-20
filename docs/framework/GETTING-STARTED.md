@@ -4,7 +4,7 @@
 
 The published installation path below uses stable Core 2.8.1, retaining the
 [2.8 runtime contracts](../releases/2.8.0.md). This checkout prepares
-[Core 3.0.0-rc.1](../releases/3.0.0-rc.1.md); it is an unapproved review candidate,
+[Core 3.0.0-rc.2](../releases/3.0.0-rc.2.md); it is an unapproved review candidate,
 not a published stable dependency. Test its artifact in a separate consumer.
 It creates a minimal web application with an
 explicit route table, application configuration and local verification tools.

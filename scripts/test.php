@@ -31,4 +31,7 @@ require __DIR__ . "/../tests/ProjectExportBaselineTest.php";
 [$packageExit, $packageOutput] = run_process([PHP_BINARY, 'tests/PackageRuntimeTest.php'], dirname(__DIR__));
 assert_same(0, $packageExit, 'Package runtime failed: ' . $packageOutput);
 echo $packageOutput;
+[$configExit, $configOutput] = run_process([PHP_BINARY, 'tests/ConfigurationSecurityTest.php'], dirname(__DIR__));
+assert_same(0, $configExit, 'Configuration security failed: ' . $configOutput);
+echo $configOutput;
 require __DIR__ . "/../tests/ReleaseArtifactBuilderTest.php";

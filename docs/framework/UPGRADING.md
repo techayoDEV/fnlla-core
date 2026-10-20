@@ -9,7 +9,7 @@ patch the installed `vendor/` or offline package tree.
 ## Select and inspect the target
 
 The Core 3 source candidate has an explicit configuration migration. Read
-[3.0.0-rc.1 migration and limits](../releases/3.0.0-rc.1.md) before testing it;
+[3.0.0-rc.2 migration and limits](../releases/3.0.0-rc.2.md) before testing it;
 the candidate does not replace published stable Core 2.8.1.
 
 Choose an immutable, approved Core release and read every intervening release's
@@ -61,6 +61,22 @@ Framework Workspace naming and account/data migration belong to Framework.
    results and a tested rollback route outside the product tree.
 
 ## Recovery and rollback
+
+Selected live fields in Core 3 must exist in application-owned configuration.
+Move any selected package default into the application's trusted configuration
+before upgrading; its absence is revocation, not permission to use a default.
+Test cached and uncached authorization equivalence. Add the declaration and
+rebuild `php fnlla config:cache` under the old Core before changing dependencies.
+Core has no Framework `optimize:clear` command. If manual cache invalidation is
+necessary while writers are stopped, remove only the known generated
+`storage/framework/cache/bootstrap-config.php`, never its whole directory.
+
+Generation fencing stops standard workers before another reservation if inputs
+change and refuses cache publication from a stale process. It does not cancel
+active work; draining/restarting all workers remains mandatory. A rollback must
+reconcile current credential revocations and role assignments before traffic
+resumes. Old decryption keys may be needed for data; they must not implicitly
+reactivate an old login secret. Do not blindly restore old `.env` or identity data.
 
 A failed code-only update must restore the previous dependency set and matching
 lock. After schema or storage-format changes, use a compatible data snapshot or

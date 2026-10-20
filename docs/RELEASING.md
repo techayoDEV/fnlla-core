@@ -22,6 +22,9 @@ policy text does not change VERSION, distribution approval or a consumer lock.
 
 ## Release sequence
 
+Use the separate [Engineering Verified, Release Verified and Deployment Verified
+scopes](framework/READINESS.md). Unresolved owner comments leave a release unapproved.
+
 For a committed prerelease, VERSION and the policy must name the same candidate
 with `channel=local-review` and `release_approved=false`. Build normally with the
 expected commit so Git blobs produce identical Windows/Linux bytes. Verify with

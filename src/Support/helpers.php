@@ -269,7 +269,11 @@ function load_config_directory(string $directory, bool $useCache = true): array
         return $base;
     };
     $liveFields = static function (array $config): array {
-        $live = $config['app']['live_config_fields'] ?? [];
+        if (array_key_exists('app', $config) && !is_array($config['app'])) {
+            throw new RuntimeException('Application configuration must be an array.');
+        }
+        $app = $config['app'] ?? [];
+        $live = array_key_exists('live_config_fields', $app) ? $app['live_config_fields'] : [];
         if (!is_array($live) || count($live) > 32) { throw new RuntimeException('Invalid live configuration field declaration.'); }
         foreach ($live as $group => $fields) {
             if (!is_string($group) || preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $group) !== 1
@@ -295,33 +299,40 @@ function load_config_directory(string $directory, bool $useCache = true): array
     };
     $directories = $defaults === null ? [$directory] : [$defaults, $directory];
     $cachedConfig = framework_config_cache_path();
-
-    if ($useCache && is_file($cachedConfig)) {
-        $config = require $cachedConfig;
-
-        if (is_array($config)) {
-            $GLOBALS["fnlla_config_source"] = "bootstrap_cache";
-            // Applications declare the small set of live fields that must not
-            // outlive rotation/revocation. Validate before evaluating any files.
-            $live = $liveFields($config);
-            foreach ($live as $group => $fields) {
-                if ($fields === []) { continue; }
-                $fresh = [];
-                foreach ($directories as $sourceDirectory) {
-                    $path = rtrim($sourceDirectory, "\\/") . DIRECTORY_SEPARATOR . $group . '.php';
-                    if (is_link($path)) { throw new RuntimeException('Linked live configuration is forbidden.'); }
-                    if (!is_file($path)) { continue; }
-                    $loaded = require $path;
-                    if (!is_array($loaded)) { throw new RuntimeException('Live configuration must return an array.'); }
-                    $fresh = $merge($fresh, $loaded);
-                }
-                foreach ($fields as $field) {
-                    if (array_key_exists($field, $fresh)) { $config[$group][$field] = $fresh[$field]; }
-                    else { unset($config[$group][$field]); }
-                }
-            }
-            return $config;
+    $read = static function (string $path): array {
+        if (is_link($path)) { throw new RuntimeException('Linked live configuration is forbidden.'); }
+        if (!is_file($path)) {
+            if (file_exists($path)) { throw new RuntimeException('Configuration path must be a regular file.'); }
+            return [];
         }
+        $loaded = require $path;
+        if (!is_array($loaded)) { throw new RuntimeException('Configuration must return an array.'); }
+        return $loaded;
+    };
+    // A selected field has one authority: application-owned configuration.
+    // Missing/revoked values must never reappear from package defaults.
+    $refresh = static function (array $config, array $live) use ($directory, $read): array {
+        foreach ($live as $group => $fields) {
+            if ($fields === []) { continue; }
+            $fresh = $read(rtrim($directory, "\\/") . DIRECTORY_SEPARATOR . $group . '.php');
+            foreach ($fields as $field) {
+                if (array_key_exists($field, $fresh)) { $config[$group][$field] = $fresh[$field]; }
+                else { unset($config[$group][$field]); }
+            }
+        }
+        return $config;
+    };
+
+    if ($useCache && (file_exists($cachedConfig) || is_link($cachedConfig))) {
+        if (is_link($cachedConfig) || !is_file($cachedConfig)) {
+            throw new RuntimeException('Bootstrap configuration cache must be a regular unlinked file.');
+        }
+        $config = require $cachedConfig;
+        if (!is_array($config)) { throw new RuntimeException('Bootstrap configuration cache must return an array.'); }
+        $GLOBALS["fnlla_config_source"] = "bootstrap_cache";
+        // Validate the explicit live-field declaration before evaluating files.
+        $live = $liveFields($config);
+        return $refresh($config, $live);
     }
 
     $config = [];
@@ -332,7 +343,7 @@ function load_config_directory(string $directory, bool $useCache = true): array
         sort($files);
         foreach ($files as $file) {
             $key = pathinfo($file, PATHINFO_FILENAME);
-            $loaded = require $file;
+            $loaded = $read($file);
 
             if (!is_array($loaded)) {
                 throw new RuntimeException("Config file must return an array: " . $file);
@@ -342,8 +353,7 @@ function load_config_directory(string $directory, bool $useCache = true): array
         }
     }
 
-    $liveFields($config);
-    return $config;
+    return $refresh($config, $liveFields($config));
 }
 
 function framework_cache_path(string $path = ""): string

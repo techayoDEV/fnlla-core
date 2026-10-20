@@ -62,7 +62,7 @@ try {
     file_put_contents($root . '/defaults/credentials.php', '<?php return ["users" => "rotated-synthetic"];');
     file_put_contents($root . '/config/credentials.php', '<?php return ["enabled" => false];');
     $config = load_config_directory($root . '/config');
-    $check($config['credentials']['users'] === 'rotated-synthetic');
+    $check(!array_key_exists('users', $config['credentials']));
     $check($config['sample'] === ['cached' => true]);
     file_put_contents($root . '/config/credentials.php', '<?php return ["users" => "application-synthetic"];');
     $check(load_config_directory($root . '/config')['credentials']['users'] === 'application-synthetic');
@@ -84,6 +84,7 @@ try {
         'app' => ['live_config_fields' => ['developer_access' => ['users']]],
         'developer_access' => ['users' => 'stale-synthetic', 'enabled' => true],
     ], true) . ';');
+    file_put_contents($root . '/config/developer_access.php', '<?php return ["users" => "rotated-synthetic"];');
     $config = load_config_directory($root . '/config');
     $check($config['developer_access']['users'] === 'rotated-synthetic');
     $check($config['developer_access']['enabled'] === true);

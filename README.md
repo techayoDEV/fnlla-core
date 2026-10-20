@@ -1,10 +1,11 @@
 # FNLLA Core
 
-This checkout prepares **Core 3.0.0-rc.1**, an unapproved release candidate.
+This checkout prepares **Core 3.0.0-rc.2**, an unapproved release candidate.
 The published stable Core release remains **2.8.1**; its packages and consumer
-pins are unchanged. Read [the Core 3 migration and limits](docs/releases/3.0.0-rc.1.md)
+pins are unchanged. Read [the Core 3 migration and limits](docs/releases/3.0.0-rc.2.md)
 and [the changelog](docs/CHANGELOG.md). Candidate validation is not stable-release
-availability or application production acceptance.
+availability or application production acceptance. See the separate
+[engineering, release and deployment acceptance scopes](docs/framework/READINESS.md).
 
 Core follows [Semantic Versioning](https://semver.org/) with no single-digit
 minor/patch limit. See the [compatibility policy](docs/framework/RUNTIME-CONTRACTS.md#semantic-versioning).
@@ -47,7 +48,7 @@ and licensed access live at [fnlla.com](https://fnlla.com).
 
 Package: `techayodev/fnlla-core`<br>
 Published stable version: `2.8.1`. Install the matching immutable tagged release;
-the `3.0.0-rc.1` development checkout does not establish stable availability.
+the `3.0.0-rc.2` development checkout does not establish stable availability.
 Read the [2.8.1 upgrade notes](docs/releases/2.8.1.md)
 for the maintenance corrections and the [2.8.0 baseline](docs/releases/2.8.0.md)
 for the optional contracts and maintenance freeze before deploying.

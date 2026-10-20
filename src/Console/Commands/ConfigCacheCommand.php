@@ -41,7 +41,9 @@ final class ConfigCacheCommand extends Command
 
         // The same loader preserves package defaults, application overrides and
         // live-field validation. Never compile from an existing bootstrap cache.
+        \Fnlla\Php\Support\ConfigurationGeneration::assertCurrent();
         $config = load_config_directory(base_path("config"), false);
+        \Fnlla\Php\Support\ConfigurationGeneration::assertCurrent();
         \Fnlla\Php\Support\PhpArrayCache::write($path, $config);
         $this->line("Configuration cached: " . $path);
 

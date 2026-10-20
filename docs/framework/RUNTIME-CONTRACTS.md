@@ -288,8 +288,10 @@ packages are immutable and do not acquire these changes automatically.
 
 An application may declare `app.live_config_fields`, for example
 `['credentials' => ['users']]`. With cached configuration, only those trusted
-namespaced fields are reloaded from package defaults followed by application
-files using the normal merge contract. Missing fields are removed. This is a
+namespaced fields are reloaded from application-owned files. Package defaults
+cannot supply a selected field: missing application fields are removed in both
+fresh and cached modes, even if an old package default survives. Other fields
+retain the normal defaults/application merge contract. This is a
 cache freshness mechanism, not authorization, a secret store or permission to
 execute untrusted PHP. Use at most 32 namespaces and 32 fields per namespace;
 names are restricted identifiers. Workspace-specific accounts are owned by the
@@ -307,5 +309,14 @@ Configuration PHP files remain trusted deployment input; live files cannot be
 symlinks. Declaration changes require rebuilding the bootstrap cache, as the
 declaration itself comes from that cache. `load_config_directory($directory,
 false)` bypasses the cache but preserves the same defaults/application merge and
-declaration validation. `config:cache` uses that path, retaining package-only
-namespaces and application overrides and validating before replacing its cache.
+declaration validation. `config:cache` uses that path, retaining unselected package
+defaults and application overrides and validating before replacing its cache.
+Malformed caches and null live-field declarations fail; they never trigger a
+silent fallback. Fresh and cached loading reject linked configuration files.
+
+The standard bootstrap captures a `ConfigurationGeneration` before environment
+loading. Queue/outbox workers check it before the next reservation and the cache
+compiler checks before compilation/publication. Changed configuration, `.env`,
+the lock or bootstrap cache requires a new process. This does not interrupt an
+active handler or reload external secrets. Drain all writers and restart workers;
+see [readiness and configuration acceptance](READINESS.md).

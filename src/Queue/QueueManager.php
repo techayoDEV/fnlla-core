@@ -110,6 +110,7 @@ final class QueueManager
                     break;
                 }
             }
+            \Fnlla\Php\Support\ConfigurationGeneration::assertCurrent();
             $queuedJob = $store->pop();
 
             if ($queuedJob === null) {
@@ -234,6 +235,7 @@ final class QueueManager
                 break;
             }
 
+            \Fnlla\Php\Support\ConfigurationGeneration::assertCurrent();
             $queuedJob = $this->store->pop();
             if ($queuedJob === null) {
                 break;

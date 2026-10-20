@@ -2,7 +2,7 @@
 
 FNLLA Core provides neutral, deny-by-default authorization, tenancy and audit building blocks.
 They are available to a standalone Core application and do not depend on the
-FNLLA Developer Panel or any commercial package.
+FNLLA Workspace or any commercial package.
 
 ## Roles, Permissions And Policies
 
