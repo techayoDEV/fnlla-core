@@ -95,7 +95,7 @@ def main():
             (app / 'composer.json').write_text(json.dumps(metadata, indent=2))
             run(composer + ['install', '--no-dev', '--no-interaction', '--no-progress'], app)
             table = 'dx_' + os.urandom(6).hex() + '_users'
-            settings = {'APP_ENV': 'development', 'APP_DEBUG': 'false', 'APP_URL': '', 'TRUSTED_HOSTS': '127.0.0.1',
+            settings = {'APP_NAME': 'Developer Exercise', 'APP_ENV': 'development', 'APP_DEBUG': 'false', 'APP_URL': '', 'TRUSTED_HOSTS': '127.0.0.1',
                 'DB_HOST': fields.get('host', '127.0.0.1'), 'DB_PORT': fields.get('port', '3306'),
                 'DB_DATABASE': 'fnlla_core_test', 'DB_USERNAME': os.environ.get('FNLLA_CORE_TEST_MYSQL_USER', ''),
                 'DB_PASSWORD': os.environ.get('FNLLA_CORE_TEST_MYSQL_PASSWORD', ''), 'CACHE_STORE': 'file',
