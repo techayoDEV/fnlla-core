@@ -65,8 +65,9 @@ endpoint and a Core 2.8.1 upgrade. Preserve commands and denied cases.
 An automated maintainer rehearsal proves reproducibility, not independent human
 usability. Before broad promotion, a developer who did not implement Core should
 repeat the published guide without private tools or verbal help and record all
-undocumented interventions. Before Core 3 publication only a labelled candidate
-rehearsal is possible; do not claim stable Composer availability.
+undocumented interventions. Core 3.0.0 is now published through its official
+channel; historical candidate rehearsals remain evidence for their original
+inputs and do not become independent human usability results.
 
 ## Comparative claims
 
