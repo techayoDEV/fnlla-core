@@ -9,8 +9,16 @@
   process configuration/environment inputs change. Add named security assertions,
   a disposable Composer/HTTP developer exercise and explicit engineering/release/
   deployment acceptance scopes. The owner authorized exactly Core 3.0.0 stable
-  conditional on all final-source public CI, artifact and installation gates;
+  conditional on all final-source CI, artifact and installation gates;
   source metadata does not establish their completion or a production deployment.
+- Add an explicitly selected, owner-approved signed local CI release venue
+  retaining all 15 native checks. Bind controller signatures/latest sequence,
+  approved tool bytes, committed source/policy/workflow/lock/verifiers and original
+  per-job logs/artifacts; issue distinct checks from a dedicated GitHub App.
+  Final release verification requires actual remote main and that App's latest
+  complete successful checks referencing the same receipt. Hosted Actions remains
+  separate; no protection, test or publication requirement is waived. Python 3
+  and Node.js 22+ are maintainer tools, not application runtime dependencies.
 - Preserve config-free minimal bootstrap while watching for a newly added config
   directory. Invalidate configuration source bytecode before evaluation under
   active OPcache; restricted invalidation fails closed. Require real OPcache

@@ -2,7 +2,8 @@
 
 These contracts describe Core 3.0.0 and distinguish its changes from the preceding
 2.8 runtime. Read the [Core 3 migration](../releases/3.0.0.md). Availability requires
-the matching official immutable release and final exact-commit public CI;
+the matching official immutable release and final exact-commit CI through the
+[approved hosted or signed local venue](https://github.com/techayoDEV/fnlla-core/blob/v3.0.0/docs/RELEASING.md#ci-compute-and-required-checks);
 source documentation alone does not establish publication.
 Reliability changes and their migration requirements are distinguished
 in [runtime reliability](RUNTIME-RELIABILITY.md); they are absent from Core 2.6.0.

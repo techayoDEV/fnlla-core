@@ -45,8 +45,9 @@ jobs:
           archive = 'dist/release/fnlla-core-' + version + '.zip'
           assert pathlib.Path(archive).read_bytes() == pathlib.Path('dist/repeat/fnlla-core-' + version + '.zip').read_bytes()
           subprocess.run(['python', 'scripts/verify-release.py', archive, commit] + (['--local-review'] if '-' in version else []), check=True)
+      - name: Verify maintainer Node.js requirement
+        run: node -e "if (Number(process.versions.node.split('.')[0]) < 22) { throw new Error('Maintainer verification requires Node.js 22+'); } console.log(process.version)"
       - name: Test fail-closed exact-commit release checks
-        if: runner.os == 'Linux'
         run: python -B -m unittest discover -s tests -p test_release_ci.py
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:

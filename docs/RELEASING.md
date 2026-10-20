@@ -55,10 +55,12 @@ without the flag rejects every prerelease and false approval state.
    consumer/export suite before publication. A local path proves integration,
    not public availability.
 5. Push the authorized stabilization branch and integrate through the protected
-   pull-request process below. Require the latest exact-commit quality
-   run: `python scripts/check-release-ci.py FULL_SHA`. This read-only gate
-   rejects missing, skipped, failed or incomplete required jobs, an older run,
-   or a commit different from remote main. Save its JSON as `CI-EVIDENCE.json`.
+   pull-request process below. Select the approved compute venue explicitly.
+   Hosted verification uses `python scripts/check-release-ci.py FULL_SHA`.
+   The signed local venue uses the command below and a dedicated source-bound
+   GitHub App, without impersonating Actions. Both require all 15 checks on
+   the actual final remote-main commit. PR receipts and older sources do not
+   replace final-main acceptance. Save the gate's JSON as `CI-EVIDENCE.json`.
 6. Compare the Windows and Linux CI ZIP hashes with the local ZIP. Require
    strict equality. Recheck that the tag/release does not already exist.
 7. Create the version tag at FULL_SHA and a draft GitHub release with the ZIP,
@@ -82,14 +84,92 @@ Linux is the production target. The public repository retains PHP 8.3/8.4/8.5
 runtime checks on Linux and Windows and deterministic packages on both systems:
 filesystem locking, path handling, mail HTTP transport and consumer installation
 are development-platform boundaries. MySQL/Redis, upgrade and Apache checks run
-on Linux. Standard public runners do not incur runner-minute charges; useful
-portable-runtime coverage is retained rather than moved into private consumers.
+on Linux. The same 15 checks may execute on the owner's isolated native local
+Linux/Windows infrastructure under the signed local contract below. Compute
+venue changes no test scope, package identity or application runtime requirement.
 
 The stable checks `PHP 8.3`, `PHP 8.4` and `PHP 8.5` are aggregators. All require
 all runtime, service, upload and package jobs to succeed and fail on cancellation
 or skipping. Expanded OS matrix names alone do not satisfy those stable names.
 The release CI reader also requires all three aggregators and all twelve underlying jobs.
 Branch protection is not modified by workflow maintenance.
+
+### Signed local native venue
+
+Follow the [controller setup, command sequence and receipt schema](LOCAL-CI.md)
+for bindings, attempt registration, real pending checks, job execution, sealing,
+verification and publication. The release-reader command below is the final gate,
+not a replacement for that controller sequence.
+
+The owner approved a dedicated local-CI GitHub App and source-specific protected
+checks as an alternative to hosted Actions. This is an explicit policy selection,
+never a silent fallback after a failed hosted run. Retain the hosted workflow
+and its independent evidence when used. Local check names start with
+`Local CI / ` and are issued only by the configured dedicated App; they are not
+GitHub Actions checks. The external operator policy pins the App identity,
+controller public key, current monotonic attempt state and approved controller
+tool bytes. The committed `.github/local-ci-policy.json` binds the exact 15
+required names, source workflow/lock/verifier files, allowed refs, freshness
+limits and narrowly named Windows symlink omissions with executed Linux
+counterparts. Do not waive checks, synthesize successful statuses, register a
+new issuer without owner authority or remove PR/admin/conversation protections.
+
+Run the actual maintained workflow commands in clean native checkouts, including
+all six PHP/platform cells, three MySQL/Redis cells, two deterministic package
+cells, Apache upload validation and all three executed aggregators. Preserve
+original per-job results/logs, source/tree/workflow/lock and controller hashes,
+start/completion times and both platforms' original artifacts. The trusted
+controller registers a new latest attempt before work starts, and records failure
+or success for that same source/ref/run/sequence. A newer running or failed
+attempt invalidates an older green receipt; sealing cannot create a new favorable
+attempt after ignoring a failure. Publish genuine in-progress App checks before
+the workers start and failed checks if that attempt fails, so protected PRs cannot
+reuse a previous green result while a newer attempt is unfinished or failed.
+Hash verification
+alone does not prove execution: the trusted controller supplies the actual
+result files and logs, and the verifier checks their identities, omissions and
+artifact equality before accepting a signed receipt. Application deployments and
+the independent full Framework consumer acceptance remain separate gates.
+
+Python 3 and Node.js 22+ are maintainer-only verification requirements. No extra
+Python crypto package, framework runtime service or customer Node dependency is
+introduced. Keep the Ed25519 controller private key, GitHub App private key,
+external trusted policy and latest attempt state outside the source checkout,
+package ZIP and evidence directory. Evidence cannot supply its own trust root.
+Never print credentials, installation tokens or private keys. The App needs only
+the approved repository installation and checks-write/contents-read access.
+
+Seal and verify the retained files with `scripts/local-ci/receipt.mjs` using
+the independently trusted operator policy. Publishing a PR check requires its
+explicitly approved release ref and a freshly verified receipt. It does not
+satisfy release acceptance: after protected integration, rerun all invalidated
+gates for the actual main commit, seal the new final receipt and publish its
+source-bound App checks. The release reader enforces actual remote main before
+and after verification and requires the latest successful complete App check
+set to reference that same signed receipt.
+
+```console
+python scripts/check-release-ci.py FULL_MAIN_SHA --venue local-native --receipt /private/evidence/receipt.json --signature /private/evidence/receipt.sig --policy /private/controller/operator-policy.json --evidence-root /private/evidence --source-root /clean/fnlla-core
+```
+
+Use `--node /managed/node` when Node is not on PATH. Receipt verification checks
+signature, latest controller sequence, source/ref, committed policy/workflow/lock/
+verifier identities, approved execution tools, all actual results/logs/artifacts
+and freshness. The Python gate then reads the live GitHub checks API and requires
+the configured App ID, exact names, current source, success and matching receipt
+digest. Failed, missing, duplicated, stale, replayed, incomplete or substituted
+evidence fails closed, including under optimized Python. It never creates check
+runs, changes protection, signs evidence or publishes a release. A GitHub API
+outage still blocks protected integration/publication; local compute does not
+replace GitHub's repository authority.
+
+Retain `CI-EVIDENCE.json`, the signed receipt/signature, public verification
+material and original source-bound logs/artifacts for review. Identify its venue
+as `signed-local-native`; it is not a public GitHub Actions receipt. A prepared
+unsigned local report, an App status by itself or an earlier commit's receipt is
+insufficient. Rotate a compromised controller/App key through an owner-approved
+trust-policy update and new exact-source acceptance, never by rewriting an
+accepted tag or artifact.
 
 Only superseded PR validation can be cancelled. Main and manual acceptance have
 unique concurrency groups and are never cancelled by a later push. Every job
@@ -103,6 +183,11 @@ evidence requires fresh validation, never replacement of a released artifact.
 Release tags and artifacts are immutable. The display title is always
 `FNLLA-CORE X.X.X`, including prerelease suffixes when applicable. Never use a
 title edit to imply different artifact contents. Main requires a PR, strict
-PHP 8.3 and PHP 8.4 checks and conversation resolution, with administrator
-enforcement and force-push/deletion disabled. The owner-approved solo policy
-requires zero approving GitHub reviews; CI and PR requirements remain mandatory.
+source-specific PHP 8.3 and PHP 8.4 checks from the selected approved issuer and
+conversation resolution, with administrator enforcement and force-push/deletion
+disabled. Hosted protection binds GitHub Actions. The owner-approved local policy
+migrates those bindings to `Local CI / PHP 8.3` and `Local CI / PHP 8.4` from the
+dedicated App; a matching text label from another App cannot satisfy them.
+The owner-approved solo policy requires zero approving GitHub reviews; CI and
+PR requirements remain mandatory. Changing issuers is an owner-authorized
+administrative action, never an automated reaction to failing checks.

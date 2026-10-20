@@ -7,13 +7,19 @@ does not create another live status registry.
 | Level | Required evidence | Separate acceptance |
 | --- | --- | --- |
 | Engineering Verified | Exact source, supported PHP/platform matrix, behavioral and denied-case assertions, static analysis, security review, dependency integrity, service integration and original-release upgrade/interruption/rollback rehearsals; explicit omissions and limits | Publication, official Composer availability, usability gains and customer hosting |
-| Release Verified | Engineering evidence for the final commit; all 15 public Core checks on actual remote main; matching deterministic Windows/Linux artifacts and provenance; clean Composer consumption; reviewed installation/migration documentation; owner decision and verified publication | Consumer activation, catalogue, integration and deployment |
+| Release Verified | Engineering evidence for the final commit; all 15 Core checks on actual remote main through hosted Actions or the explicitly approved signed local venue with dedicated source-bound App checks; matching deterministic Windows/Linux artifacts and provenance; clean Composer consumption; reviewed installation/migration documentation; owner decision and verified publication | Consumer activation, catalogue, integration and deployment |
 | Deployment Verified | Exact application release/lock on a named host; services/providers, permissions, monitoring/alerts, capacity, secret custody, backups/restore, measured RPO/RTO, rehearsed recovery and operator acceptance | Other applications, hosts and providers |
 
 A candidate can have engineering evidence while release and deployment acceptance
 remain unmet. A source edit invalidates the earlier commit's affected evidence.
 Record commits, locks, artifact hashes, commands, omissions, date, environment
 and human decisions. A green summary, policy flag or liveness response is insufficient.
+The [release procedure](https://github.com/techayoDEV/fnlla-core/blob/v3.0.0/docs/RELEASING.md#signed-local-native-venue) distinguishes
+hosted Actions from signed native local compute. The local venue requires a
+trusted external controller policy, signature/current sequence, complete original
+results/logs/artifacts and matching dedicated-App checks on actual remote main.
+It does not turn local reports into GitHub Actions, replace missing execution or
+establish customer deployment readiness.
 
 ## Configuration acceptance
 

@@ -200,6 +200,16 @@ verification and CI for the exact intended commit. Never rewrite a released tag
 or artifact, and never describe dirty-tree results as exact-commit CI.
 Follow [the release procedure](docs/RELEASING.md); `scripts/check-release-ci.py`
 requires every mandatory job on the current remote main commit.
+The owner-approved local venue retains all 15 native checks and uses the
+versioned `.github/local-ci-policy.json`, an external trusted controller policy,
+signed evidence and a dedicated GitHub App. Select it explicitly; never report
+local execution as GitHub Actions or publish Actions check identities from a
+local runner. Main's source-specific App bindings remain protected. The local
+release gate requires the latest verified receipt and matching successful remote
+App checks on actual main. PR evidence alone cannot authorize a release.
+Python 3 and Node.js 22+ are maintainer release-verification tools; they add no
+application runtime or Composer dependency. Keep signing/App private keys and
+operator state outside source, artifacts and evidence bundles.
 
 Finish with what changed, the checks actually run, compatibility/export impact
 and any remaining limitations. Keep this entrypoint concise; put domain details
