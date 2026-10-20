@@ -22,6 +22,27 @@ function git(root, ...args) {
   return result.stdout.trim();
 }
 
+function committedPayload(root) {
+  // The deterministic builder packages Git blobs; checkout line endings are not
+  // package bytes. Keep this fixture equally strict on autocrlf Windows clones.
+  const names = git(root, 'ls-files', '-z').split('\0').filter(Boolean);
+  const result = spawnSync('git', ['cat-file', '--batch'], { cwd: root,
+    input: names.map(name => 'HEAD:' + name).join('\n') + '\n', maxBuffer: 16 * 1024 * 1024, windowsHide: true });
+  assert.equal(result.status, 0, result.stderr?.toString());
+  const payload = new Map(); let cursor = 0;
+  for (const name of names) {
+    const newline = result.stdout.indexOf(10, cursor);
+    const match = /^[a-f0-9]{40} blob ([0-9]+)$/.exec(result.stdout.subarray(cursor, newline).toString('ascii'));
+    assert.ok(newline >= cursor && match, 'Expected the exact committed blob.');
+    const size = Number(match[1]); cursor = newline + 1;
+    assert.ok(Number.isSafeInteger(size) && cursor + size < result.stdout.length);
+    assert.equal(result.stdout[cursor + size], 10);
+    payload.set(name, result.stdout.subarray(cursor, cursor + size)); cursor += size + 1;
+  }
+  assert.equal(cursor, result.stdout.length);
+  return payload;
+}
+
 function crc32(bytes) {
   let crc = 0xffffffff;
   for (const value of bytes) {
@@ -82,7 +103,7 @@ async function fixture(t) {
     allowed_omissions: { 'PHP 8.3 on windows-latest': ['SKIP: synthetic unavailable symlink.'] },
     omission_counterparts: { 'PHP 8.3 on windows-latest': 'PHP 8.3 on ubuntu-latest' } };
   await fs.writeFile(path.join(sourceRoot, '.github/local-ci-policy.json'), canonical(policy));
-  git(sourceRoot, 'init', '-q'); git(sourceRoot, 'add', '.');
+  git(sourceRoot, 'init', '-q'); git(sourceRoot, 'config', 'core.autocrlf', 'true'); git(sourceRoot, 'add', '.');
   git(sourceRoot, '-c', 'user.name=Synthetic test', '-c', 'user.email=test@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Synthetic controller fixture');
   const source = git(sourceRoot, 'rev-parse', 'HEAD');
   const signing = crypto.generateKeyPairSync('ed25519');
@@ -120,8 +141,7 @@ async function fixture(t) {
     checks.push({ name, source_commit: source, status: 'success', started_at: pendingAt, completed_at, omissions: [],
       result: { path: resultName }, evidence: [await descriptor(logName, log), await descriptor(resultName, report)] });
   }
-  const payload = new Map();
-  for (const name of git(sourceRoot, 'ls-files').split('\n')) payload.set(name, await fs.readFile(path.join(sourceRoot, name)));
+  const payload = committedPayload(sourceRoot);
   const packaged = packageFiles(source, {}, payload), artifact = zip(packaged);
   const artifactDescriptors = {};
   for (const [platform, checkName] of [['linux', 'Package on ubuntu-latest'], ['windows', 'Package on windows-latest']]) {
@@ -166,6 +186,18 @@ test('signed latest exact-source receipt verifies all 15 checks and stable origi
   assert.equal(verified.checks.length, 15);
   assert.equal(verified.publication_checks.app_id, 123456);
   assert.equal(verified.publication_checks.names.every(name => name.startsWith('Local CI / ')), true);
+});
+
+test('synthetic packages use committed LF blobs while the checkout retains CRLF bytes', async t => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'fnlla-local-ci-crlf-test-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  git(root, 'init', '-q'); git(root, 'config', 'core.autocrlf', 'true');
+  const filename = path.join(root, 'line-endings.txt');
+  await fs.writeFile(filename, Buffer.from('first\r\nsecond\r\n'));
+  git(root, 'add', '.');
+  git(root, '-c', 'user.name=Synthetic test', '-c', 'user.email=test@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Synthetic CRLF fixture');
+  assert.deepEqual(await fs.readFile(filename), Buffer.from('first\r\nsecond\r\n'));
+  assert.deepEqual(committedPayload(root).get('line-endings.txt'), Buffer.from('first\nsecond\n'));
 });
 
 test('receipt tampering fails before any publication', async t => {
